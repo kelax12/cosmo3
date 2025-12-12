@@ -248,7 +248,7 @@ const OKRModal: React.FC<OKRModalProps> = ({ okr, isOpen, onClose }) => {
               {/* Title */}
               <div>
                 <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                  🎯 Titre de l'objectif *
+                   Titre de l'objectif *
                 </label>
                 <input
                   type="text"
@@ -276,7 +276,7 @@ const OKRModal: React.FC<OKRModalProps> = ({ okr, isOpen, onClose }) => {
               {/* Description */}
               <div>
                 <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                  📝 Description
+                   Description
                 </label>
                 <textarea
                   rows={4}
@@ -296,7 +296,7 @@ const OKRModal: React.FC<OKRModalProps> = ({ okr, isOpen, onClose }) => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                    🏷️ Catégorie
+                     Catégorie
                   </label>
                   <select 
                     value={formData.category}
@@ -318,7 +318,7 @@ const OKRModal: React.FC<OKRModalProps> = ({ okr, isOpen, onClose }) => {
 
                 <div>
                   <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                    📅 Date début
+                     Date début
                   </label>
                   <input
                     type="date"
@@ -335,7 +335,7 @@ const OKRModal: React.FC<OKRModalProps> = ({ okr, isOpen, onClose }) => {
 
                 <div>
                   <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                    🏁 Date fin
+                     Date fin
                   </label>
                   <input
                     type="date"
@@ -363,7 +363,7 @@ const OKRModal: React.FC<OKRModalProps> = ({ okr, isOpen, onClose }) => {
               {/* Estimated Time */}
               <div>
                 <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                  ⏱️ Temps estimé total (minutes) *
+                    Temps estimé total (minutes) *
                 </label>
                 <input
                   type="number"
@@ -406,7 +406,7 @@ const OKRModal: React.FC<OKRModalProps> = ({ okr, isOpen, onClose }) => {
               <div className="bg-gradient-to-r from-gray-50 dark:from-slate-700 to-purple-50 dark:to-purple-900/20 p-6 rounded-lg border transition-colors" style={{ borderColor: 'rgb(var(--color-border))' }}>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'rgb(var(--color-text-primary))' }}>
-                    🎯 Résultats Clés
+                     Résultats Clés
                     <span className="text-sm font-normal" style={{ color: 'rgb(var(--color-text-muted))' }}>({keyResults.length}/10)</span>
                   </h3>
                   <button
