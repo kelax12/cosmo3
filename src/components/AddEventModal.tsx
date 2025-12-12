@@ -120,7 +120,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
     const diffMs = end.getTime() - start.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    if (diffMs <= 0) return "⚠️ Fin avant début";
+    if (diffMs <= 0) return " Fin avant début";
     if (diffHours === 0) return `${diffMinutes} min`;
     if (diffMinutes === 0) return `${diffHours}h`;
     return `${diffHours}h${diffMinutes}min`;
@@ -171,7 +171,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                 className="block text-sm font-semibold mb-2"
                 style={{ color: 'rgb(var(--color-text-secondary))' }}
               >
-                📝 Titre de l'événement *
+                Titre de l'événement *
               </label>
               <input
                 type="text"
@@ -322,7 +322,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                 className="block text-sm font-semibold mb-2"
                 style={{ color: 'rgb(var(--color-text-secondary))' }}
               >
-                📄 Description
+                 Description
               </label>
               <textarea
                 value={notes}
@@ -347,7 +347,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                 className="block text-sm font-semibold mb-3"
                 style={{ color: 'rgb(var(--color-text-secondary))' }}
               >
-                🎨 Couleur de l'événement
+                 Couleur de l'événement
               </label>
 
               <div className="grid grid-cols-4 gap-2 mb-3">
@@ -411,7 +411,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                 className="text-sm font-semibold mb-3"
                 style={{ color: 'rgb(var(--color-text-secondary))' }}
               >
-                👁️ Aperçu
+                 Aperçu
               </h4>
               <div
                 className="p-3 rounded-lg text-white text-center font-medium shadow-sm"
@@ -435,7 +435,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                 type="submit"
                 className="w-full px-6 py-4 rounded-lg font-semibold text-lg transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 bg-green-600 hover:bg-green-700 text-white"
               >
-                ✅ Valider
+                 Valider
               </button>
             </div>
           </div>
