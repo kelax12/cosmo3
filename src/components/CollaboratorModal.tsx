@@ -1,307 +1,250 @@
-import React, { useState } from 'react';
-import { X, UserPlus, Trash2, Users, Mail, Search } from 'lucide-react';
-import { Task, Collaborator } from '../types/Task';
+import React, { useMemo, useState } from 'react';
+import { X, Users, UserPlus, Trash2, Mail, Search } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
 
-interface CollaboratorModalProps {
-  task: Task;
+type CollaboratorModalProps = {
   isOpen: boolean;
   onClose: () => void;
-}
+  taskId: string;
+};
 
-const CollaboratorModal: React.FC<CollaboratorModalProps> = ({ 
-  task, 
-  isOpen, 
-  onClose 
-}) => {
-  const { updateTask, collaborators } = useTasks();
-  const [newCollaboratorEmail, setNewCollaboratorEmail] = useState('');
-  const [isAddingCollaborator, setIsAddingCollaborator] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!isOpen) return null;
+const getInitials = (value: string) => {
+  if (!value) return '?';
+  const parts = value.split(/\s|@/).filter(Boolean);
+  const firstTwo = parts.slice(0, 2).map((p) => p.charAt(0).toUpperCase());
+  return firstTwo.join('') || value.charAt(0).toUpperCase();
+};
 
-  const handleAddCollaborator = async () => {
-    if (!newCollaboratorEmail.trim()) return;
+const CollaboratorModal: React.FC<CollaboratorModalProps> = ({ isOpen, onClose, taskId }) => {
+  const { tasks, updateTask, friends } = useTasks();
+  const task = tasks.find((t) => t.id === taskId);
 
-    setIsAddingCollaborator(true);
+  const [input, setInput] = useState('');
+  const [search, setSearch] = useState('');
 
-    try {
-      // Vérifier si le collaborateur existe déjà dans la base
-      let collaborator = collaborators.find(c => c.email === newCollaboratorEmail.trim());
-      
-      if (!collaborator) {
-        // Créer un nouveau collaborateur
-        const emailName = newCollaboratorEmail.split('@')[0];
-        collaborator = {
-          id: Date.now().toString(),
-          name: emailName.charAt(0).toUpperCase() + emailName.slice(1),
-          email: newCollaboratorEmail.trim(),
-          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${newCollaboratorEmail.trim()}&backgroundColor=3B82F6&textColor=ffffff`
-        };
-      }
+  const assignedCollaborators = task?.collaborators || [];
 
-      // Vérifier si le collaborateur n'est pas déjà assigné à cette tâche
-      if (!task.collaborators?.some(c => c.id === collaborator!.id)) {
-        const updatedCollaborators = [...(task.collaborators || []), collaborator];
-        updateTask(task.id, { collaborators: updatedCollaborators });
-      }
-
-      setNewCollaboratorEmail('');
-    } catch (error) {
-      console.error('Erreur lors de l\'ajout du collaborateur:', error);
-    } finally {
-      setIsAddingCollaborator(false);
-    }
-  };
-
-  const handleRemoveCollaborator = (collaboratorId: string) => {
-    const collaboratorToRemove = task.collaborators?.find(c => c.id === collaboratorId);
-    
-    if (collaboratorToRemove && window.confirm(`Êtes-vous sûr de vouloir retirer ${collaboratorToRemove.name} de cette tâche ?`)) {
-      const updatedCollaborators = task.collaborators?.filter(c => c.id !== collaboratorId) || [];
-      updateTask(task.id, { collaborators: updatedCollaborators });
-    }
-  };
-
-  const handleAddExistingCollaborator = (collaborator: Collaborator) => {
-    if (!task.collaborators?.some(c => c.id === collaborator.id)) {
-      const updatedCollaborators = [...(task.collaborators || []), collaborator];
-      updateTask(task.id, { collaborators: updatedCollaborators });
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !isAddingCollaborator) {
-      handleAddCollaborator();
-    }
-    if (e.key === 'Escape') {
-      onClose();
-    }
-  };
-
-  const isValidEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const canAddCollaborator = newCollaboratorEmail.trim() && 
-                            isValidEmail(newCollaboratorEmail.trim()) && 
-                            !task.collaborators?.some(c => c.email === newCollaboratorEmail.trim());
-
-  // Filtrer les collaborateurs disponibles (non assignés à cette tâche)
-  const availableCollaborators = collaborators.filter(c => 
-    !task.collaborators?.some(tc => tc.id === c.id) &&
-    (searchTerm === '' || 
-     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     c.email.toLowerCase().includes(searchTerm.toLowerCase()))
+  const availableFriends = useMemo(
+    () =>
+      (friends || []).filter(
+        (friend) => !assignedCollaborators.includes(friend.id) &&
+          (search.trim() === '' ||
+            friend.name.toLowerCase().includes(search.toLowerCase()) ||
+            friend.email.toLowerCase().includes(search.toLowerCase()))
+      ),
+    [friends, assignedCollaborators, search]
   );
 
+  if (!isOpen) return null;
+  if (!task) return null;
+
+  const setCollaborators = (collaborators: string[]) => {
+    updateTask(task.id, { collaborators, isCollaborative: collaborators.length > 0 });
+  };
+
+  const handleAdd = () => {
+    const value = input.trim();
+    if (!value) return;
+    if (assignedCollaborators.includes(value)) {
+      setInput('');
+      return;
+    }
+    setCollaborators([...assignedCollaborators, value]);
+    setInput('');
+  };
+
+  const handleToggleFriend = (friendId: string) => {
+    if (assignedCollaborators.includes(friendId)) {
+      setCollaborators(assignedCollaborators.filter((c) => c !== friendId));
+    } else {
+      setCollaborators([...assignedCollaborators, friendId]);
+    }
+  };
+
+  const handleRemove = (collaboratorId: string) => {
+    setCollaborators(assignedCollaborators.filter((c) => c !== collaboratorId));
+  };
+
+  const displayInfo = (id: string) => {
+    const friend = friends?.find((f) => f.id === id);
+    if (friend) {
+      return { name: friend.name, email: friend.email, avatar: friend.avatar };
+    }
+    if (emailRegex.test(id)) {
+      return { name: id.split('@')[0], email: id, avatar: undefined };
+    }
+    return { name: id, email: undefined, avatar: undefined };
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl mx-auto max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+            <div className="p-2 rounded-xl bg-blue-100 dark:bg-blue-900/30">
               <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                Gérer les collaborateurs
+              <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Collaborateurs</p>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                {task.name}
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Tâche : {task.title}
-              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Fermer la fenêtre des collaborateurs"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 max-h-[70vh] overflow-y-auto">
-          {/* Current Collaborators */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">
-                Collaborateurs assignés
-              </h3>
-              <span className="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-full text-sm font-medium">
-                {task.collaborators?.length || 0}
+        <div className="p-6 space-y-8 overflow-y-auto max-h-[70vh]">
+          {/* Assigned collaborators */}
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Collaborateurs assignés</h3>
+              <span className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                {assignedCollaborators.length}
               </span>
             </div>
-            
-            {task.collaborators && task.collaborators.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {task.collaborators.map((collaborator) => (
-                  <div
-                    key={collaborator.id}
-                    className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={collaborator.avatar}
-                        alt={collaborator.name}
-                        className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-800 shadow-sm"
-                      />
-                      <div>
-                        <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                          {collaborator.name}
-                        </p>
-                        <div className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400">
-                          <Mail size={12} />
-                          <span>{collaborator.email}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveCollaborator(collaborator.id)}
-                      className="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                      title="Retirer le collaborateur"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
+            {assignedCollaborators.length === 0 ? (
+              <div className="p-4 rounded-lg border border-dashed border-slate-200 dark:border-slate-700 text-center text-sm text-slate-500 dark:text-slate-400">
+                Aucun collaborateur pour l’instant.
               </div>
             ) : (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-slate-400" />
-                </div>
-                <p className="text-slate-500 dark:text-slate-400 text-sm">
-                  Aucun collaborateur assigné à cette tâche
-                </p>
-                <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">
-                  Ajoutez des collaborateurs pour travailler en équipe
-                </p>
+              <div className="space-y-3">
+                {assignedCollaborators.map((collaboratorId) => {
+                  const info = displayInfo(collaboratorId);
+                  return (
+                    <div
+                      key={collaboratorId}
+                      className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-700 dark:text-blue-300 font-semibold">
+                          {info.avatar ? info.avatar : getInitials(info.name || collaboratorId)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{info.name}</p>
+                          {info.email && (
+                            <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                              <Mail size={12} />
+                              <span>{info.email}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleRemove(collaboratorId)}
+                        className="p-2 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                        aria-label="Retirer ce collaborateur"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
-          </div>
+          </section>
 
-          {/* Add New Collaborator by Email */}
-          <div className="mb-8 border-t border-slate-200 dark:border-slate-700 pt-6">
-            <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-4">
-              Ajouter par email
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Adresse email
-                </label>
-                <input
-                  type="email"
-                  value={newCollaboratorEmail}
-                  onChange={(e) => setNewCollaboratorEmail(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="exemple@email.com"
-                  className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  disabled={isAddingCollaborator}
-                />
-                {newCollaboratorEmail && !isValidEmail(newCollaboratorEmail) && (
-                  <p className="text-red-500 text-xs mt-1">
-                    Veuillez entrer une adresse email valide
-                  </p>
-                )}
-                {newCollaboratorEmail && task.collaborators?.some(c => c.email === newCollaboratorEmail.trim()) && (
-                  <p className="text-orange-500 text-xs mt-1">
-                    Ce collaborateur est déjà assigné à cette tâche
-                  </p>
-                )}
-              </div>
-              
-              <button
-                onClick={handleAddCollaborator}
-                disabled={!canAddCollaborator || isAddingCollaborator}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
-              >
-                {isAddingCollaborator ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Ajout en cours...</span>
-                  </>
-                ) : (
-                  <>
-                    <UserPlus size={16} />
-                    <span>Ajouter le collaborateur</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Add Existing Collaborators */}
-          {availableCollaborators.length > 0 && (
-            <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
-              <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-4">
-                Collaborateurs disponibles
-              </h3>
-              
-              {/* Search */}
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          {/* Add collaborator by email/id */}
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Ajouter un collaborateur</h3>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="relative flex-1">
                 <input
                   type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Rechercher un collaborateur..."
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Email ou identifiant"
+                  className="w-full px-4 py-3 pr-10 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {input && (
+                  <button
+                    onClick={() => setInput('')}
+                    className="absolute inset-y-0 right-2 flex items-center text-slate-400 hover:text-slate-600"
+                    aria-label="Effacer l'entrée"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={handleAdd}
+                disabled={!input.trim()}
+                className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <UserPlus size={16} />
+                Ajouter
+              </button>
+            </div>
+            {input && !emailRegex.test(input.trim()) && input.includes('@') && (
+              <p className="text-xs text-orange-500">Le format de l'adresse semble invalide.</p>
+            )}
+          </section>
+
+          {/* Available friends */}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Collaborateurs disponibles</h3>
+              <div className="relative w-full sm:w-64">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Rechercher un contact"
+                  className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                {availableCollaborators.map((collaborator) => (
+            {availableFriends.length === 0 ? (
+              <p className="text-sm text-slate-500 dark:text-slate-400">Aucun contact à ajouter.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {availableFriends.map((friend) => (
                   <div
-                    key={collaborator.id}
-                    className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+                    key={friend.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
                   >
                     <div className="flex items-center gap-3">
-                      <img
-                        src={collaborator.avatar}
-                        alt={collaborator.name}
-                        className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 shadow-sm"
-                      />
+                      <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-700 dark:text-blue-300 font-semibold">
+                        {friend.avatar ? friend.avatar : getInitials(friend.name)}
+                      </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                          {collaborator.name}
-                        </p>
-                        <p className="text-xs text-slate-600 dark:text-slate-400">
-                          {collaborator.email}
-                        </p>
+                        <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{friend.name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{friend.email}</p>
                       </div>
                     </div>
                     <button
-                      onClick={() => handleAddExistingCollaborator(collaborator)}
-                      className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                      title="Ajouter à cette tâche"
+                      onClick={() => handleToggleFriend(friend.id)}
+                      className="p-2 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30 transition-colors"
+                      aria-label="Ajouter ce collaborateur"
                     >
                       <UserPlus size={16} />
                     </button>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </section>
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-6 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
           <button
             onClick={onClose}
-            className="px-6 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium transition-colors"
+            className="px-4 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
           >
-            Annuler
-          </button>
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 font-medium transition-colors"
-          >
-            Terminer
+            Fermer
           </button>
         </div>
       </div>
