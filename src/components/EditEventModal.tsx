@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Clock } from "lucide-react";
 import { CalendarEvent } from "../context/TaskContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 type EditEventModalProps = {
   isOpen: boolean;
@@ -33,6 +34,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   const [endTime, setEndTime] = useState("");
   const [notes, setNotes] = useState("");
   const [color, setColor] = useState("#3B82F6");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (isOpen && event) {
@@ -78,9 +80,12 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   };
 
   const handleDelete = () => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet événement ?")) {
-      onDeleteEvent(event.id);
-    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    onDeleteEvent(event.id);
+    setShowDeleteConfirm(false);
   };
 
   const colorOptions = [
@@ -159,7 +164,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                 className="block text-sm font-semibold mb-2"
                 style={{ color: "rgb(var(--color-text-secondary))" }}
               >
-                📝 Titre de l'événement *
+                 Titre de l'événement *
               </label>
               <input
                 type="text"
@@ -328,7 +333,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                 className="block text-sm font-semibold mb-2"
                 style={{ color: "rgb(var(--color-text-secondary))" }}
               >
-                📄 Description
+                 Description
               </label>
               <textarea
                 value={notes}
@@ -353,7 +358,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                 className="block text-sm font-semibold mb-3"
                 style={{ color: "rgb(var(--color-text-secondary))" }}
               >
-                🎨 Couleur de l'événement
+                 Couleur de l'événement
               </label>
               <div className="grid grid-cols-4 gap-2 mb-3">
                 {colorOptions.map((option) => (
@@ -421,7 +426,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                 className="text-sm font-semibold mb-3"
                 style={{ color: "rgb(var(--color-text-secondary))" }}
               >
-                👁️ Aperçu
+                 Aperçu
               </h4>
               <div
                 className="p-3 rounded-lg text-white text-center font-medium shadow-sm"
@@ -449,7 +454,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                   color: "#fff",
                 }}
               >
-                ✅ Valider
+                 Valider
               </button>
               <button
                 type="button"
@@ -461,12 +466,71 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                   borderColor: "rgb(var(--color-border))",
                 }}
               >
-                🗑️ Supprimer l'événement
+                 Supprimer l'événement
               </button>
             </div>
           </div>
         </div>
       </form>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowDeleteConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="rounded-xl shadow-2xl w-full max-w-md p-6 transition-colors"
+              style={{ backgroundColor: "rgb(var(--color-surface))" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2
+                className="text-lg font-semibold mb-2"
+                style={{ color: "rgb(var(--color-text-primary))" }}
+              >
+                Confirmer la suppression
+              </h2>
+              <p
+                className="text-sm mb-6"
+                style={{ color: "rgb(var(--color-text-secondary))" }}
+              >
+                Êtes-vous sûr de vouloir supprimer cet événement ? Cette action
+                est irréversible.
+              </p>
+              <div className="flex justify-end gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-4 py-2 rounded-lg font-medium border transition-colors"
+                  style={{
+                    borderColor: "rgb(var(--color-border))",
+                    color: "rgb(var(--color-text-primary))",
+                  }}
+                >
+                  Annuler
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={confirmDelete}
+                  className="px-4 py-2 rounded-lg font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors"
+                >
+                  Supprimer
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
