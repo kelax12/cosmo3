@@ -1,9 +1,11 @@
 import React from 'react';
 import { CheckSquare, Clock, Star, AlertCircle } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
+import { useNavigate } from 'react-router-dom';
 
 const TodayTasks: React.FC = () => {
   const { tasks, toggleComplete, toggleBookmark } = useTasks();
+  const navigate = useNavigate();
   
   // Tâches prioritaires pour aujourd'hui
   const todayTasks = tasks
@@ -25,13 +27,13 @@ const TodayTasks: React.FC = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      red: 'bg-red-100 border-red-200',
-      blue: 'bg-blue-100 border-blue-200',
-      green: 'bg-green-100 border-green-200',
-      purple: 'bg-purple-100 border-purple-200',
-      orange: 'bg-orange-100 border-orange-200'
+      red: 'bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-800 hover:bg-red-200 dark:hover:bg-red-800/40 hover:border-red-500 dark:hover:border-red-600',
+      blue: 'bg-blue-100 dark:bg-blue-900/20 border-blue-300 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-800/40 hover:border-blue-500 dark:hover:border-blue-600',
+      green: 'bg-green-100 dark:bg-green-900/20 border-green-300 dark:border-green-800 hover:bg-green-200 dark:hover:bg-green-800/40 hover:border-green-500 dark:hover:border-green-600',
+      purple: 'bg-purple-100 dark:bg-purple-900/20 border-purple-300 dark:border-purple-800 hover:bg-purple-200 dark:hover:bg-purple-800/40 hover:border-purple-500 dark:hover:border-purple-600',
+      orange: 'bg-orange-100 dark:bg-orange-900/20 border-orange-300 dark:border-orange-800 hover:bg-orange-200 dark:hover:bg-orange-800/40 hover:border-orange-500 dark:hover:border-orange-600'
     };
-    return colors[category as keyof typeof colors] || 'bg-gray-100 border-gray-200';
+    return colors[category as keyof typeof colors] || 'bg-gray-100 dark:bg-gray-800/50 border-gray-300 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700/60 hover:border-gray-500 dark:hover:border-gray-600';
   };
 
   const getPriorityIcon = (priority: number) => {
@@ -42,12 +44,12 @@ const TodayTasks: React.FC = () => {
   return (
     <div className="card p-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-blue-100 rounded-xl">
-          <CheckSquare size={24} className="text-blue-600" />
+        <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-xl border border-blue-300 dark:border-blue-800/30">
+          <CheckSquare size={24} className="text-blue-700 dark:text-blue-400" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Tâches prioritaires</h2>
-          <p className="text-gray-600 text-sm">
+          <h2 className="text-xl font-bold text-[rgb(var(--color-text-primary))]">Tâches prioritaires</h2>
+          <p className="text-[rgb(var(--color-text-secondary))] text-sm">
             {todayTasks.length} tâches • {Math.floor(totalTime / 60)}h{totalTime % 60}min
           </p>
         </div>
@@ -57,30 +59,34 @@ const TodayTasks: React.FC = () => {
         {todayTasks.map(task => (
           <div 
             key={task.id}
-            className={`p-4 rounded-2xl border-2 transition-all duration-300 ${
+            onClick={() => navigate('/tasks', { state: { openTaskId: task.id } })}
+            className={`p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:scale-105 hover:shadow-lg ${
               task.isCollaborative ? 'collaborative-task' : getCategoryColor(task.category)
             }`}
           >
             <div className="flex items-center gap-3">
               <button
-                onClick={() => toggleComplete(task.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleComplete(task.id);
+                }}
                 className="flex-shrink-0"
               >
-                <CheckSquare size={20} className="text-gray-400 hover:text-green-500" />
+                <CheckSquare size={20} className="text-gray-400 dark:text-gray-500 hover:text-green-600 dark:hover:text-green-400" />
               </button>
               
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-bold text-gray-900">{task.name}</h3>
+                  <h3 className="font-bold text-[rgb(var(--color-text-primary))]">{task.name}</h3>
                   {getPriorityIcon(task.priority)}
                   {task.isCollaborative && (
-                    <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">
+                    <span className="text-xs bg-blue-600 dark:bg-blue-600 text-white px-2 py-1 rounded-full">
                       Collaboratif
                     </span>
                   )}
                 </div>
                 
-                <div className="flex items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-4 text-sm text-[rgb(var(--color-text-secondary))]">
                   <div className="flex items-center gap-1">
                     <Clock size={14} />
                     <span>{task.estimatedTime} min</span>
@@ -96,12 +102,15 @@ const TodayTasks: React.FC = () => {
               </div>
               
               <button
-                onClick={() => toggleBookmark(task.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleBookmark(task.id);
+                }}
                 className="flex-shrink-0"
               >
                 <Star 
                   size={18} 
-                  className={task.bookmarked ? 'favorite-icon filled' : 'text-gray-400 hover:text-yellow-500'} 
+                  className={task.bookmarked ? 'favorite-icon filled' : 'text-gray-400 dark:text-gray-500 hover:text-yellow-500 dark:hover:text-yellow-400'} 
                 />
               </button>
             </div>
