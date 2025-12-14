@@ -143,4 +143,3 @@ const AdModal: React.FC<AdModalProps> = ({ isOpen, onClose, onAdComplete }) => {
 };
 
 export default AdModal;
-
