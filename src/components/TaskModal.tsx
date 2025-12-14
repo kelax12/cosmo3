@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Clock, Users, Search, UserPlus, Save, AlertCircle, CheckCircle, Calendar, Star, Bookmark } from 'lucide-react';
+import { X, Users, Save, AlertCircle, CheckCircle, Star, Bookmark } from 'lucide-react';
 import { Task, useTasks } from '../context/TaskContext';
+import CollaboratorModal from './CollaboratorModal';
 
 interface TaskModalProps {
   task: Task;
@@ -12,7 +13,7 @@ interface TaskModalProps {
 }
 
 const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, isCreating = false, showCollaborators = false }) => {
-  const { updateTask, deleteTask, colorSettings, friends, shareTask, isPremium } = useTasks();
+  const { tasks, updateTask, deleteTask, colorSettings, friends, isPremium } = useTasks();
   
   // Form state with validation
   const [formData, setFormData] = useState({
@@ -25,12 +26,18 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
     bookmarked: false
   });
   
-  const [collaborators, setCollaborators] = useState<string[]>([]);
-  const [searchUser, setSearchUser] = useState('');
-  const [showCollaboratorSection, setShowCollaboratorSection] = useState(showCollaborators);
+  const [collaboratorModalOpen, setCollaboratorModalOpen] = useState(showCollaborators);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [hasChanges, setHasChanges] = useState(false);
+
+  const categoryColors = {
+    red: '#EF4444',
+    blue: '#3B82F6',
+    green: '#10B981',
+    purple: '#8B5CF6',
+    orange: '#F97316'
+  };
 
   // Initialize form data when task changes
   useEffect(() => {
@@ -44,7 +51,6 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
         completed: task.completed,
         bookmarked: task.bookmarked
       });
-      setCollaborators(task.collaborators || []);
       setHasChanges(false);
       setErrors({});
     }
@@ -61,11 +67,16 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
       formData.deadline !== (task.deadline ? task.deadline.split('T')[0] : '') ||
       formData.estimatedTime !== task.estimatedTime ||
       formData.completed !== task.completed ||
-      formData.bookmarked !== task.bookmarked ||
-      JSON.stringify(collaborators) !== JSON.stringify(task.collaborators || []);
+      formData.bookmarked !== task.bookmarked;
     
     setHasChanges(hasFormChanges);
-  }, [formData, collaborators, task]);
+  }, [formData, task]);
+
+  useEffect(() => {
+    if (showCollaborators && isOpen) {
+      setCollaboratorModalOpen(true);
+    }
+  }, [showCollaborators, isOpen]);
 
   if (!isOpen) return null;
 
@@ -122,13 +133,16 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 800));
       
+      const currentTask = tasks.find((t) => t.id === task.id) || task;
+      const collaboratorIdsForSave = currentTask?.collaborators || task.collaborators || [];
+      
       if (isCreating && onSave) {
         // Creating new task
         const newTaskData = {
           ...formData,
           deadline: formData.deadline ? new Date(formData.deadline).toISOString() : new Date().toISOString(),
-          isCollaborative: collaborators.length > 0,
-          collaborators: collaborators.length > 0 ? collaborators : undefined
+          isCollaborative: collaboratorIdsForSave.length > 0,
+          collaborators: collaboratorIdsForSave.length > 0 ? collaboratorIdsForSave : undefined
         };
         onSave(newTaskData);
       } else {
@@ -136,18 +150,11 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
         const updatedTask: Partial<Task> = {
           ...formData,
           deadline: formData.deadline ? new Date(formData.deadline).toISOString() : task.deadline,
-          isCollaborative: collaborators.length > 0,
-          collaborators: collaborators.length > 0 ? collaborators : undefined
+          isCollaborative: collaboratorIdsForSave.length > 0,
+          collaborators: collaboratorIdsForSave.length > 0 ? collaboratorIdsForSave : undefined
         };
         
         updateTask(task.id, updatedTask);
-        
-        // Share with collaborators if any
-        if (collaborators.length > 0 && isPremium()) {
-          collaborators.forEach(userId => {
-            shareTask(task.id, userId, 'editor');
-          });
-        }
       }
       
       onClose();
@@ -184,49 +191,23 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
     }
   };
 
-  // Auto-scroll to collaborators section when showCollaborators is true
-  useEffect(() => {
-    if (showCollaborators && isOpen) {
-      const timer = setTimeout(() => {
-        const collaboratorSection = document.querySelector('[data-collaborator-section]');
-        if (collaboratorSection) {
-          collaboratorSection.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-          });
-        }
-      }, 300); // Small delay to ensure modal is fully rendered
-      
-      return () => clearTimeout(timer);
+  const getInitials = (value: string) => {
+    if (!value) return '?';
+    const parts = value.split(/\s|@/).filter(Boolean);
+    const firstTwo = parts.slice(0, 2).map(p => p.charAt(0).toUpperCase());
+    return firstTwo.join('') || value.charAt(0).toUpperCase();
+  };
+
+  const currentTask = tasks.find((t) => t.id === task.id) || task;
+  const collaboratorIds = currentTask?.collaborators || [];
+  const collaboratorInfos = collaboratorIds.map((userId) => {
+    const friend = friends?.find((f) => f.id === userId);
+    if (friend) {
+      return { id: userId, name: friend.name, email: friend.email, avatar: friend.avatar };
     }
-  }, [showCollaborators, isOpen]);
-
-  const toggleCollaborator = (userId: string) => {
-    setCollaborators(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
-    );
-  };
-
-  const availableFriends = friends || [
-    { id: 'user2', name: 'Marie Dupont', email: 'marie@example.com', avatar: '👩‍💼' },
-    { id: 'user3', name: 'Jean Martin', email: 'jean@example.com', avatar: '👨‍💻' },
-    { id: 'user4', name: 'Sophie Bernard', email: 'sophie@example.com', avatar: '👩‍🔬' },
-  ];
-
-  const filteredFriends = availableFriends.filter(friend => 
-    friend.name.toLowerCase().includes(searchUser.toLowerCase()) ||
-    friend.email.toLowerCase().includes(searchUser.toLowerCase())
-  );
-
-  const categoryColors = {
-    red: '#EF4444',
-    blue: '#3B82F6',
-    green: '#10B981',
-    purple: '#8B5CF6',
-    orange: '#F97316'
-  };
+    return { id: userId, name: userId, email: undefined, avatar: undefined };
+  });
+  const canManageCollaborators = !isCreating && !!task?.id;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
@@ -284,7 +265,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
               {/* Task Name */}
               <div>
                 <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                  📝 Nom de la tâche *
+                   Nom de la tâche *
                 </label>
                 <input
                   type="text"
@@ -313,7 +294,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                    🎯 Priorité
+                     Priorité
                   </label>
                   <select
                     value={formData.priority}
@@ -335,7 +316,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
                 
                 <div>
                   <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                    🏷️ Catégorie
+                     Catégorie
                   </label>
                   <select
                     value={formData.category}
@@ -367,7 +348,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                    📅 Date limite
+                     Date limite
                   </label>
                   <input
                     type="date"
@@ -393,7 +374,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
                 
                 <div>
                   <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                    ⏱️ Temps estimé (min)
+                     Temps estimé (min)
                   </label>
                   <input
                     type="number"
@@ -470,126 +451,65 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
               <div data-collaborator-section>
                 <div className="flex items-center justify-between mb-4">
                   <label className="block text-sm font-semibold" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                    👥 Collaborateurs
+                     Collaborateurs
                   </label>
                   <button
                     type="button"
-                    onClick={() => setShowCollaboratorSection(!showCollaboratorSection)}
-                    className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                    onClick={() => setCollaboratorModalOpen(true)}
+                    disabled={!canManageCollaborators}
+                    className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors disabled:opacity-50"
                   >
                     <Users size={16} />
-                    <span>{showCollaboratorSection ? 'Masquer' : 'Gérer'}</span>
+                    <span>{canManageCollaborators ? 'Gérer' : 'Après création'}</span>
                   </button>
                 </div>
 
-                {showCollaboratorSection && (
-                  <div className="rounded-lg p-4 border transition-colors" style={{
-                    backgroundColor: 'rgb(var(--color-hover))',
-                    borderColor: 'rgb(var(--color-border))'
-                  }}>
-                    {!isPremium() ? (
-                      <div className="text-center py-6">
-                        <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
-                          <Users size={24} className="text-yellow-600 dark:text-yellow-400" />
-                        </div>
-                        <p className="text-sm mb-3" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                          Fonctionnalité Premium requise
-                        </p>
-                        <button className="text-xs bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-full transition-colors">
-                          Débloquer Premium
-                        </button>
+                <div className="rounded-lg p-4 border transition-colors" style={{
+                  backgroundColor: 'rgb(var(--color-hover))',
+                  borderColor: 'rgb(var(--color-border))'
+                }}>
+                  {!isPremium() ? (
+                    <div className="text-center py-6">
+                      <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <Users size={24} className="text-yellow-600 dark:text-yellow-400" />
                       </div>
-                    ) : (
-                      <>
-                        {/* Search users */}
-                        <div className="relative mb-4">
-                          <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-                          <input
-                            type="text"
-                            value={searchUser}
-                            onChange={(e) => setSearchUser(e.target.value)}
-                            placeholder="Rechercher un utilisateur..."
-                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors"
-                            style={{
-                              backgroundColor: 'rgb(var(--color-surface))',
-                              color: 'rgb(var(--color-text-primary))',
-                              borderColor: 'rgb(var(--color-border))'
-                            }}
-                          />
-                        </div>
-
-                        {/* Friends list */}
-                        <div className="space-y-2 max-h-48 overflow-y-auto">
-                          {filteredFriends.map(friend => (
-                            <div 
-                              key={friend.id}
-                              className="flex items-center justify-between p-3 rounded-lg border transition-colors"
+                      <p className="text-sm" style={{ color: 'rgb(var(--color-text-secondary))' }}>
+                        Fonctionnalité Premium requise
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {collaboratorInfos.length === 0 ? (
+                        <p className="text-sm" style={{ color: 'rgb(var(--color-text-secondary))' }}>
+                          Aucun collaborateur. {canManageCollaborators ? 'Cliquez sur Gérer pour en ajouter.' : 'Disponible après création.'}
+                        </p>
+                      ) : (
+                        <div className="flex flex-wrap gap-3">
+                          {collaboratorInfos.map((info) => (
+                            <div
+                              key={info.id}
+                              className="flex items-center gap-2 px-3 py-2 rounded-lg border"
                               style={{
                                 backgroundColor: 'rgb(var(--color-surface))',
                                 borderColor: 'rgb(var(--color-border))'
                               }}
-                              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgb(var(--color-text-muted))'}
-                              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgb(var(--color-border))'}
                             >
-                              <div className="flex items-center gap-3">
-                                <div className="text-2xl">{friend.avatar}</div>
-                                <div>
-                                  <div className="font-medium" style={{ color: 'rgb(var(--color-text-primary))' }}>{friend.name}</div>
-                                  <div className="text-sm" style={{ color: 'rgb(var(--color-text-secondary))' }}>{friend.email}</div>
-                                </div>
+                              <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-700 dark:text-blue-300 font-semibold">
+                                {info.avatar ? info.avatar : getInitials(info.name || info.id)}
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => toggleCollaborator(friend.id)}
-                                className={`p-2 rounded-lg transition-colors ${
-                                  collaborators.includes(friend.id)
-                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                }`}
-                              >
-                                {collaborators.includes(friend.id) ? (
-                                  <X size={16} />
-                                ) : (
-                                  <UserPlus size={16} />
+                              <div>
+                                <div className="font-medium text-sm" style={{ color: 'rgb(var(--color-text-primary))' }}>{info.name}</div>
+                                {info.email && (
+                                  <div className="text-xs" style={{ color: 'rgb(var(--color-text-secondary))' }}>{info.email}</div>
                                 )}
-                              </button>
+                              </div>
                             </div>
                           ))}
                         </div>
-
-                        {/* Selected collaborators */}
-                        {collaborators.length > 0 && (
-                          <div className="mt-4 pt-4 border-t" style={{ borderColor: 'rgb(var(--color-border))' }}>
-                            <div className="text-sm font-medium mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                              Collaborateurs sélectionnés ({collaborators.length})
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {collaborators.map(userId => {
-                                const friend = availableFriends.find(f => f.id === userId);
-                                return friend ? (
-                                  <div 
-                                    key={userId}
-                                    className="flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full text-sm"
-                                  >
-                                    <span>{friend.avatar}</span>
-                                    <span>{friend.name}</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => toggleCollaborator(userId)}
-                                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
-                                    >
-                                      <X size={14} />
-                                    </button>
-                                  </div>
-                                ) : null;
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Task Preview */}
@@ -675,6 +595,14 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave, is
             </div>
           </div>
         </div>
+
+        {collaboratorModalOpen && canManageCollaborators && task.id && (
+          <CollaboratorModal
+            isOpen={collaboratorModalOpen}
+            onClose={() => setCollaboratorModalOpen(false)}
+            taskId={task.id}
+          />
+        )}
       </div>
     </div>
   );
