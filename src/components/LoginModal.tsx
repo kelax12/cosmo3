@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { useGoogleLogin } from '@react-oauth/google';
+import { useTasks } from '../context/TaskContext';
+import { toast } from 'sonner';
 
 // Composant pour l'icône Google
 const GoogleIcon = () => (
@@ -25,15 +28,79 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, mode, onSwitch
     email: '',
     password: '',
   });
+  const { login, register, loginWithGoogle } = useTasks();
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-    onClose();
+    
+    try {
+      let success = false;
+      
+      if (mode === 'login') {
+        success = await login(formData.email, formData.password);
+        if (success) {
+          toast.success('Connexion réussie !');
+          onClose();
+        } else {
+          toast.error('Email ou mot de passe incorrect');
+        }
+      } else {
+        success = await register(formData.name, formData.email, formData.password);
+        if (success) {
+          toast.success('Compte créé avec succès !');
+          onClose();
+        } else {
+          toast.error('Erreur lors de la création du compte');
+        }
+      }
+    } catch (error) {
+      toast.error('Une erreur est survenue');
+    }
   };
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        // Récupérer les informations de l'utilisateur avec le token d'accès
+        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: {
+            Authorization: `Bearer ${tokenResponse.access_token}`,
+          },
+        });
+        
+        const userInfo = await userInfoResponse.json();
+        
+        // Créer un credential JWT simulé pour la fonction loginWithGoogle
+        const mockCredential = btoa(JSON.stringify({
+          header: { alg: 'none', typ: 'JWT' },
+          payload: {
+            sub: userInfo.sub,
+            name: userInfo.name,
+            email: userInfo.email,
+            picture: userInfo.picture,
+          },
+        }));
+        
+        const credential = `header.${mockCredential}.signature`;
+        const success = await loginWithGoogle(credential);
+        
+        if (success) {
+          toast.success(`Bienvenue ${userInfo.name} !`);
+          onClose();
+        } else {
+          toast.error('Erreur lors de la connexion avec Google');
+        }
+      } catch (error) {
+        console.error('Erreur Google Login:', error);
+        toast.error('Erreur lors de la connexion avec Google');
+      }
+    },
+    onError: () => {
+      toast.error('Erreur lors de la connexion avec Google');
+    },
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -68,6 +135,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, mode, onSwitch
           {/* Bouton Google */}
           <button
             type="button"
+            onClick={() => handleGoogleLogin()}
             className="w-full bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-900 dark:text-white border border-gray-300 dark:border-slate-600 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-3"
           >
             <GoogleIcon />
