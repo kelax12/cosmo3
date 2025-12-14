@@ -34,45 +34,58 @@ const Layout: React.FC = () => {
         </div>
         
         <nav className="flex-1 px-4 py-6 space-y-1">
-          <NavLink to="/" className={({isActive}) => 
-            isActive ? 'sidebar-item active' : 'sidebar-item'
-          } end>
-            <LayoutDashboard size={20} />
+          <NavLink 
+            to="/" 
+            className={({isActive}) => `sidebar-item ${isActive ? 'active' : ''}`}
+            end
+            aria-label="Accéder au tableau de bord"
+          >
+            <LayoutDashboard size={20} aria-hidden="true" />
             <span>Dashboard</span>
           </NavLink>
           
-          <NavLink to="/tasks" className={({isActive}) => 
-            isActive ? 'sidebar-item active' : 'sidebar-item'
-          }>
-            <CheckSquare size={20} />
+          <NavLink 
+            to="/tasks" 
+            className={({isActive}) => `sidebar-item ${isActive ? 'active' : ''}`}
+            aria-label="Accéder à la liste des tâches"
+          >
+            <CheckSquare size={20} aria-hidden="true" />
             <span>To do list</span>
           </NavLink>
           
-          <NavLink to="/agenda" className={({isActive}) => 
-            isActive ? 'sidebar-item active' : 'sidebar-item'
-          }>
-            <Calendar size={20} />
+          <NavLink 
+            to="/agenda" 
+            className={({isActive}) => `sidebar-item ${isActive ? 'active' : ''}`}
+            aria-label="Accéder à l'agenda"
+          >
+            <Calendar size={20} aria-hidden="true" />
             <span>Agenda</span>
           </NavLink>
           
-          <NavLink to="/okr" className={({isActive}) => 
-            isActive ? 'sidebar-item active' : 'sidebar-item'
-          }>
-            <Target size={20} />
+          <NavLink 
+            to="/okr" 
+            className={({isActive}) => `sidebar-item ${isActive ? 'active' : ''}`}
+            aria-label="Accéder aux objectifs OKR"
+          >
+            <Target size={20} aria-hidden="true" />
             <span>OKR</span>
           </NavLink>
           
-          <NavLink to="/habits" className={({isActive}) => 
-            isActive ? 'sidebar-item active' : 'sidebar-item'
-          }>
-            <Repeat size={20} />
+          <NavLink 
+            to="/habits" 
+            className={({isActive}) => `sidebar-item ${isActive ? 'active' : ''}`}
+            aria-label="Accéder au suivi des habitudes"
+          >
+            <Repeat size={20} aria-hidden="true" />
             <span>Habitudes</span>
           </NavLink>
           
-          <NavLink to="/statistics" className={({isActive}) => 
-            isActive ? 'sidebar-item active' : 'sidebar-item'
-          }>
-            <BarChart2 size={20} />
+          <NavLink 
+            to="/statistics" 
+            className={({isActive}) => `sidebar-item ${isActive ? 'active' : ''}`}
+            aria-label="Accéder aux statistiques"
+          >
+            <BarChart2 size={20} aria-hidden="true" />
             <span>Statistiques</span>
           </NavLink>
         </nav>
@@ -81,13 +94,15 @@ const Layout: React.FC = () => {
         <div className="border-t p-4" style={{ borderColor: 'rgb(var(--nav-border))' }}>
           <div className="text-xs font-semibold uppercase mb-4 px-2" style={{ color: 'rgb(var(--color-text-muted))' }}>COMPANY</div>
           
-          <NavLink to="/messaging" className={({isActive}) => 
-            isActive ? 'sidebar-item active' : 'sidebar-item'
-          }>
+          <NavLink 
+            to="/messaging" 
+            className={({isActive}) => `sidebar-item ${isActive ? 'active' : ''}`}
+            aria-label={`Accéder à la messagerie${unreadMessages > 0 ? ` - ${unreadMessages} messages non lus` : ''}`}
+          >
             <div className="relative">
-              <MessageCircle size={20} />
+              <MessageCircle size={20} aria-hidden="true" />
               {unreadMessages > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" aria-label={`${unreadMessages} messages non lus`}>
                   {unreadMessages}
                 </span>
               )}
@@ -95,25 +110,30 @@ const Layout: React.FC = () => {
             <span>Messagerie</span>
           </NavLink>
           
-          <NavLink to="/premium" className={({isActive}) => 
-            isActive ? 'sidebar-item active' : 'sidebar-item'
-          }>
-            <Crown size={20} />
+          <NavLink 
+            to="/premium" 
+            className={({isActive}) => `sidebar-item ${isActive ? 'active' : ''}`}
+            aria-label="Accéder à Premium"
+          >
+            <Crown size={20} aria-hidden="true" />
             <span>Premium</span>
           </NavLink>
           
-          <NavLink to="/settings" className={({isActive}) => 
-            isActive ? 'sidebar-item active' : 'sidebar-item'
-          }>
-            <Settings size={20} />
+          <NavLink 
+            to="/settings" 
+            className={({isActive}) => `sidebar-item ${isActive ? 'active' : ''}`}
+            aria-label="Accéder aux paramètres"
+          >
+            <Settings size={20} aria-hidden="true" />
             <span>Paramètres</span>
           </NavLink>
           
           <button 
             onClick={logout}
             className="sidebar-item w-full text-left text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+            aria-label="Se déconnecter"
           >
-            <LogOut size={20} />
+            <LogOut size={20} aria-hidden="true" />
             <span>Déconnexion</span>
           </button>
         </div>
