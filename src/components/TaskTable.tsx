@@ -26,7 +26,7 @@ const TaskTable: React.FC<TaskTableProps> = ({
   selectedTaskId: externalSelectedTaskId,
   onTaskModalClose
 }) => {
-  const { tasks: contextTasks, deleteTask, toggleBookmark, toggleComplete, addEvent } = useTasks();
+  const { tasks: contextTasks, deleteTask, toggleBookmark, toggleComplete, addEvent, priorityRange } = useTasks();
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
   const [selectedTaskForCollaborators, setSelectedTaskForCollaborators] = useState<string | null>(null);
@@ -59,10 +59,11 @@ const TaskTable: React.FC<TaskTableProps> = ({
     }
   };
 
-  // Filter tasks based on completion status and bookmark filter
-  const filteredByCompletion = showCompleted 
+  // Filter tasks based on completion status, bookmark filter and priority range
+  const filteredByCompletion = (showCompleted 
     ? tasks.filter(task => task.completed)
-    : tasks.filter(task => !task.completed);
+    : tasks.filter(task => !task.completed)
+  ).filter(task => task.priority >= priorityRange[0] && task.priority <= priorityRange[1]);
 
   const filteredTasks = showBookmarkedOnly 
     ? filteredByCompletion.filter(task => task.bookmarked)
@@ -117,7 +118,11 @@ const TaskTable: React.FC<TaskTableProps> = ({
   };
 
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd/MM/yyyy', { locale: fr });
+    try {
+      return format(new Date(dateString), 'dd/MM/yyyy', { locale: fr });
+    } catch (e) {
+      return 'N/A';
+    }
   };
 
   return (
