@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ChevronDown, Filter, X, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTasks } from '../context/TaskContext';
+import { Slider } from './ui/slider';
 
 type TaskFilterProps = {
   onFilterChange: (value: string) => void;
@@ -15,18 +17,10 @@ const TaskFilter: React.FC<TaskFilterProps> = ({
   showCompleted = false,
   onShowCompletedChange 
 }) => {
+  const { categories, priorityRange, setPriorityRange } = useTasks();
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priorityRange, setPriorityRange] = useState<[number, number]>([1, 5]);
-
-  const categories = [
-    { value: 'red', label: 'Réviser textes', color: '#EF4444' },
-    { value: 'blue', label: 'Texte à fichées', color: '#3B82F6' },
-    { value: 'green', label: 'Apprendre textes', color: '#10B981' },
-    { value: 'purple', label: 'Autres taches', color: '#8B5CF6' },
-    { value: 'orange', label: 'Entrainement dissert', color: '#F97316' },
-  ];
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev => 
@@ -161,7 +155,7 @@ const TaskFilter: React.FC<TaskFilterProps> = ({
               {/* Search */}
               <div>
                 <label htmlFor="search-tasks" className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                  🔍 Rechercher
+                   Rechercher
                 </label>
                 <div className="relative">
                   <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" aria-hidden="true" />
@@ -194,30 +188,30 @@ const TaskFilter: React.FC<TaskFilterProps> = ({
               {/* Categories Filter */}
               <div>
                 <label className="block text-sm font-semibold mb-3" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                  🏷️ Filtrer par catégories
+                   Filtrer par catégories
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {categories.map((category) => (
                     <motion.button
-                      key={category.value}
+                      key={category.id}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => toggleCategory(category.value)}
+                      onClick={() => toggleCategory(category.id)}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                        selectedCategories.includes(category.value)
+                        selectedCategories.includes(category.id)
                           ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-md border-2 border-slate-900 dark:border-slate-100'
                           : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700'
                       }`}
-                      aria-label={`${selectedCategories.includes(category.value) ? 'Retirer' : 'Ajouter'} le filtre ${category.label}`}
-                      aria-pressed={selectedCategories.includes(category.value)}
+                      aria-label={`${selectedCategories.includes(category.id) ? 'Retirer' : 'Ajouter'} le filtre ${category.name}`}
+                      aria-pressed={selectedCategories.includes(category.id)}
                     >
                       <div 
                         className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: category.color }}
                         aria-hidden="true"
                       />
-                      <span>{category.label}</span>
-                      {selectedCategories.includes(category.value) && (
+                      <span>{category.name}</span>
+                      {selectedCategories.includes(category.id) && (
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
@@ -232,48 +226,51 @@ const TaskFilter: React.FC<TaskFilterProps> = ({
               </div>
 
               {/* Priority Range */}
-              <div>
-                <label className="block text-sm font-semibold mb-3" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                  🎯 Filtrer par priorité: {priorityRange[0]} - {priorityRange[1]}
-                </label>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium" style={{ color: 'rgb(var(--color-text-primary))' }}>Min: 1</span>
-                  <input
-                    type="range"
-                    min="1"
-                    max="5"
-                    value={priorityRange[0]}
-                    onChange={(e) => setPriorityRange([Number(e.target.value), priorityRange[1]])}
-                    className="flex-1 h-2 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    aria-label="Priorité minimale"
-                  />
-                  <input
-                    type="range"
-                    min="1"
-                    max="5"
-                    value={priorityRange[1]}
-                    onChange={(e) => setPriorityRange([priorityRange[0], Number(e.target.value)])}
-                    className="flex-1 h-2 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    aria-label="Priorité maximale"
-                  />
-                  <span className="text-sm font-medium" style={{ color: 'rgb(var(--color-text-primary))' }}>Max: 5</span>
-                </div>
-                <div className="flex justify-between mt-2">
-                  {[1, 2, 3, 4, 5].map(priority => (
-                    <span 
-                      key={priority}
-                      className={`text-xs ${
-                        priority >= priorityRange[0] && priority <= priorityRange[1]
-                          ? 'text-blue-600 dark:text-blue-400 font-bold'
-                          : 'text-slate-400'
-                      }`}
-                      aria-hidden="true"
-                    >
-                      {priority}
+              <div className="bg-slate-900/40 p-5 rounded-2xl border border-slate-800/50">
+                <div className="flex items-center justify-between mb-6">
+                  <label className="text-sm font-bold uppercase tracking-widest text-slate-500">
+                     Intervalle de priorité
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-bold">
+                      P{priorityRange[0]}
                     </span>
-                  ))}
+                    <span className="text-slate-600">à</span>
+                    <span className="px-3 py-1 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-bold">
+                      P{priorityRange[1]}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="px-4 py-2">
+                  <Slider
+                    min={1}
+                    max={5}
+                    step={1}
+                    value={priorityRange}
+                    onValueChange={(value) => setPriorityRange(value as [number, number])}
+                    className="cursor-pointer"
+                  />
+                </div>
+
+                <div className="flex justify-between mt-6 px-1">
+                  {[1, 2, 3, 4, 5].map(p => {
+                    const isActive = p >= priorityRange[0] && p <= priorityRange[1];
+                    return (
+                      <div key={p} className="flex flex-col items-center gap-2">
+                        <div className={`text-xs font-black transition-colors ${isActive ? 'text-blue-400 scale-110' : 'text-slate-600'}`}>
+                          P{p}
+                        </div>
+                        <div className={`h-2 w-2 rounded-full transition-all duration-300 ${isActive ? 'bg-blue-500 ring-4 ring-blue-500/20' : 'bg-slate-800'}`} />
+                        <span className="text-[10px] text-slate-500 font-medium">
+                          {p === 1 ? 'Basse' : p === 5 ? 'Critique' : ''}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
+
 
               {/* Active Filters Summary */}
               {hasActiveFilters && (
@@ -306,11 +303,22 @@ const TaskFilter: React.FC<TaskFilterProps> = ({
                         Recherche: "{searchTerm}"
                       </span>
                     )}
-                    {selectedCategories.map(cat => (
-                      <span key={cat} className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded text-xs">
-                        {categories.find(c => c.value === cat)?.label}
-                      </span>
-                    ))}
+                    {selectedCategories.map((cat) => {
+                      const selected = categories.find(c => c.id === cat);
+                      const color = selected?.color || '#3B82F6';
+                      return (
+                        <div key={cat} className="flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></span>
+                          <span>{selected?.name || cat}</span>
+                          <button
+                            onClick={() => toggleCategory(cat)}
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                          >
+                            <X size={14} aria-hidden="true" />
+                          </button>
+                        </div>
+                      );
+                    })}
                     {showCompleted && (
                       <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-xs">
                         Complétées
