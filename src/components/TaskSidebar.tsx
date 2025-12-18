@@ -3,28 +3,22 @@ import { useTasks } from '../context/TaskContext';
 import { Search, Clock, Star, Filter, X, CheckCircle2 } from 'lucide-react';
 
 const TaskSidebar: React.FC = () => {
-  const { tasks, colorSettings, events } = useTasks();
+  const { tasks, colorSettings, categories, events, priorityRange } = useTasks();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
 
-  // Filter tasks (exclude completed ones)
+  // Filter tasks (exclude completed ones and respect priority range)
   const availableTasks = tasks.filter(task => 
     !task.completed &&
     task.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (filterCategory === '' || task.category === filterCategory) &&
-    (filterPriority === '' || task.priority.toString() === filterPriority)
+    (filterPriority === '' || task.priority.toString() === filterPriority) &&
+    task.priority >= priorityRange[0] && task.priority <= priorityRange[1]
   );
 
   const getCategoryColor = (category: string) => {
-    const colors = {
-      red: '#EF4444',
-      blue: '#3B82F6',
-      green: '#10B981',
-      purple: '#8B5CF6',
-      orange: '#F97316'
-    };
-    return colors[category as keyof typeof colors] || '#6B7280';
+    return categories.find(cat => cat.id === category)?.color || '#6B7280';
   };
 
   const getPriorityColor = (priority: number) => {
@@ -78,8 +72,8 @@ const TaskSidebar: React.FC = () => {
             }}
           >
             <option value="">Toutes catégories</option>
-            {Object.entries(colorSettings).map(([key, label]) => (
-              <option key={key} value={key}>{label}</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>{category.name}</option>
             ))}
           </select>
           
@@ -164,7 +158,7 @@ const TaskSidebar: React.FC = () => {
                     borderColor: 'rgb(var(--color-border))',
                     color: 'rgb(var(--color-text-secondary))'
                   }}>
-                    {colorSettings[task.category]}
+                    {colorSettings[task.category] || 'Sans catégorie'}
                   </span>
                 </div>
                 
