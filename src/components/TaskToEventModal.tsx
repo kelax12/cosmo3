@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, Clock } from "lucide-react";
-import { Task } from "../context/TaskContext";
+import { Task, useTasks } from "../context/TaskContext";
 
 type TaskToEventModalProps = {
   isOpen: boolean;
@@ -21,6 +21,7 @@ const TaskToEventModal: React.FC<TaskToEventModalProps> = ({
   task,
   onConvert,
 }) => {
+  const { categories } = useTasks();
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("12:00");
@@ -44,19 +45,13 @@ const TaskToEventModal: React.FC<TaskToEventModalProps> = ({
 
       // Set color based on task category if available
       if (task.category) {
-        const categoryColors = {
-          red: '#EF4444',
-          blue: '#3B82F6',
-          green: '#10B981',
-          purple: '#8B5CF6',
-          orange: '#F97316'
-        };
-        setColor(categoryColors[task.category] || '#3B82F6');
+        const categoryColor = categories.find(cat => cat.id === task.category)?.color;
+        setColor(categoryColor || '#3B82F6');
       } else {
         setColor("#3B82F6");
       }
     }
-  }, [isOpen, task]);
+  }, [isOpen, task, categories]);
 
   if (!isOpen || !task) return null;
 
