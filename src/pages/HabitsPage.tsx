@@ -10,24 +10,24 @@ const HabitsPage: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'table'>('list');
 
-  const getTodayCompletionRate = () => {
-    if (habits.length === 0) return 0;
-    const today = new Date().toISOString().split('T')[0];
-    const completedToday = habits.filter(habit => habit.completions[today]).length;
-    return Math.round((completedToday / habits.length) * 100);
-  };
-  return (
-    <div className="p-8" style={{ backgroundColor: 'rgb(var(--color-background))' }}>
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2" style={{ color: 'rgb(var(--color-text-primary))' }}>Habitudes</h1>
-          <p style={{ color: 'rgb(var(--color-text-secondary))' }}>Développez de bonnes habitudes au quotidien</p>
-          {habits.length > 0 && (
-            <div className="mt-2 text-sm" style={{ color: 'rgb(var(--color-text-muted))' }}>
-              Progression du jour : {getTodayCompletionRate()}% ({habits.filter(h => h.completions[new Date().toISOString().split('T')[0]]).length}/{habits.length})
-            </div>
-          )}
-        </div>
+    const getTodayCompletionRate = () => {
+      if (habits.length === 0) return 0;
+      const today = new Date().toLocaleDateString('en-CA');
+      const completedToday = habits.filter(habit => habit.completions[today]).length;
+      return Math.round((completedToday / habits.length) * 100);
+    };
+    return (
+      <div className="p-8" style={{ backgroundColor: 'rgb(var(--color-background))' }}>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2" style={{ color: 'rgb(var(--color-text-primary))' }}>Habitudes</h1>
+            <p style={{ color: 'rgb(var(--color-text-secondary))' }}>Développez de bonnes habitudes au quotidien</p>
+            {habits.length > 0 && (
+              <div className="mt-2 text-sm" style={{ color: 'rgb(var(--color-text-muted))' }}>
+                Progression du jour : {getTodayCompletionRate()}% ({habits.filter(h => h.completions[new Date().toLocaleDateString('en-CA')]).length}/{habits.length})
+              </div>
+            )}
+          </div>
         <div className="flex items-center gap-4">
           {habits.length > 0 && (
             <div className="flex items-center rounded-lg p-1 transition-colors" style={{ backgroundColor: 'rgb(var(--color-hover))' }}>
@@ -57,10 +57,10 @@ const HabitsPage: React.FC = () => {
               </button>
             </div>
           )}
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="btn-primary flex items-center gap-2"
-          >
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-bold text-white shadow-lg shadow-blue-500/25 transform transition-all hover:scale-105 active:scale-95 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
+            >
             <Plus size={20} />
             <span>Nouvelle habitude</span>
           </button>
@@ -89,12 +89,12 @@ const HabitsPage: React.FC = () => {
               </div>
               <h3 className="text-xl font-semibold mb-2" style={{ color: 'rgb(var(--color-text-primary))' }}>Aucune habitude</h3>
               <p className="mb-6" style={{ color: 'rgb(var(--color-text-secondary))' }}>Commencez par créer votre première habitude</p>
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="btn-primary"
-              >
-                Créer une habitude
-              </button>
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-bold text-white shadow-lg shadow-blue-500/25 transform transition-all hover:scale-105 active:scale-95 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
+                >
+                  Créer une habitude
+                </button>
             </div>
           )}
         </div>
@@ -107,4 +107,3 @@ const HabitsPage: React.FC = () => {
 };
 
 export default HabitsPage;
-
