@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckSquare, Clock, Star, AlertCircle } from 'lucide-react';
+import { CheckSquare, Clock, Bookmark, AlertCircle } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -101,18 +101,18 @@ const TodayTasks: React.FC = () => {
                 </div>
               </div>
               
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleBookmark(task.id);
-                }}
-                className="flex-shrink-0"
-              >
-                <Star 
-                  size={18} 
-                  className={task.bookmarked ? 'favorite-icon filled' : 'text-gray-400 dark:text-gray-500 hover:text-yellow-500 dark:hover:text-yellow-400'} 
-                />
-              </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleBookmark(task.id);
+                  }}
+                  className="flex-shrink-0"
+                >
+                  <Bookmark 
+                    size={18} 
+                    className={task.bookmarked ? 'favorite-icon filled' : 'text-gray-400 dark:text-gray-500 hover:text-yellow-500 dark:hover:text-yellow-400'} 
+                  />
+                </button>
             </div>
           </div>
         ))}
