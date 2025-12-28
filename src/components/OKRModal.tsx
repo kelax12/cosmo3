@@ -26,6 +26,7 @@ const OKRModal: React.FC<OKRModalProps> = ({ okr, isOpen, onClose }) => {
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [hasChanges, setHasChanges] = useState(false);
   const [editingKeyResult, setEditingKeyResult] = useState<string | null>(null);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   // Categories for OKR
   const categories = [
@@ -167,9 +168,7 @@ const OKRModal: React.FC<OKRModalProps> = ({ okr, isOpen, onClose }) => {
 
   const handleClose = () => {
     if (hasChanges) {
-      if (window.confirm('Vous avez des modifications non sauvegardées. Voulez-vous vraiment fermer ?')) {
-        onClose();
-      }
+      setShowCloseConfirm(true);
     } else {
       onClose();
     }
@@ -589,6 +588,33 @@ const OKRModal: React.FC<OKRModalProps> = ({ okr, isOpen, onClose }) => {
           </div>
         </div>
       </div>
+      
+      {showCloseConfirm && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-[#1e2235] rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-700/50">
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-white mb-3">Modifications non sauvegardées</h3>
+              <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                Vous avez des modifications non sauvegardées. Voulez-vous vraiment fermer ?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowCloseConfirm(false)}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white border border-slate-600 hover:bg-slate-800 transition-all duration-200"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={onClose}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-all duration-200"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
