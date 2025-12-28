@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { X, Users, UserPlus, Trash2, Mail, Search } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
+import CollaboratorItem from './CollaboratorItem';
 
 type CollaboratorModalProps = {
   isOpen: boolean;
@@ -105,54 +106,41 @@ const CollaboratorModal: React.FC<CollaboratorModalProps> = ({ isOpen, onClose, 
 
         {/* Content */}
         <div className="p-6 space-y-8 overflow-y-auto max-h-[70vh]">
-          {/* Assigned collaborators */}
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Collaborateurs assignés</h3>
-              <span className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                {assignedCollaborators.length}
-              </span>
-            </div>
-            {assignedCollaborators.length === 0 ? (
-              <div className="p-4 rounded-lg border border-dashed border-slate-200 dark:border-slate-700 text-center text-sm text-slate-500 dark:text-slate-400">
-                Aucun collaborateur pour l’instant.
+            {/* Assigned collaborators */}
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Collaborateurs assignés</h3>
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
+                  {assignedCollaborators.length}
+                </span>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {assignedCollaborators.map((collaboratorId) => {
-                  const info = displayInfo(collaboratorId);
-                  return (
-                    <div
-                      key={collaboratorId}
-                      className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-700 dark:text-blue-300 font-semibold">
-                          {info.avatar ? info.avatar : getInitials(info.name || collaboratorId)}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{info.name}</p>
-                          {info.email && (
-                            <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                              <Mail size={12} />
-                              <span>{info.email}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleRemove(collaboratorId)}
-                        className="p-2 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                        aria-label="Retirer ce collaborateur"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
+              {assignedCollaborators.length === 0 ? (
+                <div className="p-8 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-center">
+                  <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Users className="w-6 h-6 text-slate-400" />
+                  </div>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Aucun collaborateur pour l’instant.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-3">
+                  {assignedCollaborators.map((collaboratorId) => {
+                    const info = displayInfo(collaboratorId);
+                    return (
+                      <CollaboratorItem
+                        key={collaboratorId}
+                        id={collaboratorId}
+                        name={info.name}
+                        email={info.email}
+                        avatar={info.avatar}
+                        onAction={() => handleRemove(collaboratorId)}
+                        variant="remove"
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+
 
           {/* Add collaborator by email/id */}
           <section className="space-y-3">
@@ -190,52 +178,51 @@ const CollaboratorModal: React.FC<CollaboratorModalProps> = ({ isOpen, onClose, 
             )}
           </section>
 
-          {/* Available friends */}
-          <section className="space-y-3">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Collaborateurs disponibles</h3>
-              <div className="relative w-full sm:w-64">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Rechercher un contact"
-                  className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            {availableFriends.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-slate-400">Aucun contact à ajouter.</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {availableFriends.map((friend) => (
-                  <div
-                    key={friend.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-700 dark:text-blue-300 font-semibold">
-                        {friend.avatar ? friend.avatar : getInitials(friend.name)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{friend.name}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{friend.email}</p>
-                      </div>
-                    </div>
+            {/* Available friends */}
+            <section className="space-y-4">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Collaborateurs disponibles</h3>
+                <div className="relative w-full sm:w-72">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Rechercher un contact"
+                    className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  />
+                  {search && (
                     <button
-                      onClick={() => handleToggleFriend(friend.id)}
-                      className="p-2 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30 transition-colors"
-                      aria-label="Ajouter ce collaborateur"
+                      onClick={() => setSearch('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     >
-                      <UserPlus size={16} />
+                      <X size={14} />
                     </button>
-                  </div>
-                ))}
+                  )}
+                </div>
               </div>
-            )}
-          </section>
+
+              {availableFriends.length === 0 ? (
+                <div className="p-8 rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-center">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Aucun contact trouvé.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {availableFriends.map((friend) => (
+                    <CollaboratorItem
+                      key={friend.id}
+                      id={friend.id}
+                      name={friend.name}
+                      email={friend.email}
+                      avatar={friend.avatar}
+                      onAction={() => handleToggleFriend(friend.id)}
+                      variant="add"
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+
         </div>
 
         {/* Footer */}
