@@ -77,6 +77,13 @@ export type Habit = {
   createdAt: string;
 };
 
+export type OKRCategory = {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+};
+
 export type OKR = {
   id: string;
   title: string;
@@ -120,6 +127,7 @@ type TaskContextType = {
   friendRequests: FriendRequest[];
   habits: Habit[];
   okrs: OKR[];
+  okrCategories: OKRCategory[];
   friends: User[];
   favoriteColors: string[];
   setFavoriteColors: (colors: string[]) => void;
@@ -158,12 +166,16 @@ type TaskContextType = {
   addOKR: (okr: OKR) => void;
   updateOKR: (id: string, updates: Partial<OKR>) => void;
   updateKeyResult: (okrId: string, keyResultId: string, updates: Partial<KeyResult>) => void;
-  deleteOKR: (id: string) => void;
-  updateUserSettings: (updates: Partial<User>) => void;
-  addCategory: (category: Category) => void;
-  updateCategory: (id: string, updates: Partial<Category>) => void;
-  deleteCategory: (id: string) => void;
-};
+    deleteOKR: (id: string) => void;
+    updateUserSettings: (updates: Partial<User>) => void;
+    addCategory: (category: Category) => void;
+    updateCategory: (id: string, updates: Partial<Category>) => void;
+    deleteCategory: (id: string) => void;
+    addOKRCategory: (category: OKRCategory) => void;
+    updateOKRCategory: (id: string, updates: Partial<OKRCategory>) => void;
+    deleteOKRCategory: (id: string) => void;
+  };
+
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
@@ -434,6 +446,13 @@ const initialEvents: CalendarEvent[] = [
     { id: 'okr', name: 'Tâches depuis OKR', color: '#6366F1' },
   ];
 
+  const initialOKRCategories: OKRCategory[] = [
+    { id: 'personal', name: 'Personnel', color: 'blue', icon: '👤' },
+    { id: 'professional', name: 'Professionnel', color: 'green', icon: '💼' },
+    { id: 'health', name: 'Santé', color: 'red', icon: '❤️' },
+    { id: 'learning', name: 'Apprentissage', color: 'purple', icon: '📚' },
+  ];
+
   export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [tasks, setTasks] = useState<Task[]>(initialTasks);
     const [lists, setLists] = useState<TaskList[]>(initialLists);
@@ -444,6 +463,7 @@ const initialEvents: CalendarEvent[] = [
     const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
     const [habits, setHabits] = useState<Habit[]>(initialHabits);
     const [okrs, setOkrs] = useState<OKR[]>(initialOKRs);
+    const [okrCategories, setOkrCategories] = useState<OKRCategory[]>(initialOKRCategories);
     const [friends, setFriends] = useState<User[]>(initialFriends);
     const [priorityRange, setPriorityRange] = useState<[number, number]>([1, 5]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -472,6 +492,7 @@ const initialEvents: CalendarEvent[] = [
       const savedUser = localStorage.getItem('user');
       const savedHabits = localStorage.getItem('habits');
         const savedOKRs = localStorage.getItem('okrs');
+        const savedOKRCategories = localStorage.getItem('okrCategories');
         const savedFavoriteColors = localStorage.getItem('favoriteColors');
         
         if (savedTasks) setTasks(JSON.parse(savedTasks));
@@ -481,6 +502,7 @@ const initialEvents: CalendarEvent[] = [
         if (savedUser) setUser(JSON.parse(savedUser));
         if (savedHabits) setHabits(JSON.parse(savedHabits));
         if (savedOKRs) setOkrs(JSON.parse(savedOKRs));
+        if (savedOKRCategories) setOkrCategories(JSON.parse(savedOKRCategories));
         if (savedFavoriteColors) setFavoriteColors(JSON.parse(savedFavoriteColors));
       }, []);
 
@@ -491,6 +513,7 @@ const initialEvents: CalendarEvent[] = [
         localStorage.setItem('categories', JSON.stringify(categories));
         localStorage.setItem('habits', JSON.stringify(habits));
         localStorage.setItem('okrs', JSON.stringify(okrs));
+        localStorage.setItem('okrCategories', JSON.stringify(okrCategories));
         localStorage.setItem('favoriteColors', JSON.stringify(favoriteColors));
         if (user) localStorage.setItem('user', JSON.stringify(user));
       }, [tasks, lists, events, categories, user, habits, okrs, favoriteColors]);
@@ -530,11 +553,16 @@ const initialEvents: CalendarEvent[] = [
       })));
     };
 
-    const addCategory = (category: Category) => setCategories(prev => [...prev, category]);
-    const updateCategory = (id: string, updates: Partial<Category>) => setCategories(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
-    const deleteCategory = (id: string) => setCategories(prev => prev.filter(c => c.id !== id));
+      const addCategory = (category: Category) => setCategories(prev => [...prev, category]);
+      const updateCategory = (id: string, updates: Partial<Category>) => setCategories(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+      const deleteCategory = (id: string) => setCategories(prev => prev.filter(c => c.id !== id));
 
-    const login = async (email: string, password: string) => {
+      const addOKRCategory = (category: OKRCategory) => setOkrCategories(prev => [...prev, category]);
+      const updateOKRCategory = (id: string, updates: Partial<OKRCategory>) => setOkrCategories(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+      const deleteOKRCategory = (id: string) => setOkrCategories(prev => prev.filter(c => c.id !== id));
+
+      const login = async (email: string, password: string) => {
+
     if (email === 'demo@cosmo.app' && password === 'demo') {
       setUser(defaultUser);
       return true;
@@ -637,7 +665,7 @@ const initialEvents: CalendarEvent[] = [
 
     const contextValue = {
       tasks, lists, events, colorSettings, categories, priorityRange, searchTerm, selectedCategories,
-      user, messages, friendRequests, habits, okrs, friends, favoriteColors, setFavoriteColors,
+      user, messages, friendRequests, habits, okrs, okrCategories, friends, favoriteColors, setFavoriteColors,
       addTask, deleteTask, toggleBookmark, toggleComplete, updateTask,
       addList, addTaskToList, removeTaskFromList, deleteList, updateList,
       addEvent, deleteEvent, updateEvent, updateColorSettings,
@@ -646,7 +674,8 @@ const initialEvents: CalendarEvent[] = [
       sendMessage, sendFriendRequest, acceptFriendRequest, rejectFriendRequest, shareTask,
       addHabit, toggleHabitCompletion, updateHabit, deleteHabit,
       addOKR, updateOKR, updateKeyResult, deleteOKR, updateUserSettings,
-      addCategory, updateCategory, deleteCategory
+      addCategory, updateCategory, deleteCategory,
+      addOKRCategory, updateOKRCategory, deleteOKRCategory
     };
 
   return (
