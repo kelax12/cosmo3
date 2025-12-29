@@ -122,12 +122,12 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Gérez vos domaines d'objectifs</p>
                 </div>
               </div>
-              <button 
-                onClick={onClose}
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all active:scale-90"
-              >
-                <X size={20} className="text-slate-500" />
-              </button>
+                <button 
+                  onClick={onClose}
+                  className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all active:scale-90 group"
+                >
+                  <X size={20} className="text-slate-500 group-hover:text-blue-600" />
+                </button>
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -143,12 +143,12 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                       className="overflow-hidden mb-6"
                     >
                         <form onSubmit={handleSubmit} className="relative bg-slate-50 dark:bg-slate-800/40 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 space-y-5">
-                          <button
-                            type="button"
-                            onClick={cancelEdit}
-                            className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 rounded-lg transition-colors z-10"
-                            title="Fermer"
-                          >
+                            <button
+                              type="button"
+                              onClick={cancelEdit}
+                              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 rounded-lg transition-colors z-10"
+                              title="Fermer"
+                            >
                             <X size={16} />
                           </button>
                           <div className="flex items-center justify-between mb-2">
