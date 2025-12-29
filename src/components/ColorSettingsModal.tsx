@@ -76,7 +76,7 @@ const ColorSettingsModal: React.FC<ColorSettingsModalProps> = ({ isOpen, onClose
           <h2 className="text-xl font-medium">Modifier les catégories</h2>
           <button
             onClick={onClose}
-            className="text-blue-500 hover:text-blue-400 transition-colors"
+            className="text-slate-400 hover:text-blue-600 transition-colors"
           >
             <X size={28} strokeWidth={3} />
           </button>
@@ -87,7 +87,7 @@ const ColorSettingsModal: React.FC<ColorSettingsModalProps> = ({ isOpen, onClose
           <div className="flex justify-end mb-4">
             <button 
               onClick={handleAddCategory}
-              className="text-white hover:text-slate-300 transition-colors"
+              className="text-white hover:text-blue-600 transition-colors"
             >
               <Plus size={24} strokeWidth={3} />
             </button>
@@ -130,13 +130,13 @@ const ColorSettingsModal: React.FC<ColorSettingsModalProps> = ({ isOpen, onClose
                     />
                   </div>
 
-                  {/* Delete Button */}
-                  <button
-                    onClick={() => handleDeleteLocal(category.id)}
-                    className="p-1 text-red-500 hover:text-red-400 transition-colors"
-                  >
-                    <Trash2 size={20} />
-                  </button>
+                    {/* Delete Button */}
+                    <button
+                      onClick={() => handleDeleteLocal(category.id)}
+                      className="p-1 text-red-500 hover:text-red-600 transition-colors"
+                    >
+                      <Trash2 size={20} />
+                    </button>
                 </motion.div>
               ))}
             </AnimatePresence>
