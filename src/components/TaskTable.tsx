@@ -2,7 +2,7 @@ import AnimatedList from './AnimatedList';
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Bookmark, Calendar, MoreHorizontal, Trash2, BookmarkCheck, Palette, UserPlus } from 'lucide-react';
+import { Bookmark, Calendar, MoreHorizontal, Trash2, BookmarkCheck, Palette, UserPlus, Check } from 'lucide-react';
 import { Task, useTasks } from '../context/TaskContext';
 import TaskCategoryIndicator from './TaskCategoryIndicator';
 import TaskModal from './TaskModal';
@@ -28,6 +28,15 @@ const TaskTable: React.FC<TaskTableProps> = ({
 }) => {
   const { tasks: contextTasks, deleteTask, toggleBookmark, toggleComplete, addEvent, priorityRange } = useTasks();
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  useEffect(() => {
+    if (sortField === 'priority') {
+      setSortDirection('desc');
+    } else {
+      setSortDirection('asc');
+    }
+  }, [sortField]);
+
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
   const [selectedTaskForCollaborators, setSelectedTaskForCollaborators] = useState<string | null>(null);
   const [addToListTask, setAddToListTask] = useState<string | null>(null);
@@ -56,21 +65,21 @@ const TaskTable: React.FC<TaskTableProps> = ({
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      setSortDirection('asc');
+      setSortDirection(field === 'priority' ? 'desc' : 'asc');
     }
   };
 
-  // Filter tasks based on completion status, bookmark filter and priority range
+  // Filter tasks based on completion status, bookmark filter, today filter and priority range
   const filteredByCompletion = (showCompleted 
     ? tasks.filter(task => task.completed)
     : tasks.filter(task => !task.completed)
   ).filter(task => task.priority >= priorityRange[0] && task.priority <= priorityRange[1]);
 
-  const filteredTasks = showBookmarkedOnly 
-    ? filteredByCompletion.filter(task => task.bookmarked)
-    : filteredByCompletion;
+    let filteredTasks = showBookmarkedOnly 
+      ? filteredByCompletion.filter(task => task.bookmarked)
+      : filteredByCompletion;
 
-  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    const sortedTasks = [...filteredTasks].sort((a, b) => {
     // First, prioritize bookmarked tasks
     if (a.bookmarked && !b.bookmarked) return -1;
     if (!a.bookmarked && b.bookmarked) return 1;
@@ -135,38 +144,37 @@ const TaskTable: React.FC<TaskTableProps> = ({
 
   return (
     <>
-      <div className="flex justify-between mb-4">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              showBookmarkedOnly 
-                ? 'bg-primary-100 text-primary-700 dark:bg-slate-100 dark:text-slate-900' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-            }`}
-          >
-            {showBookmarkedOnly ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
-            <span>{showBookmarkedOnly ? 'Tous' : 'Favoris'}</span>
-          </button>
+        <div className="flex justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <button
+                onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-sm border ${
+                  showBookmarkedOnly 
+                    ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md' 
+                    : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700'
+                }`}
+              >
+              {showBookmarkedOnly ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
+              <span>{showBookmarkedOnly ? 'Tous' : 'Favoris'}</span>
+            </button>
 
-          <button
-            onClick={() => setShowColorSettings(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
-          >
-            <Palette size={20} />
-            <span>Couleurs</span>
-          </button>
+            <button
+              onClick={() => setShowColorSettings(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-slate-700 border border-slate-300 shadow-sm hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700 transition-all"
+            >
+              <Palette size={20} />
+              <span>Couleurs</span>
+            </button>
+          </div>
         </div>
-      </div>
 
       <div className="table-container shadow-sm overflow-x-auto">
         <table className="data-table" style={{ minWidth: '1000px' }}>
-          <thead>
-            <tr>
-              <th className="px-2 py-3" style={{ width: '30px' }}></th>
-              <th className="px-1 py-3" style={{ width: '30px' }}></th>
-              <th 
-                className="cursor-pointer px-2 py-3"
+            <thead>
+              <tr>
+                <th className="px-1 py-3" style={{ width: '30px' }}></th>
+                <th 
+                  className="cursor-pointer px-2 py-3"
                 onClick={() => handleSort('name')}
                 style={{ width: '140px' }}
               >
@@ -220,27 +228,19 @@ const TaskTable: React.FC<TaskTableProps> = ({
           </thead>
           <tbody className="divide-y divide-gray-200">
             {sortedTasks.map((task) => (
-              <tr 
-                key={task.id} 
-                className={`animate-fade-in cursor-pointer transition-colors ${
-                  task.bookmarked ? 'bg-primary-100 bg-opacity-60' : ''
-                } ${task.completed ? 'opacity-75' : ''}`}
-                onClick={() => setSelectedTask(task.id)}
-                style={{ 
-                  backgroundColor: task.bookmarked ? 'rgb(var(--color-accent) / 0.1)' : 'transparent'
-                }}
-              >
-                <td className="text-center px-2 py-4 whitespace-nowrap" onClick={e => e.stopPropagation()}>
-                  <input 
-                    type="checkbox" 
-                    checked={task.completed}
-                    onChange={(e) => handleTaskComplete(task.id, e as any)}
-                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 bg-white dark:bg-gray-800"
-                  />
-                </td>
-                <td className="px-1 py-4 whitespace-nowrap">
-                  <TaskCategoryIndicator category={task.category} />
-                </td>
+                <tr 
+                  key={task.id} 
+                  className={`animate-fade-in cursor-pointer transition-colors ${
+                    task.bookmarked ? 'bg-primary-100 bg-opacity-60' : ''
+                  } ${task.completed ? 'opacity-75' : ''}`}
+                  onClick={() => setSelectedTask(task.id)}
+                  style={{ 
+                    backgroundColor: task.bookmarked ? 'rgb(var(--color-accent) / 0.1)' : 'transparent'
+                  }}
+                >
+                  <td className="px-1 py-4 whitespace-nowrap">
+                    <TaskCategoryIndicator category={task.category} />
+                  </td>
                 <td className={`font-medium px-2 py-4 text-base ${task.completed ? 'line-through' : ''}`} 
                     style={{ color: task.completed ? 'rgb(var(--color-text-muted))' : 'rgb(var(--color-text-primary))' }}>
                   <div className="truncate" title={task.name}>
@@ -258,22 +258,45 @@ const TaskTable: React.FC<TaskTableProps> = ({
                 <td className="text-center px-1 py-4 whitespace-nowrap text-base font-medium" style={{ color: 'rgb(var(--color-text-primary))' }}>{task.estimatedTime}</td>
                 <td onClick={e => e.stopPropagation()} className="px-2 py-4 whitespace-nowrap">
                   <div className="flex justify-center items-center gap-1">
-                    <button 
-                      onClick={() => toggleBookmark(task.id)} 
-                      className={`p-2 rounded transition-colors ${task.bookmarked ? 'favorite-icon filled' : ''}`}
-                      style={{ 
-                        color: task.bookmarked ? '#EAB308' : 'rgb(var(--color-text-muted))'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      title="Favori"
-                    >
-                      <Bookmark size={16} className={task.bookmarked ? 'favorite-icon filled' : ''} />
-                    </button>
-                    {!task.completed && (
                       <button 
-                        onClick={() => setTaskToEventModal(task)}
-                        className="p-2 rounded transition-colors hover:text-blue-500"
+                        onClick={() => toggleBookmark(task.id)} 
+                        className={`p-2 rounded transition-colors ${task.bookmarked ? 'favorite-icon filled' : ''}`}
+                        style={{ 
+                          color: task.bookmarked ? '#EAB308' : 'rgb(var(--color-text-muted))'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
+                          e.currentTarget.style.color = 'rgb(var(--color-accent))';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = task.bookmarked ? '#EAB308' : 'rgb(var(--color-text-muted))';
+                        }}
+                        title="Favori"
+                      >
+                        <Bookmark size={16} className={task.bookmarked ? 'favorite-icon filled' : ''} />
+                      </button>
+                      {!task.completed && (
+                        <button 
+                          onClick={() => setTaskToEventModal(task)}
+                          className="p-2 rounded transition-colors"
+                          style={{ color: 'rgb(var(--color-text-muted))' }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
+                            e.currentTarget.style.color = 'rgb(var(--color-accent))';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = 'rgb(var(--color-text-muted))';
+                          }}
+                          title="Ajouter au calendrier"
+                        >
+                          <Calendar size={16} />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => setAddToListTask(task.id)}
+                        className="p-2 rounded transition-colors"
                         style={{ color: 'rgb(var(--color-text-muted))' }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
@@ -283,59 +306,42 @@ const TaskTable: React.FC<TaskTableProps> = ({
                           e.currentTarget.style.backgroundColor = 'transparent';
                           e.currentTarget.style.color = 'rgb(var(--color-text-muted))';
                         }}
-                        title="Ajouter au calendrier"
+                        title="Options"
                       >
-                        <Calendar size={16} />
+                        <MoreHorizontal size={16} />
                       </button>
-                    )}
-                    <button 
-                      onClick={() => setAddToListTask(task.id)}
-                      className="p-2 rounded transition-colors"
-                      style={{ color: 'rgb(var(--color-text-muted))' }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
-                        e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = 'rgb(var(--color-text-muted))';
-                      }}
-                      title="Options"
-                    >
-                      <MoreHorizontal size={16} />
-                    </button>
-                    <button 
-                      onClick={() => setCollaboratorModalTask(task.id)}
-                      className="p-2 rounded transition-colors hover:text-blue-500"
-                      style={{ color: 'rgb(var(--color-text-muted))' }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
-                        e.currentTarget.style.color = 'rgb(var(--color-accent))';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = 'rgb(var(--color-text-muted))';
-                      }}
-                      title="Ajouter collaborateur"
-                    >
-                      <UserPlus size={16} />
-                    </button>
                       <button 
-                        onClick={() => setTaskToDelete(task.id)} 
-                        className="p-2 rounded transition-colors hover:text-red-500"
-                      style={{ color: 'rgb(var(--color-text-muted))' }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
-                        e.currentTarget.style.color = 'rgb(var(--color-error))';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = 'rgb(var(--color-text-muted))';
-                      }}
-                      title="Supprimer"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                        onClick={() => setCollaboratorModalTask(task.id)}
+                        className="p-2 rounded transition-colors"
+                        style={{ color: 'rgb(var(--color-text-muted))' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
+                          e.currentTarget.style.color = 'rgb(var(--color-accent))';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = 'rgb(var(--color-text-muted))';
+                        }}
+                        title="Ajouter collaborateur"
+                      >
+                        <UserPlus size={16} />
+                      </button>
+                          <button 
+                            onClick={() => setTaskToDelete(task.id)} 
+                            className="p-2 rounded transition-colors"
+                          style={{ color: 'rgb(var(--color-text-muted))' }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
+                            e.currentTarget.style.color = '#ef4444';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = 'rgb(var(--color-text-muted))';
+                          }}
+                          title="Supprimer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                   </div>
                 </td>
                 <td className="px-2 py-4 whitespace-nowrap text-base" style={{ color: 'rgb(var(--color-text-primary))' }}>
