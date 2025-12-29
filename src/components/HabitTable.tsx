@@ -226,70 +226,70 @@ type PeriodType = 'week' | 'month' | '3months' | 'all';
                     color: period === option.value ? 'white' : 'rgb(var(--color-text-secondary))',
                     boxShadow: period === option.value ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none'
                   }}
-                  onMouseEnter={(e) => {
-                    if (period !== option.value) {
-                      e.currentTarget.style.color = 'rgb(var(--color-text-primary))';
-                      e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (period !== option.value) {
-                      e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-            
-            {/* Navigation */}
-            {period !== 'all' && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => navigatePeriod('prev')}
-                  className="p-2 rounded-lg transition-colors"
-                  style={{ color: 'rgb(var(--color-text-secondary))' }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = 'rgb(var(--color-text-primary))';
-                    e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <div className="text-sm font-medium min-w-[120px] text-center" style={{ color: 'rgb(var(--color-text-primary))' }}>
-                  {getCurrentPeriodLabel()}
-                </div>
-                <button
-                  onClick={() => navigatePeriod('next')}
-                  disabled={!canNavigateNext()}
-                  className="p-2 rounded-lg transition-colors"
-                  style={{
-                    color: canNavigateNext() ? 'rgb(var(--color-text-secondary))' : 'rgb(var(--color-text-muted))',
-                    cursor: canNavigateNext() ? 'pointer' : 'not-allowed'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (canNavigateNext()) {
-                      e.currentTarget.style.color = 'rgb(var(--color-text-primary))';
-                      e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (canNavigateNext()) {
-                      e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }
-                  }}
-                >
-                  <ChevronRight size={20} />
-                </button>
+                    onMouseEnter={(e) => {
+                      if (period !== option.value) {
+                        e.currentTarget.style.color = 'rgb(var(--color-accent))';
+                        e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (period !== option.value) {
+                        e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
-            )}
+              
+              {/* Navigation */}
+              {period !== 'all' && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => navigatePeriod('prev')}
+                    className="p-2 rounded-lg transition-colors"
+                    style={{ color: 'rgb(var(--color-text-secondary))' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'rgb(var(--color-accent))';
+                      e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div className="text-sm font-medium min-w-[120px] text-center" style={{ color: 'rgb(var(--color-text-primary))' }}>
+                    {getCurrentPeriodLabel()}
+                  </div>
+                  <button
+                    onClick={() => navigatePeriod('next')}
+                    disabled={!canNavigateNext()}
+                    className="p-2 rounded-lg transition-colors"
+                    style={{
+                      color: canNavigateNext() ? 'rgb(var(--color-text-secondary))' : 'rgb(var(--color-text-muted))',
+                      cursor: canNavigateNext() ? 'pointer' : 'not-allowed'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (canNavigateNext()) {
+                        e.currentTarget.style.color = 'rgb(var(--color-accent))';
+                        e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (canNavigateNext()) {
+                        e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+              )}
           </div>
         </div>
       </div>
@@ -363,18 +363,19 @@ type PeriodType = 'week' | 'month' | '3months' | 'all';
                             onClick={() => handleDayClick(habit.id, day.date)}
                             disabled={day.isFuture || isBeforeCreation}
                             className="w-8 h-8 rounded-lg border-2 transition-all flex items-center justify-center mx-auto"
-                            style={{
-                              backgroundColor: isCompleted ? '#10B981' : (day.isFuture || isBeforeCreation) ? 'rgb(var(--color-hover) / 0.5)' : day.isToday ? 'rgb(var(--color-accent) / 0.1)' : 'transparent',
-                              borderColor: isCompleted ? '#10B981' : day.isToday ? 'rgb(var(--color-accent))' : (day.isFuture || isBeforeCreation) ? 'transparent' : 'rgb(var(--color-border))',
-                              color: isCompleted ? 'white' : (day.isFuture || isBeforeCreation) ? 'rgb(var(--color-text-muted) / 0.3)' : 'rgb(var(--color-text-secondary))',
-                              cursor: (day.isFuture || isBeforeCreation) ? 'not-allowed' : 'pointer',
-                              opacity: isBeforeCreation ? 0.3 : 1,
-                              filter: isBeforeCreation ? 'grayscale(1)' : 'none'
-                            }}
+                              style={{
+                                backgroundColor: isCompleted ? '#2563EB' : (day.isFuture || isBeforeCreation) ? 'rgb(var(--color-hover) / 0.5)' : day.isToday ? 'rgb(var(--color-accent) / 0.1)' : 'transparent',
+                                borderColor: isCompleted ? '#2563EB' : day.isToday ? 'rgb(var(--color-accent))' : (day.isFuture || isBeforeCreation) ? 'transparent' : 'rgb(var(--color-border))',
+                                color: isCompleted ? 'white' : (day.isFuture || isBeforeCreation) ? 'rgb(var(--color-text-muted) / 0.3)' : 'rgb(var(--color-text-secondary))',
+                                cursor: (day.isFuture || isBeforeCreation) ? 'not-allowed' : 'pointer',
+                                opacity: isBeforeCreation ? 0.3 : 1,
+                                filter: isBeforeCreation ? 'grayscale(1)' : 'none'
+                              }}
                             onMouseEnter={(e) => {
                               if (!day.isFuture && !isBeforeCreation && !isCompleted) {
                                 e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
-                                e.currentTarget.style.borderColor = 'rgb(var(--color-text-muted))';
+                                e.currentTarget.style.borderColor = 'rgb(var(--color-accent))';
+                                e.currentTarget.style.color = 'rgb(var(--color-accent))';
                                 e.currentTarget.style.transform = 'scale(1.05)';
                               }
                             }}
@@ -382,6 +383,7 @@ type PeriodType = 'week' | 'month' | '3months' | 'all';
                               if (!day.isFuture && !isBeforeCreation && !isCompleted) {
                                 e.currentTarget.style.backgroundColor = day.isToday ? 'rgb(var(--color-accent) / 0.1)' : 'transparent';
                                 e.currentTarget.style.borderColor = day.isToday ? 'rgb(var(--color-accent))' : 'rgb(var(--color-border))';
+                                e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
                                 e.currentTarget.style.transform = 'scale(1)';
                               }
                             }}
