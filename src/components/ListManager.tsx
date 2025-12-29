@@ -83,7 +83,7 @@ const ListManager: React.FC = () => {
         <h2 className="text-xl font-bold" style={{ color: 'rgb(var(--color-text-primary))' }}>Gestion des listes</h2>
         <button
           onClick={() => setIsCreating(true)}
-          className="btn-primary flex items-center gap-2"
+          className="flex items-center gap-2 rounded-lg px-4 py-2 transition-all shadow-sm border bg-blue-600 text-white border-blue-700 hover:bg-blue-700 dark:bg-blue-500 dark:border-blue-600 dark:hover:bg-blue-600 font-medium"
         >
           <Plus size={20} />
           <span>Nouvelle liste</span>
@@ -99,40 +99,48 @@ const ListManager: React.FC = () => {
               <label className="block text-sm font-medium mb-1" style={{ color: 'rgb(var(--color-text-secondary))' }}>
                 Nom de la liste
               </label>
-              <input
-                type="text"
-                value={newListName}
-                onChange={(e) => setNewListName(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                style={{
-                  backgroundColor: 'rgb(var(--color-surface))',
-                  color: 'rgb(var(--color-text-primary))',
-                  borderColor: 'rgb(var(--color-border))'
-                }}
-                placeholder="Entrez le nom de la liste"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-                Couleur
-              </label>
-              <select
-                value={newListColor}
-                onChange={(e) => setNewListColor(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                style={{
-                  backgroundColor: 'rgb(var(--color-surface))',
-                  color: 'rgb(var(--color-text-primary))',
-                  borderColor: 'rgb(var(--color-border))'
-                }}
-              >
-                {colorOptions.map(color => (
-                  <option key={color.value} value={color.value}>
-                    {color.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={newListName}
+                    onChange={(e) => setNewListName(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                    style={{
+                      backgroundColor: 'rgb(var(--color-surface))',
+                      color: 'rgb(var(--color-text-primary))',
+                      borderColor: 'rgb(var(--color-border))'
+                    }}
+                    placeholder="Entrez le nom de la liste"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'rgb(var(--color-text-secondary))' }}>
+                  Couleur
+                </label>
+                <div className="relative">
+                  <select
+                    value={newListColor}
+                    onChange={(e) => setNewListColor(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                    style={{
+                      backgroundColor: 'rgb(var(--color-surface))',
+                      color: 'rgb(var(--color-text-primary))',
+                      borderColor: 'rgb(var(--color-border))'
+                    }}
+                  >
+                    {colorOptions.map(color => (
+                      <option key={color.value} value={color.value}>
+                        {color.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div 
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border border-black/10 dark:border-white/20 shadow-sm pointer-events-none transition-colors duration-200"
+                    style={{ backgroundColor: colorOptions.find(c => c.value === newListColor)?.color || '#3B82F6' }}
+                  />
+                </div>
+              </div>
           </div>
           <div className="flex justify-end gap-2 mt-4">
             <button
@@ -149,8 +157,7 @@ const ListManager: React.FC = () => {
             </button>
             <button
               onClick={handleCreateList}
-              className="px-6 py-3 rounded-lg transition-all font-medium text-white"
-              style={{ backgroundColor: 'rgb(var(--nav-item-active-bg))' }}
+              className="px-6 py-3 rounded-lg transition-all font-bold text-white shadow-lg shadow-blue-500/25 bg-blue-600 hover:bg-blue-700 border border-blue-700"
               onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
               onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
             >
@@ -168,41 +175,46 @@ const ListManager: React.FC = () => {
             borderColor: 'rgb(var(--color-border))'
           }}>
             {editingList === list.id ? (
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  style={{
-                    backgroundColor: 'rgb(var(--color-surface))',
-                    color: 'rgb(var(--color-text-primary))',
-                    borderColor: 'rgb(var(--color-border))'
-                  }}
-                />
-                <select
-                  value={editColor}
-                  onChange={(e) => setEditColor(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  style={{
-                    backgroundColor: 'rgb(var(--color-surface))',
-                    color: 'rgb(var(--color-text-primary))',
-                    borderColor: 'rgb(var(--color-border))'
-                  }}
-                >
-                  {colorOptions.map(color => (
-                    <option key={color.value} value={color.value}>
-                      {color.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                      style={{
+                        backgroundColor: 'rgb(var(--color-surface))',
+                        color: 'rgb(var(--color-text-primary))',
+                        borderColor: 'rgb(var(--color-border))'
+                      }}
+                    />
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={editColor}
+                      onChange={(e) => setEditColor(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                      style={{
+                        backgroundColor: 'rgb(var(--color-surface))',
+                        color: 'rgb(var(--color-text-primary))',
+                        borderColor: 'rgb(var(--color-border))'
+                      }}
+                    >
+                      {colorOptions.map(color => (
+                        <option key={color.value} value={color.value}>
+                          {color.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div 
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border border-black/10 dark:border-white/20 shadow-sm pointer-events-none transition-colors duration-200"
+                      style={{ backgroundColor: colorOptions.find(c => c.value === editColor)?.color || '#3B82F6' }}
+                    />
+                  </div>
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={handleCancelEdit}
-                    className="p-1 transition-colors"
-                    style={{ color: 'rgb(var(--color-text-muted))' }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(var(--color-text-secondary))'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(var(--color-text-muted))'}
+                    className="p-1 text-[rgb(var(--color-text-muted))] hover:text-blue-600 transition-colors"
                   >
                     <X size={16} />
                   </button>
@@ -229,22 +241,16 @@ const ListManager: React.FC = () => {
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => handleEditList(list.id)}
-                    className="p-1 transition-colors"
-                    style={{ color: 'rgb(var(--color-text-muted))' }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(var(--color-text-secondary))'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(var(--color-text-muted))'}
+                    className="p-1 text-[rgb(var(--color-text-muted))] hover:text-blue-600 transition-colors"
                   >
                     <Edit2 size={16} />
                   </button>
-                    <button
-                      onClick={() => setListToDelete(list.id)}
-                      className="p-1 transition-colors"
-                      style={{ color: 'rgb(var(--color-text-muted))' }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(var(--color-error))'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(var(--color-text-muted))'}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <button
+                    onClick={() => setListToDelete(list.id)}
+                    className="p-1 text-[rgb(var(--color-text-muted))] hover:text-red-600 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               </>
             )}
