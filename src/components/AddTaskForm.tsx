@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, X, Users, Search, UserPlus, AlertCircle, CheckCircle, Bookmark, Mail, List, Calendar } from 'lucide-react';
+import { Plus, X, Users, Search, UserPlus, AlertCircle, CheckCircle, Bookmark, Mail, List, Calendar, ChevronDown } from 'lucide-react';
 import { Dialog, DialogContent } from './ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { useTasks } from '../context/TaskContext';
 import CollaboratorItem from './CollaboratorItem';
+import { DatePicker } from './ui/date-picker';
 
 type AddTaskFormProps = {
   onFormToggle?: (isOpen: boolean) => void;
@@ -206,129 +208,243 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onFormToggle, expanded = fals
       <DialogContent showCloseButton={false} className="p-0 border-0 bg-transparent shadow-none sm:max-w-4xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto">
         <div className="rounded-2xl shadow-2xl w-full transition-colors overflow-hidden" style={{ backgroundColor: 'rgb(var(--color-surface))' }}>
           {/* Header */}
-          <div className="flex justify-between items-center px-6 py-4 border-b bg-gradient-to-r from-blue-50 dark:from-blue-900/20 to-purple-50 dark:to-purple-900/20 transition-colors" style={{ borderColor: 'rgb(var(--color-border))' }}>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <CheckCircle size={24} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
+            <div className="flex justify-between items-center px-6 py-4 border-b bg-gradient-to-r from-blue-50 dark:from-blue-900/20 to-purple-50 dark:to-purple-900/20 transition-colors" style={{ borderColor: 'rgb(var(--color-border))' }}>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                  <CheckCircle size={24} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                </div>
+                <h2 className="text-xl font-bold" style={{ color: 'rgb(var(--color-text-primary))' }}>Créer une nouvelle tâche</h2>
+                {hasChanges && (
+                  <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400 text-sm">
+                    <AlertCircle size={16} aria-hidden="true" />
+                    <span>Non sauvegardé</span>
+                  </div>
+                )}
               </div>
-              <h2 className="text-xl font-bold" style={{ color: 'rgb(var(--color-text-primary))' }}>Créer une nouvelle tâche</h2>
-              {hasChanges && (
-                <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400 text-sm">
-                  <AlertCircle size={16} aria-hidden="true" />
-                  <span>Non sauvegardé</span>
+              <button
+                onClick={() => handleFormToggle(false)}
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: 'rgb(var(--color-text-muted))' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'rgb(var(--color-accent))';
+                  e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'rgb(var(--color-text-muted))';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+                aria-label="Fermer le formulaire"
+              >
+                <X size={20} aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              {errors.general && (
+                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg" role="alert">
+                  <div className="flex items-center gap-2 text-red-700 dark:text-red-300">
+                    <AlertCircle size={16} aria-hidden="true" />
+                    <span className="font-medium">{errors.general}</span>
+                  </div>
                 </div>
               )}
-            </div>
-            <button onClick={() => handleFormToggle(false)} className="p-2 rounded-lg transition-colors hover:bg-slate-200 dark:hover:bg-slate-800" style={{ color: 'rgb(var(--color-text-muted))' }} aria-label="Fermer">
-              <X size={20} />
-            </button>
-          </div>
 
-          <div className="p-6">
-            {errors.general && (
-              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 flex items-center gap-2">
-                <AlertCircle size={16} />
-                <span className="font-medium">{errors.general}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Left Column */}
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>Nom de la tâche *</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${errors.name ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} ${okrFields.name ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-transparent'}`}
-                      style={{ color: 'rgb(var(--color-text-primary))' }}
-                      placeholder="Qu'y a-t-il à faire ?"
-                    />
-                    {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left Column */}
+                  <div className="space-y-5">
                     <div>
-                      <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>Priorité</label>
-                      <select
-                        value={formData.priority}
-                        onChange={(e) => handleInputChange('priority', Number(e.target.value))}
-                        className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                        style={{ color: 'rgb(var(--color-text-primary))' }}
-                      >
-                        <option value="0" disabled>Choisir...</option>
-                        <option value="1">1 (Très haute)</option>
-                        <option value="2">2 (Haute)</option>
-                        <option value="3">3 (Moyenne)</option>
-                        <option value="4">4 (Basse)</option>
-                        <option value="5">5 (Très basse)</option>
-                      </select>
+                      <label htmlFor="task-name" className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>Nom de la tâche *</label>
+                          <input
+                            id="task-name"
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => handleInputChange('name', e.target.value)}
+                            className={`w-full px-4 h-12 border rounded-lg focus:outline-none hover:border-blue-500 focus:border-blue-600 focus:border-2 transition-all text-base ${errors.name ? 'border-red-300 dark:border-red-600' : 'border-slate-200 dark:border-slate-700'} ${okrFields.name ? 'bg-blue-50/50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : ''}`}
+                            style={{
+                              backgroundColor: okrFields.name ? undefined : 'rgb(var(--color-surface))',
+                              color: 'rgb(var(--color-text-primary))',
+                              borderColor: errors.name ? 'rgb(var(--color-error))' : (okrFields.name ? undefined : undefined)
+                            }}
+                            placeholder="Qu'y a-t-il à faire ?"
+                            aria-describedby={errors.name ? 'name-error' : undefined}
+                            aria-invalid={!!errors.name}
+                          />
+                      {errors.name && (
+                        <div id="name-error" className="flex items-center gap-2 mt-1 text-red-600 dark:text-red-400 text-sm" role="alert">
+                          <AlertCircle size={14} aria-hidden="true" />
+                          {errors.name}
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>Catégorie</label>
-                      <select
-                        value={formData.category}
-                        onChange={(e) => handleInputChange('category', e.target.value)}
-                        className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                        style={{ color: 'rgb(var(--color-text-primary))' }}
-                      >
-                        <option value="" disabled>Choisir...</option>
-                        {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-                      </select>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>Échéance</label>
-                      <input
-                        type="date"
-                        value={formData.deadline}
-                        onChange={(e) => handleInputChange('deadline', e.target.value)}
-                        className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                        style={{ color: 'rgb(var(--color-text-primary))' }}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>Temps (min)</label>
-                      <input
-                        type="number"
-                        value={formData.estimatedTime || ''}
-                        onChange={(e) => handleInputChange('estimatedTime', Number(e.target.value))}
-                        className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                        style={{ color: 'rgb(var(--color-text-primary))' }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Favori & Listes */}
-                  <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800">
-                      <div className="flex items-center gap-3">
-                        <Bookmark size={20} className={formData.bookmarked ? 'text-yellow-500' : 'text-slate-400'} />
-                        <span className="font-medium text-sm" style={{ color: 'rgb(var(--color-text-primary))' }}>Marquer comme favori</span>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="task-priority" className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>Priorité</label>
+                            <select
+                              id="task-priority"
+                              value={formData.priority}
+                              onChange={(e) => handleInputChange('priority', Number(e.target.value))}
+                              className="w-full px-4 h-12 border rounded-lg focus:outline-none hover:border-blue-500 focus:border-blue-600 focus:border-2 transition-all text-base border-slate-200 dark:border-slate-700"
+                              style={{
+                                backgroundColor: 'rgb(var(--color-surface))',
+                                color: formData.priority === 0 ? 'rgb(var(--color-text-muted))' : 'rgb(var(--color-text-primary))',
+                              }}
+                            >
+                          <option value="0" disabled hidden>Choisir...</option>
+                          <option value="1" style={{ color: 'rgb(var(--color-text-primary))' }}>1 (Très haute)</option>
+                          <option value="2" style={{ color: 'rgb(var(--color-text-primary))' }}>2 (Haute)</option>
+                          <option value="3" style={{ color: 'rgb(var(--color-text-primary))' }}>3 (Moyenne)</option>
+                          <option value="4" style={{ color: 'rgb(var(--color-text-primary))' }}>4 (Basse)</option>
+                          <option value="5" style={{ color: 'rgb(var(--color-text-primary))' }}>5 (Très basse)</option>
+                        </select>
+                        {errors.priority && (
+                          <div className="flex items-center gap-2 mt-1 text-red-600 dark:text-red-400 text-sm" role="alert">
+                            <AlertCircle size={14} aria-hidden="true" />
+                            {errors.priority}
+                          </div>
+                        )}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleInputChange('bookmarked', !formData.bookmarked)}
-                        className={`w-12 h-6 rounded-full transition-all relative ${formData.bookmarked ? 'bg-yellow-500' : 'bg-slate-300 dark:bg-slate-700'}`}
-                      >
-                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${formData.bookmarked ? 'left-7' : 'left-1'}`} />
-                      </button>
+                          <div>
+                            <label className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>Catégorie</label>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                          <button
+                                            type="button"
+                                            className={`w-full flex items-center justify-between px-4 h-12 border rounded-lg focus:outline-none hover:border-blue-500 focus:border-blue-600 focus:border-2 data-[state=open]:border-blue-600 data-[state=open]:border-2 transition-all text-base ${
+                                              errors.category ? 'border-red-500' : (okrFields.category ? 'border-blue-500 dark:border-blue-400' : 'border-slate-200 dark:border-slate-700')
+                                            } ${okrFields.category ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''}`}
+                                            style={{
+                                            backgroundColor: okrFields.category ? undefined : 'rgb(var(--color-surface))',
+                                            color: formData.category ? 'rgb(var(--color-text-primary))' : 'rgb(var(--color-text-muted))',
+                                            borderColor: errors.category ? 'rgb(var(--color-error))' : (okrFields.category ? undefined : undefined)
+                                          }}
+                                        >
+                                    <span>{categories.find(c => c.id === formData.category)?.name || (formData.category === 'okr' ? 'OKR' : 'Choisir...')}</span>
+                                    <ChevronDown size={18} className="text-blue-500" />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent 
+                                  align="start" 
+                                  className="w-[var(--radix-dropdown-menu-trigger-width)] bg-[#f8fafc] dark:bg-[#1e293b] border-slate-200 dark:border-slate-700 p-1 shadow-xl"
+                                >
+                                    {formData.category === 'okr' && !categories.find(c => c.id === 'okr') && (
+                                      <DropdownMenuItem asChild>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleInputChange('category', 'okr')}
+                                          className="w-full text-left px-4 py-3 text-base rounded-md transition-colors flex items-center gap-2 bg-blue-600 text-white shadow-sm"
+                                        >
+                                          <div className="w-2 h-2 rounded-full bg-blue-400" />
+                                          OKR
+                                        </button>
+                                      </DropdownMenuItem>
+                                    )}
+                                    {categories.map((cat) => (
+                                      <DropdownMenuItem key={cat.id} asChild>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleInputChange('category', cat.id)}
+                                          className={`w-full text-left px-4 py-3 text-base rounded-md transition-colors flex items-center gap-2 ${
+                                            formData.category === cat.id
+                                              ? 'bg-blue-600 text-white shadow-sm'
+                                              : 'text-slate-700 dark:text-slate-200 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600'
+                                          }`}
+                                        >
+                                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
+                                          {cat.name}
+                                        </button>
+                                      </DropdownMenuItem>
+                                    ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          {errors.category && (
+                            <div className="flex items-center gap-2 mt-1 text-red-600 dark:text-red-400 text-sm" role="alert">
+                              <AlertCircle size={14} aria-hidden="true" />
+                              {errors.category}
+                            </div>
+                          )}
+                        </div>
                     </div>
 
-                    <div className="flex items-start gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800">
-                      <div className="flex-shrink-0 pt-1">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="task-deadline" className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>Échéance</label>
+                          <DatePicker
+                            value={formData.deadline}
+                            onChange={(date) => handleInputChange('deadline', date)}
+                            placeholder="Sélectionner une date"
+                            className={`h-12 ${errors.deadline ? 'border-red-300 dark:border-red-600' : ''}`}
+                          />
+                          {errors.deadline && (
+                            <div id="deadline-error" className="flex items-center gap-2 mt-1 text-red-600 dark:text-red-400 text-sm" role="alert">
+                              <AlertCircle size={14} aria-hidden="true" />
+                              {errors.deadline}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <label htmlFor="task-time" className="block text-sm font-semibold mb-2" style={{ color: 'rgb(var(--color-text-secondary))' }}>Temps (min)</label>
+                          <input
+                            id="task-time"
+                            type="number"
+                            value={formData.estimatedTime === 0 ? '' : formData.estimatedTime}
+                            onChange={(e) => handleInputChange('estimatedTime', e.target.value === '' ? '' : Number(e.target.value))}
+                            placeholder="Estimation en minute"
+                            className={`w-full px-4 h-12 border rounded-lg focus:outline-none hover:border-blue-500 focus:border-blue-600 focus:border-2 transition-all text-base ${errors.estimatedTime ? 'border-red-300 dark:border-red-600' : 'border-slate-200 dark:border-slate-700'} ${okrFields.estimatedTime ? 'bg-blue-50/50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : ''}`}
+                            style={{
+                              backgroundColor: okrFields.estimatedTime ? undefined : 'rgb(var(--color-surface))',
+                              color: 'rgb(var(--color-text-primary))',
+                              borderColor: errors.estimatedTime ? 'rgb(var(--color-error))' : (okrFields.estimatedTime ? undefined : undefined)
+                            }}
+                          />
+                        {errors.estimatedTime && (
+                          <div id="time-error" className="flex items-center gap-2 mt-1 text-red-600 dark:text-red-400 text-sm" role="alert">
+                            <AlertCircle size={14} aria-hidden="true" />
+                            {errors.estimatedTime}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Favori & Listes */}
+                    <div className="flex flex-wrap gap-4 items-center pt-2">
+                      <div className="flex items-center justify-between p-4 rounded-lg border transition-colors min-w-[140px]" style={{
+                        backgroundColor: 'rgb(var(--color-hover))',
+                        borderColor: 'rgb(var(--color-border))'
+                      }}>
+                        <div className="flex items-center gap-3">
+                          <Bookmark size={20} className={formData.bookmarked ? 'text-yellow-500' : 'text-gray-400 dark:text-gray-500'} aria-hidden="true" />
+                          <span className="font-medium" style={{ color: 'rgb(var(--color-text-primary))' }}>Favori</span>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer ml-4">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={formData.bookmarked}
+                            onChange={(e) => handleInputChange('bookmarked', e.target.checked)}
+                            aria-label="Marquer comme favori"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center gap-3 p-4 rounded-lg border transition-colors" style={{
+                        backgroundColor: 'rgb(var(--color-hover))',
+                        borderColor: 'rgb(var(--color-border))'
+                      }}>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <List size={18} className="text-blue-500" aria-hidden="true" />
+                          <span className="font-semibold text-sm" style={{ color: 'rgb(var(--color-text-primary))' }}>Listes</span>
+                        </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <button type="button" className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all shadow-sm">
-                              <List size={20} />
+                            <button type="button" className="p-1 rounded-lg transition-all hover:bg-blue-500/10" style={{ color: "rgb(var(--color-text-primary))" }}>
+                              <Plus size={18} className="text-blue-500" />
                             </button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start" className="w-56 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl">
-                            {lists.length === 0 && <div className="p-3 text-xs text-center text-slate-500">Aucune liste</div>}
+                          <DropdownMenuContent align="end" className="w-56 bg-[#1e293b] border-slate-700 text-white">
+                            {lists.length === 0 && <div className="p-2 text-sm text-center text-slate-400">Aucune liste disponible</div>}
                             {lists.map(list => (
                               <DropdownMenuCheckboxItem
                                 key={list.id}
@@ -337,6 +453,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onFormToggle, expanded = fals
                                   setSelectedListIds(checked ? [...selectedListIds, list.id] : selectedListIds.filter(id => id !== list.id));
                                   setHasChanges(true);
                                 }}
+                                className="focus:bg-slate-700 focus:text-white"
                               >
                                 {list.name}
                               </DropdownMenuCheckboxItem>
@@ -344,118 +461,153 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onFormToggle, expanded = fals
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
-                      <div className="flex-1 flex flex-wrap gap-2 min-h-[40px] items-center">
-                        {selectedListIds.length === 0 ? (
-                          <span className="text-xs text-slate-400">Ajouter à une liste...</span>
-                        ) : (
-                          selectedListIds.map(id => {
-                            const list = lists.find(l => l.id === id);
-                            if (!list) return null;
-                            return (
-                              <div key={id} className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/50">
-                                <span className="text-xs font-semibold">{list.name}</span>
-                                <button type="button" onClick={() => setSelectedListIds(selectedListIds.filter(lid => lid !== id))} className="hover:text-red-500 transition-colors">
-                                  <X size={12} strokeWidth={3} />
-                                </button>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Right Column */}
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <label className="text-sm font-semibold" style={{ color: 'rgb(var(--color-text-secondary))' }}>Collaborateurs</label>
-                      <button type="button" onClick={() => setShowCollaboratorSection(!showCollaboratorSection)} className="text-xs text-blue-600 flex items-center gap-1 font-medium">
-                        <Users size={14} />
-                        {showCollaboratorSection ? 'Masquer' : 'Gérer'}
-                      </button>
-                    </div>
-
-                    {showCollaboratorSection && (
-                      <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 space-y-4">
-                        {!isPremium() ? (
-                          <div className="text-center py-4">
-                            <Users size={24} className="mx-auto text-slate-400 mb-2" />
-                            <p className="text-xs text-slate-500 mb-2">Premium requis pour collaborer</p>
-                            <button type="button" className="text-[10px] bg-yellow-500 text-white px-2 py-1 rounded-full font-bold uppercase tracking-wider">Passer Pro</button>
-                          </div>
-                        ) : (
-                          <>
-                            <div className="flex gap-2">
-                              <div className="relative flex-1">
-                                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                <input
-                                  type="text"
-                                  value={emailInput}
-                                  onChange={(e) => setEmailInput(e.target.value)}
-                                  placeholder="Email ou ID..."
-                                  className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
-                                />
-                              </div>
-                              <button type="button" onClick={handleAddEmail} className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20">
-                                <UserPlus size={16} />
+                      <div className="flex flex-wrap gap-2 items-center">
+                        {selectedListIds.map(id => {
+                          const list = lists.find(l => l.id === id);
+                          if (!list) return null;
+                          return (
+                            <div key={id} className="flex items-center gap-1.5 text-xs font-medium bg-blue-500/10 text-blue-400 px-3 py-1.5 rounded-lg border border-blue-500/20">
+                              {list.name}
+                              <button type="button" onClick={() => setSelectedListIds(selectedListIds.filter(lid => lid !== id))} className="text-blue-500 hover:text-blue-400 transition-colors">
+                                <X size={14} />
                               </button>
                             </div>
-                            <div className="space-y-1 max-h-40 overflow-y-auto">
-                              {filteredFriends.map(friend => (
-                                <CollaboratorItem key={friend.id} id={friend.id} name={friend.name} email={friend.email} avatar={friend.avatar} isSelected={collaborators.includes(friend.id)} onAction={() => toggleCollaborator(friend.id)} variant="toggle" />
-                              ))}
-                            </div>
-                            {collaborators.length > 0 && (
-                              <div className="pt-3 border-t border-slate-200 dark:border-slate-700 space-y-2">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase">Sélectionnés ({collaborators.length})</p>
-                                <div className="space-y-1">
-                                  {collaborators.map(id => {
-                                    const info = displayInfo(id);
-                                    return <CollaboratorItem key={id} id={id} name={info.name} email={info.email} avatar={info.avatar} onAction={() => toggleCollaborator(id)} variant="remove" />;
-                                  })}
-                                </div>
-                              </div>
-                            )}
-                          </>
-                        )}
+                          );
+                        })}
                       </div>
-                    )}
+                    </div>
                   </div>
 
-                  <div className="p-5 rounded-2xl border border-blue-100 dark:border-blue-900/30 bg-blue-50/30 dark:bg-blue-900/10">
-                    <h4 className="text-xs font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-4">Aperçu</h4>
-                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-blue-100 dark:border-blue-900/50 shadow-sm transition-all hover:shadow-md">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getCategoryColor(formData.category) }} />
-                        <span className="font-bold text-slate-800 dark:text-slate-100">{formData.name || 'Ma nouvelle tâche'}</span>
-                        {formData.bookmarked && <Bookmark size={14} className="fill-yellow-400 text-yellow-400" />}
+                  {/* Right Column */}
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <label className="text-sm font-semibold" style={{ color: 'rgb(var(--color-text-secondary))' }}>Collaborateurs</label>
+                        <button
+                          type="button"
+                          onClick={() => setShowCollaboratorSection(!showCollaboratorSection)}
+                          className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                        >
+                          <Users size={16} />
+                          <span>{showCollaboratorSection ? 'Masquer' : 'Gérer'}</span>
+                        </button>
                       </div>
-                      <div className="flex items-center gap-4 text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        <span className="flex items-center gap-1"><AlertCircle size={10} /> P{formData.priority || '?'}</span>
-                        <span className="flex items-center gap-1"><Calendar size={10} /> {formData.deadline || 'Date ?'}</span>
-                        <span className="flex items-center gap-1">Durée: {formData.estimatedTime || 0}m</span>
+
+                      {showCollaboratorSection && (
+                        <div className="rounded-lg p-4 border transition-colors" style={{ backgroundColor: 'rgb(var(--color-hover))', borderColor: 'rgb(var(--color-border))' }}>
+                          {!isPremium() ? (
+                            <div className="text-center py-6">
+                              <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                <Users size={24} className="text-yellow-600 dark:text-yellow-400" />
+                              </div>
+                              <p className="text-sm mb-3" style={{ color: 'rgb(var(--color-text-secondary))' }}>Fonctionnalité Premium requise</p>
+                              <button type="button" className="text-xs bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-full transition-colors">Débloquer Premium</button>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex gap-2 mb-4">
+                                <div className="relative flex-1">
+                                  <Mail size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+                                  <input
+                                    type="text"
+                                    value={emailInput}
+                                    onChange={(e) => setEmailInput(e.target.value)}
+                                    placeholder="Email ou identifiant"
+                                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none hover:border-blue-500 focus:border-blue-600 focus:border-2 text-sm transition-colors border-slate-200 dark:border-slate-700"
+                                    style={{ backgroundColor: 'rgb(var(--color-surface))', color: 'rgb(var(--color-text-primary))' }}
+                                  />
+                                </div>
+                                <button type="button" onClick={handleAddEmail} disabled={!emailInput.trim()} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                                  <UserPlus size={18} />
+                                </button>
+                              </div>
+
+                              <div className="relative mb-4">
+                                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+                                <input
+                                  type="text"
+                                  value={searchUser}
+                                  onChange={(e) => setSearchUser(e.target.value)}
+                                  placeholder="Rechercher parmi vos amis..."
+                                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none hover:border-blue-500 focus:border-blue-600 focus:border-2 text-sm transition-colors border-slate-200 dark:border-slate-700"
+                                    style={{ backgroundColor: 'rgb(var(--color-surface))', color: 'rgb(var(--color-text-primary))' }}
+                                />
+                              </div>
+
+                              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                {filteredFriends.map(friend => (
+                                  <CollaboratorItem key={friend.id} id={friend.id} name={friend.name} email={friend.email} avatar={friend.avatar} isSelected={collaborators.includes(friend.id)} onAction={() => toggleCollaborator(friend.id)} variant="toggle" />
+                                ))}
+                                {filteredFriends.length === 0 && searchUser && (
+                                  <p className="text-center py-4 text-sm text-slate-500">Aucun contact trouvé</p>
+                                )}
+                              </div>
+
+                              {collaborators.length > 0 && (
+                                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Sélectionnés ({collaborators.length})</h4>
+                                  <div className="grid grid-cols-1 gap-2">
+                                    {collaborators.map(id => {
+                                      const info = displayInfo(id);
+                                      return <CollaboratorItem key={id} id={id} name={info.name} email={info.email} avatar={info.avatar} onAction={() => toggleCollaborator(id)} variant="remove" />;
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-4 rounded-lg border transition-colors" style={{ backgroundColor: 'rgb(var(--color-hover))', borderColor: 'rgb(var(--color-border))' }}>
+                      <h4 className="text-sm font-semibold mb-3" style={{ color: 'rgb(var(--color-text-secondary))' }}>Aperçu de la tâche</h4>
+                      <div className="p-4 rounded-lg border transition-colors" style={{ backgroundColor: 'rgb(var(--color-surface))', borderColor: 'rgb(var(--color-border))' }}>
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-4 h-4 rounded" style={{ backgroundColor: getCategoryColor(formData.category) }} />
+                          <span className="font-medium" style={{ color: 'rgb(var(--color-text-primary))' }}>{formData.name || 'Nom de la tâche'}</span>
+                          {formData.bookmarked && <Bookmark size={16} className="text-yellow-500" />}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm" style={{ color: 'rgb(var(--color-text-secondary))' }}>
+                          <span>Priorité {formData.priority || '?'}</span>
+                          <span>{formData.estimatedTime || 0} min</span>
+                          <span>{formData.deadline || 'Pas de date'}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex justify-end gap-3 mt-10 pt-6 border-t border-slate-100 dark:border-slate-800">
-                <button type="button" onClick={() => handleFormToggle(false)} className="px-6 py-2.5 rounded-xl font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Annuler</button>
-                <button
-                  type="submit"
-                  disabled={isLoading || !isFormValid()}
-                  className="px-8 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/25 transition-all disabled:opacity-50 transform hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  {isLoading ? 'Création...' : 'Créer la tâche'}
-                </button>
-              </div>
-            </form>
+                <div className="flex justify-end gap-3 mt-10 pt-6 border-t" style={{ borderColor: 'rgb(var(--color-border))' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleFormToggle(false)}
+                    disabled={isLoading}
+                    className="px-6 py-3 rounded-lg transition-colors disabled:opacity-50 font-semibold"
+                    style={{ backgroundColor: 'rgb(var(--color-hover))', color: 'rgb(var(--color-text-secondary))' }}
+                    onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.backgroundColor = 'rgb(var(--color-active))'; }}
+                    onMouseLeave={(e) => { if (!isLoading) e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))'; }}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isLoading || !isFormValid()}
+                    className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold text-white shadow-lg shadow-blue-500/25 transform transition-all hover:scale-105 active:scale-95 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" role="status"></div>
+                        Création...
+                      </>
+                    ) : 'Créer la tâche'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      </DialogContent>
+        </DialogContent>
     </Dialog>
   );
 };
