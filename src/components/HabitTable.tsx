@@ -26,8 +26,7 @@ type PeriodType = 'week' | 'month' | '3months' | 'all';
     const periodOptions = [
       { value: 'week' as PeriodType, label: 'Semaine', days: 7 },
       { value: 'month' as PeriodType, label: 'Mois', days: 30 },
-      { value: '3months' as PeriodType, label: '3 Mois', days: 90 },
-      { value: 'all' as PeriodType, label: 'Depuis création', days: 0 },
+      { value: 'all' as PeriodType, label: 'Tout', days: 0 },
     ];
 
       const getOldestHabitDate = () => {
@@ -113,6 +112,31 @@ type PeriodType = 'week' | 'month' | '3months' | 'all';
       };
 
   const days = generateDays();
+
+  const getDailyPercentage = (date: string) => {
+    if (habits.length === 0) return 0;
+    const activeHabits = habits.filter(h => {
+      const createdDate = h.createdAt ? h.createdAt.split('T')[0] : '';
+      return !createdDate || date >= createdDate;
+    });
+    if (activeHabits.length === 0) return 0;
+    const completedCount = activeHabits.filter(h => h.completions[date]).length;
+    return Math.round((completedCount / activeHabits.length) * 100);
+  };
+
+  const getSuccessColor = (percentage: number) => {
+    if (percentage === 100) return '#3B82F6';
+    if (percentage >= 90) return '#064e3b';
+    if (percentage >= 80) return '#10B981';
+    if (percentage >= 70) return '#34d399';
+    if (percentage >= 60) return '#6ee7b7';
+    if (percentage >= 50) return '#fcd34d';
+    if (percentage >= 40) return '#fbbf24';
+    if (percentage >= 30) return '#fb923c';
+    if (percentage >= 20) return '#f97316';
+    if (percentage >= 10) return '#ef4444';
+    return '#b91c1c';
+  };
 
   const handleDayClick = (habitId: string, date: string) => {
     toggleHabitCompletion(habitId, date);
@@ -205,9 +229,55 @@ type PeriodType = 'week' | 'month' | '3months' | 'all';
             <p className="mt-1" style={{ color: 'rgb(var(--color-text-secondary))' }}>Vue d'ensemble de toutes vos habitudes</p>
           </div>
           
-          {/* Sélecteur de période */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center rounded-lg p-1 shadow-sm border transition-colors" style={{
+{/* Navigation */}
+            {period !== 'all' && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigatePeriod('prev')}
+                  className="p-2 rounded-lg transition-colors"
+                  style={{ color: 'rgb(var(--color-text-secondary))' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'rgb(var(--color-accent))';
+                    e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="text-sm font-medium min-w-[120px] text-center" style={{ color: 'rgb(var(--color-text-primary))' }}>
+                  {getCurrentPeriodLabel()}
+                </div>
+                <button
+                  onClick={() => navigatePeriod('next')}
+                  disabled={!canNavigateNext()}
+                  className="p-2 rounded-lg transition-colors"
+                  style={{
+                    color: canNavigateNext() ? 'rgb(var(--color-text-secondary))' : 'rgb(var(--color-text-muted))',
+                    cursor: canNavigateNext() ? 'pointer' : 'not-allowed'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (canNavigateNext()) {
+                      e.currentTarget.style.color = 'rgb(var(--color-accent))';
+                      e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (canNavigateNext()) {
+                      e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
+                  }}
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            )}
+
+            {/* Sélecteur de période */}
+            <div className="flex flex-wrap items-center rounded-lg p-1 shadow-sm border transition-colors" style={{
               backgroundColor: 'rgb(var(--color-surface))',
               borderColor: 'rgb(var(--color-border))'
             }}>
@@ -222,75 +292,27 @@ type PeriodType = 'week' | 'month' | '3months' | 'all';
                   }}
                   className="px-3 py-2 rounded-md text-sm font-medium transition-colors"
                   style={{
-                    backgroundColor: period === option.value ? 'rgb(var(--color-accent))' : 'transparent',
+                    backgroundColor: period === option.value ? '#2563EB' : 'transparent',
                     color: period === option.value ? 'white' : 'rgb(var(--color-text-secondary))',
                     boxShadow: period === option.value ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none'
                   }}
-                    onMouseEnter={(e) => {
-                      if (period !== option.value) {
-                        e.currentTarget.style.color = 'rgb(var(--color-accent))';
-                        e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (period !== option.value) {
-                        e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-              
-              {/* Navigation */}
-              {period !== 'all' && (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => navigatePeriod('prev')}
-                    className="p-2 rounded-lg transition-colors"
-                    style={{ color: 'rgb(var(--color-text-secondary))' }}
-                    onMouseEnter={(e) => {
+                  onMouseEnter={(e) => {
+                    if (period !== option.value) {
                       e.currentTarget.style.color = 'rgb(var(--color-accent))';
                       e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
-                    }}
-                    onMouseLeave={(e) => {
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (period !== option.value) {
                       e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
                       e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-                  <div className="text-sm font-medium min-w-[120px] text-center" style={{ color: 'rgb(var(--color-text-primary))' }}>
-                    {getCurrentPeriodLabel()}
-                  </div>
-                  <button
-                    onClick={() => navigatePeriod('next')}
-                    disabled={!canNavigateNext()}
-                    className="p-2 rounded-lg transition-colors"
-                    style={{
-                      color: canNavigateNext() ? 'rgb(var(--color-text-secondary))' : 'rgb(var(--color-text-muted))',
-                      cursor: canNavigateNext() ? 'pointer' : 'not-allowed'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (canNavigateNext()) {
-                        e.currentTarget.style.color = 'rgb(var(--color-accent))';
-                        e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (canNavigateNext()) {
-                        e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
-                    }}
-                  >
-                    <ChevronRight size={20} />
-                  </button>
-                </div>
-              )}
-          </div>
+                    }
+                  }}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
         </div>
       </div>
       
@@ -363,30 +385,30 @@ type PeriodType = 'week' | 'month' | '3months' | 'all';
                             onClick={() => handleDayClick(habit.id, day.date)}
                             disabled={day.isFuture || isBeforeCreation}
                             className="w-8 h-8 rounded-lg border-2 transition-all flex items-center justify-center mx-auto"
-                              style={{
-                                backgroundColor: isCompleted ? '#2563EB' : (day.isFuture || isBeforeCreation) ? 'rgb(var(--color-hover) / 0.5)' : day.isToday ? 'rgb(var(--color-accent) / 0.1)' : 'transparent',
-                                borderColor: isCompleted ? '#2563EB' : day.isToday ? 'rgb(var(--color-accent))' : (day.isFuture || isBeforeCreation) ? 'transparent' : 'rgb(var(--color-border))',
-                                color: isCompleted ? 'white' : (day.isFuture || isBeforeCreation) ? 'rgb(var(--color-text-muted) / 0.3)' : 'rgb(var(--color-text-secondary))',
+style={{
+                                    backgroundColor: isCompleted ? '#2563EB' : (day.isFuture || isBeforeCreation) ? 'rgb(var(--color-hover) / 0.5)' : day.isToday ? 'rgba(37, 99, 235, 0.1)' : 'transparent',
+                                    borderColor: isCompleted ? '#2563EB' : day.isToday ? '#2563EB' : (day.isFuture || isBeforeCreation) ? 'transparent' : 'rgb(var(--color-border))',
+                                    color: isCompleted ? 'white' : (day.isFuture || isBeforeCreation) ? 'rgb(var(--color-text-muted) / 0.3)' : 'rgb(var(--color-text-secondary))',
                                 cursor: (day.isFuture || isBeforeCreation) ? 'not-allowed' : 'pointer',
                                 opacity: isBeforeCreation ? 0.3 : 1,
                                 filter: isBeforeCreation ? 'grayscale(1)' : 'none'
                               }}
-                            onMouseEnter={(e) => {
-                              if (!day.isFuture && !isBeforeCreation && !isCompleted) {
-                                e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
-                                e.currentTarget.style.borderColor = 'rgb(var(--color-accent))';
-                                e.currentTarget.style.color = 'rgb(var(--color-accent))';
-                                e.currentTarget.style.transform = 'scale(1.05)';
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              if (!day.isFuture && !isBeforeCreation && !isCompleted) {
-                                e.currentTarget.style.backgroundColor = day.isToday ? 'rgb(var(--color-accent) / 0.1)' : 'transparent';
-                                e.currentTarget.style.borderColor = day.isToday ? 'rgb(var(--color-accent))' : 'rgb(var(--color-border))';
-                                e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
-                                e.currentTarget.style.transform = 'scale(1)';
-                              }
-                            }}
+onMouseEnter={(e) => {
+                                if (!day.isFuture && !isBeforeCreation && !isCompleted) {
+                                  e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))';
+                                  e.currentTarget.style.borderColor = '#2563EB';
+                                  e.currentTarget.style.color = '#2563EB';
+                                  e.currentTarget.style.transform = 'scale(1.05)';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!day.isFuture && !isBeforeCreation && !isCompleted) {
+                                  e.currentTarget.style.backgroundColor = day.isToday ? 'rgba(37, 99, 235, 0.1)' : 'transparent';
+                                  e.currentTarget.style.borderColor = day.isToday ? '#2563EB' : 'rgb(var(--color-border))';
+                                  e.currentTarget.style.color = 'rgb(var(--color-text-secondary))';
+                                  e.currentTarget.style.transform = 'scale(1)';
+                                }
+                              }}
                           >
                             {isCompleted ? (
                               <CheckCircle size={14} />
@@ -411,38 +433,47 @@ type PeriodType = 'week' | 'month' | '3months' | 'all';
             ))}
           </tbody>
         </table>
-      </div>
-      
-      {/* Légende pour les longues périodes */}
-      {(period === '3months' || period === 'all') && (
-        <div className="p-4 border-t transition-colors" style={{
-          backgroundColor: 'rgb(var(--color-hover))',
-          borderColor: 'rgb(var(--color-border))'
-        }}>
-          <div className="flex items-center justify-center gap-6 text-sm" style={{ color: 'rgb(var(--color-text-secondary))' }}>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-500 rounded border-2 border-green-500"></div>
-              <span>Complété</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 rounded" style={{
-                backgroundColor: 'rgb(var(--color-surface))',
-                borderColor: 'rgb(var(--color-border))'
-              }}></div>
-              <span>Non complété</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 rounded" style={{
-                backgroundColor: 'rgb(var(--color-accent) / 0.1)',
-                borderColor: 'rgb(var(--color-accent))'
-              }}></div>
-              <span>Aujourd'hui</span>
-            </div>
+        </div>
+
+        <div className="mt-8 border-t transition-colors" style={{ borderColor: 'rgb(var(--color-border))' }}>
+          <div className="p-6 transition-colors" style={{ backgroundColor: 'rgb(var(--color-hover))' }}>
+            <h3 className="text-lg font-semibold" style={{ color: 'rgb(var(--color-text-primary))' }}>Analyse de réussite journalière</h3>
+            <p className="text-sm mt-1" style={{ color: 'rgb(var(--color-text-secondary))' }}>Pourcentage d'habitudes complétées par jour</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <tbody>
+                <tr className="transition-colors" style={{ backgroundColor: 'rgb(var(--table-row-even))' }}>
+                  <td className="p-4 sticky left-0 bg-inherit z-10 border-r font-medium min-w-[250px] transition-colors" style={{ borderColor: 'rgb(var(--table-border))', color: 'rgb(var(--color-text-primary))' }}>
+                    % Réussite globale
+                  </td>
+                  {days.map(day => {
+                    const percentage = getDailyPercentage(day.date);
+                    const color = getSuccessColor(percentage);
+                    return (
+                      <td key={day.date} className="p-2 text-center transition-colors min-w-[50px]">
+                        <div 
+                          className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto font-bold text-xs shadow-sm transition-all"
+                          style={{ 
+                            backgroundColor: color,
+                            color: 'white',
+                            opacity: day.isFuture ? 0.2 : 1
+                          }}
+                        >
+                          {percentage}%
+                        </div>
+                      </td>
+                    );
+                  })}
+                  <td className="p-4 min-w-[80px]"></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-      )}
-    </div>
-  );
-};
+      </div>
+    );
+  };
+
 
 export default HabitTable;
