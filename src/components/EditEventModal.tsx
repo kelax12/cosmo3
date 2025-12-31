@@ -120,7 +120,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   return (
     <>
       <div
-        className="modal-content rounded-2xl shadow-2xl w-full max-w-4xl h-auto transition-colors overflow-hidden"
+        className="modal-content rounded-2xl shadow-2xl w-full max-w-4xl xl:max-w-5xl 2xl:max-w-6xl 3xl:max-w-[1600px] min-h-[50vh] 3xl:min-h-[85vh] h-auto transition-colors overflow-hidden"
         style={{ backgroundColor: 'rgb(var(--color-surface))' }}
       >
         {/* Header */}
