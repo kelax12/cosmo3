@@ -1,8 +1,12 @@
-import React, { useMemo, useEffect, useRef } from 'react';
-import { BarChart3 } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrendingUp, Calendar, Clock, Flame } from 'lucide-react';
+import { useTasks } from '../context/TaskContext';
+import { calculateWorkTimeForDate } from '../lib/workTimeCalculator';
 
 const DashboardChart: React.FC = () => {
-  const chartTopRef = useRef<HTMLDivElement>(null);
+  const [hoveredBar, setHoveredBar] = useState<number | null>(null);
+  const { tasks, events, habits, okrs } = useTasks();
 
   const chartData = useMemo(() => {
     const days = [];
@@ -10,121 +14,237 @@ const DashboardChart: React.FC = () => {
       const date = new Date();
       date.setDate(date.getDate() - i);
 
-      const baseTime = 60;
-      const variation = Math.sin((i * Math.PI) / 6) * 30;
-      const randomFactor = (Math.random() - 0.5) * 20;
-      const totalTime = Math.max(0, baseTime + variation + randomFactor);
-
       days.push({
-        date: date.toLocaleDateString('fr-FR', { weekday: 'short' }),
-        time: Math.round(totalTime),
-        fullDate: date.toLocaleDateString('fr-FR')
+        date: date.toLocaleDateString('fr-FR', { weekday: 'short' }).toUpperCase().replace('.', ''),
+        time: calculateWorkTimeForDate(date, { tasks, events, habits, okrs }),
+        fullDate: date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
       });
     }
     return days;
-  }, []);
+  }, [tasks, events, habits, okrs]);
 
-  const maxTime = Math.max(...chartData.map(d => d.time));
-  const chartHeight = 200;
-  const labelSpace = 50;
+  const maxTime = Math.max(...chartData.map(d => d.time), 1);
+  const avgTime = chartData.reduce((sum, d) => sum + d.time, 0) / chartData.length;
+  const totalTime = chartData.reduce((sum, d) => sum + d.time, 0);
+  const todayTime = chartData[chartData.length - 1].time;
 
-  useEffect(() => {
-    if (chartTopRef.current) {
-      chartTopRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
+  const formatTimeShort = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) {
+      return mins > 0 ? `${hours}h${mins}` : `${hours}h`;
     }
-  }, [chartData]);
+    return `${minutes}m`;
+  };
+
+  const formatTimeFull = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+  };
+
+  const yScaleMax = Math.max(Math.ceil(maxTime / 30) * 30, 90);
+  const yTicks = [];
+  for (let i = 0; i <= yScaleMax; i += 30) {
+    yTicks.push(i);
+  }
 
   return (
-    <div className="card p-6 lg:p-8 h-full bg-transparent">
-      <div className="flex items-center gap-3 mb-6 lg:mb-8">
-        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex-shrink-0 transition-colors duration-300">
-          <BarChart3 size={24} className="text-blue-600 dark:text-blue-400" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-lg lg:text-xl font-semibold text-[rgb(var(--color-text-primary))]">
-            Temps de travail quotidien
-          </h2>
-          <p className="text-[rgb(var(--color-text-secondary))] text-xs lg:text-sm">
-            7 derniers jours
-          </p>
-        </div>
+    <motion.div 
+      className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 lg:p-8 shadow-2xl"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div ref={chartTopRef} className="absolute -mt-32" />
+      <div className="relative z-10 flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <motion.div 
+            className="p-3 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-500 shadow-lg shadow-blue-500/25"
+            whileHover={{ scale: 1.05, rotate: 5 }}
+          >
+            <TrendingUp size={24} className="text-white" />
+          </motion.div>
+          <div>
+            <h2 className="text-xl lg:text-2xl font-bold text-white tracking-tight">
+              Temps de travail
+            </h2>
+            <p className="text-slate-400 text-sm flex items-center gap-2">
+              <Calendar size={14} />
+              7 derniers jours
+            </p>
+          </div>
+        </div>
+        
+        <motion.div 
+          className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20"
+          whileHover={{ scale: 1.02 }}
+        >
+          <Flame size={16} className="text-blue-400" />
+          <span className="text-blue-400 text-sm font-medium">+12% cette semaine</span>
+        </motion.div>
+      </div>
 
-      <div className="relative overflow-x-auto overflow-y-visible">
-        <div className="flex items-end justify-between gap-2 lg:gap-3 min-w-[500px] lg:min-w-0 pt-20 pb-4 bg-transparent" style={{ height: `${chartHeight + labelSpace + 60}px` }}>
-          {chartData.map((day, index) => {
-            const barHeight = (day.time / maxTime) * chartHeight * 0.9;
-            const isToday = index === chartData.length - 1;
+      <div className="relative z-10 mb-6">
+        <div className="flex">
+          {/* Y-Axis Labels */}
+          <div className="flex flex-col justify-between pr-3 py-2" style={{ height: '200px' }}>
+            {[...yTicks].reverse().map((tick) => (
+              <span key={tick} className="text-[11px] font-medium text-slate-500 text-right leading-none">
+                {formatTimeShort(tick)}
+              </span>
+            ))}
+          </div>
 
-            return (
-              <div key={index} className="flex-1 flex flex-col items-center group bg-transparent">
-                <div className="relative flex-1 flex items-end justify-center w-full">
-                  <div
-                    className={`w-8 lg:w-10 rounded-t-lg transition-all duration-500 hover:opacity-80 relative ${
-                      isToday
-                        ? 'bg-gradient-to-t from-blue-600 to-blue-500 dark:from-blue-500 dark:to-blue-400 shadow-lg shadow-blue-500/30'
-                        : 'bg-gradient-to-t from-slate-300 to-slate-200 dark:from-slate-600 dark:to-slate-500'
-                    }`}
-                    style={{ height: `${barHeight}px`, minHeight: barHeight > 0 ? '4px' : '0' }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
+          {/* Chart Area */}
+          <div className="flex-1 relative" style={{ height: '200px' }}>
+            {/* Grid Lines */}
+            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+              {yTicks.map((tick) => (
+                <div key={tick} className="border-b border-slate-700/30 w-full" />
+              ))}
+            </div>
 
-                  <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 whitespace-nowrap text-center">
-                    <span className={`text-sm lg:text-base font-bold ${
-                      isToday
-                        ? 'text-blue-600 dark:text-blue-400'
-                        : 'text-[rgb(var(--color-text-primary))]'
-                    }`}>
-                      {Math.floor(day.time / 60)}h{day.time % 60}min
-                    </span>
-                  </div>
-                </div>
+              {/* Bars Container */}
+              <div className="absolute inset-0 flex items-end justify-around px-2">
+                {chartData.map((day, index) => {
+                  const chartHeight = 200;
+                  const barHeight = (day.time / yScaleMax) * chartHeight;
+                  const isToday = index === chartData.length - 1;
+                  const isHovered = hoveredBar === index;
 
-                <div className="mt-3 lg:mt-4 text-center">
-                  <div className={`text-xs lg:text-sm font-semibold transition-colors duration-200 ${
-                    isToday
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-[rgb(var(--color-text-secondary))] group-hover:text-[rgb(var(--color-text-primary))]'
+                  return (
+                    <div
+                      key={index}
+                      className="flex flex-col items-center justify-end relative h-full"
+                      style={{ width: `${100 / chartData.length}%` }}
+                      onMouseEnter={() => setHoveredBar(index)}
+                      onMouseLeave={() => setHoveredBar(null)}
+                    >
+                      {/* Tooltip */}
+                      <AnimatePresence>
+                        {isHovered && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                            className="absolute z-20 flex flex-col items-center"
+                            style={{ bottom: barHeight + 10 }}
+                          >
+                            <div className="bg-white px-3 py-1.5 rounded-xl shadow-xl text-center">
+                              <div className="text-slate-900 font-bold text-xs whitespace-nowrap">
+                                {formatTimeFull(day.time)}
+                              </div>
+                              <div className="text-slate-500 text-[10px] whitespace-nowrap">
+                                {day.fullDate}
+                              </div>
+                            </div>
+                            <div className="w-2 h-2 bg-white rotate-45 -mt-1 shadow-xl" />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Bar */}
+                      <motion.div
+                        className={`w-8 rounded-t-lg cursor-pointer ${
+                          isToday 
+                            ? 'bg-gradient-to-t from-indigo-600 to-violet-400' 
+                            : 'bg-gradient-to-t from-blue-600 to-blue-400'
+                        }`}
+                        style={{
+                          opacity: hoveredBar === null || isHovered ? 1 : 0.4,
+                          minHeight: 4
+                        }}
+                        initial={{ height: 0 }}
+                        animate={{ height: barHeight }}
+                        transition={{ 
+                          type: "spring", 
+                          stiffness: 100, 
+                          damping: 15, 
+                          delay: index * 0.05 
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+          </div>
+        </div>
+
+        {/* X-Axis Labels */}
+        <div className="flex mt-3">
+          <div className="pr-3" style={{ width: '40px' }} />
+          <div className="flex-1 flex justify-around px-2">
+            {chartData.map((day, index) => {
+              const isToday = index === chartData.length - 1;
+              const isHovered = hoveredBar === index;
+              return (
+                <div 
+                  key={index} 
+                  className="text-center"
+                  style={{ width: `${100 / chartData.length}%` }}
+                >
+                  <span className={`text-[11px] font-bold uppercase tracking-wider transition-colors duration-200 ${
+                    isToday ? 'text-blue-400' : isHovered ? 'text-white' : 'text-slate-500'
                   }`}>
                     {day.date}
-                  </div>
-                  <div className="text-[10px] lg:text-xs text-[rgb(var(--color-text-muted))]">
-                    {day.fullDate}
-                  </div>
+                  </span>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      <div className="mt-6 lg:mt-8 grid grid-cols-3 gap-4 lg:gap-6 pt-6 border-t border-[rgb(var(--color-border))]">
-        <div className="text-center p-4 rounded-xl border border-[rgb(var(--color-border))] bg-transparent transition-all duration-300 hover:scale-105">
-          <div className="text-xl lg:text-2xl font-bold text-blue-600 dark:text-blue-400">
-            {Math.floor(chartData[chartData.length - 1].time / 60)}h{chartData[chartData.length - 1].time % 60}min
-          </div>
-          <div className="text-[10px] lg:text-xs text-[rgb(var(--color-text-secondary))] mt-1 font-medium">Aujourd'hui</div>
-        </div>
-        <div className="text-center p-4 rounded-xl border border-[rgb(var(--color-border))] bg-transparent transition-all duration-300 hover:scale-105">
-          <div className="text-xl lg:text-2xl font-bold text-green-600 dark:text-green-400">
-            {Math.floor(chartData.reduce((sum, d) => sum + d.time, 0) / chartData.length / 60)}h
-          </div>
-          <div className="text-[10px] lg:text-xs text-[rgb(var(--color-text-secondary))] mt-1 font-medium">Moyenne</div>
-        </div>
-        <div className="text-center p-4 rounded-xl border border-[rgb(var(--color-border))] bg-transparent transition-all duration-300 hover:scale-105">
-          <div className="text-xl lg:text-2xl font-bold text-amber-600 dark:text-amber-400">
-            {Math.floor(chartData.reduce((sum, d) => sum + d.time, 0) / 60)}h
-          </div>
-          <div className="text-[10px] lg:text-xs text-[rgb(var(--color-text-secondary))] mt-1 font-medium">Total semaine</div>
-        </div>
+      {/* Stats grid */}
+      <div className="relative z-10 grid grid-cols-3 gap-4">
+        {[
+          { 
+            label: "Aujourd'hui", 
+            value: formatTimeFull(todayTime),
+            icon: Clock,
+            gradient: 'from-blue-500 to-indigo-500'
+          },
+          { 
+            label: 'Moyenne', 
+            value: formatTimeFull(Math.round(avgTime)),
+            icon: TrendingUp,
+            gradient: 'from-violet-500 to-purple-500'
+          },
+          { 
+            label: 'Total', 
+            value: `${Math.floor(totalTime / 60)}h`,
+            icon: Flame,
+            gradient: 'from-amber-500 to-orange-500'
+          }
+        ].map((stat, index) => (
+          <motion.div
+            key={stat.label}
+            className="relative group"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 + index * 0.1 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm hover:border-slate-600/50 transition-all duration-300">
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`p-1.5 rounded-lg bg-gradient-to-br ${stat.gradient}`}>
+                  <stat.icon size={14} className="text-white" />
+                </div>
+                <span className="text-slate-400 text-xs font-medium">{stat.label}</span>
+              </div>
+              <div className={`text-lg lg:text-xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
+                {stat.value}
+              </div>
+            </div>
+          </motion.div>
+        ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
