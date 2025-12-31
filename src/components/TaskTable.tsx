@@ -21,13 +21,22 @@ type TaskTableProps = {
 
 const TaskTable: React.FC<TaskTableProps> = ({ 
   tasks: propTasks, 
-  sortField, 
+  sortField: propSortField, 
   showCompleted = false,
   selectedTaskId: externalSelectedTaskId,
   onTaskModalClose
 }) => {
   const { tasks: contextTasks, deleteTask, toggleBookmark, toggleComplete, addEvent, priorityRange } = useTasks();
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [localSortField, setLocalSortField] = useState<string | undefined>(propSortField);
+
+  const sortField = localSortField;
+
+  useEffect(() => {
+    if (propSortField) {
+      setLocalSortField(propSortField);
+    }
+  }, [propSortField]);
 
   useEffect(() => {
     if (sortField === 'priority') {
@@ -65,6 +74,7 @@ const TaskTable: React.FC<TaskTableProps> = ({
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
+      setLocalSortField(field);
       setSortDirection(field === 'priority' ? 'desc' : 'asc');
     }
   };
@@ -80,33 +90,34 @@ const TaskTable: React.FC<TaskTableProps> = ({
       : filteredByCompletion;
 
     const sortedTasks = [...filteredTasks].sort((a, b) => {
-    // First, prioritize bookmarked tasks
+    // Si un tri est actif, il est prioritaire sur les favoris
+    if (sortField) {
+      let comparison = 0;
+      if (sortField === 'name') {
+        comparison = a.name.localeCompare(b.name);
+      } else if (sortField === 'priority') {
+        comparison = a.priority - b.priority;
+      } else if (sortField === 'deadline') {
+        comparison = new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+      } else if (sortField === 'estimatedTime') {
+        comparison = a.estimatedTime - b.estimatedTime;
+      } else if (sortField === 'createdAt') {
+        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (sortField === 'category') {
+        comparison = a.category.localeCompare(b.category);
+      } else if (sortField === 'completedAt' && showCompleted) {
+        const aDate = a.completedAt ? new Date(a.completedAt).getTime() : 0;
+        const bDate = b.completedAt ? new Date(b.completedAt).getTime() : 0;
+        comparison = aDate - bDate;
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    }
+
+    // Si pas de tri actif, prioritize bookmarked tasks
     if (a.bookmarked && !b.bookmarked) return -1;
     if (!a.bookmarked && b.bookmarked) return 1;
 
-    // Then apply the selected sort
-    if (!sortField) return 0;
-
-    let comparison = 0;
-    if (sortField === 'name') {
-      comparison = a.name.localeCompare(b.name);
-    } else if (sortField === 'priority') {
-      comparison = a.priority - b.priority;
-    } else if (sortField === 'deadline') {
-      comparison = new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-    } else if (sortField === 'estimatedTime') {
-      comparison = a.estimatedTime - b.estimatedTime;
-    } else if (sortField === 'createdAt') {
-      comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    } else if (sortField === 'category') {
-      comparison = a.category.localeCompare(b.category);
-    } else if (sortField === 'completedAt' && showCompleted) {
-      const aDate = a.completedAt ? new Date(a.completedAt).getTime() : 0;
-      const bDate = b.completedAt ? new Date(b.completedAt).getTime() : 0;
-      comparison = aDate - bDate;
-    }
-
-    return sortDirection === 'asc' ? comparison : -comparison;
+    return 0;
   });
 
   const selectedTaskData = tasks.find(task => task.id === selectedTask);
@@ -170,11 +181,12 @@ const TaskTable: React.FC<TaskTableProps> = ({
 
       <div className="table-container shadow-sm overflow-x-auto">
         <table className="data-table" style={{ minWidth: '1000px' }}>
-            <thead>
-              <tr>
-                <th className="px-1 py-3" style={{ width: '30px' }}></th>
-                <th 
-                  className="cursor-pointer px-2 py-3"
+              <thead>
+                <tr>
+                  <th className="px-2 py-3" style={{ width: '40px' }}></th>
+                  <th className="px-1 py-3" style={{ width: '30px' }}></th>
+                  <th 
+                    className="cursor-pointer px-2 py-3"
                 onClick={() => handleSort('name')}
                 style={{ width: '140px' }}
               >
@@ -228,19 +240,35 @@ const TaskTable: React.FC<TaskTableProps> = ({
           </thead>
           <tbody className="divide-y divide-gray-200">
             {sortedTasks.map((task) => (
-                <tr 
-                  key={task.id} 
-                  className={`animate-fade-in cursor-pointer transition-colors ${
-                    task.bookmarked ? 'bg-primary-100 bg-opacity-60' : ''
-                  } ${task.completed ? 'opacity-75' : ''}`}
-                  onClick={() => setSelectedTask(task.id)}
-                  style={{ 
-                    backgroundColor: task.bookmarked ? 'rgb(var(--color-accent) / 0.1)' : 'transparent'
-                  }}
-                >
-                  <td className="px-1 py-4 whitespace-nowrap">
-                    <TaskCategoryIndicator category={task.category} />
-                  </td>
+                  <tr 
+                    key={task.id} 
+                    className={`animate-fade-in cursor-pointer transition-colors ${task.completed ? 'opacity-75' : ''}`}
+                    onClick={() => setSelectedTask(task.id)}
+                    style={{ 
+                      backgroundColor: task.bookmarked ? 'rgba(234, 179, 8, 0.15)' : 'transparent',
+                      borderLeft: task.bookmarked ? '3px solid #EAB308' : '3px solid transparent'
+                    }}
+                  >
+                    <td className="px-2 py-4 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                      <button
+                        onClick={() => toggleComplete(task.id)}
+                        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                          task.completed 
+                            ? 'bg-green-500 border-green-500' 
+                            : 'border-gray-400 hover:border-green-500'
+                        }`}
+                        title={task.completed ? "Marquer comme non faite" : "Marquer comme faite"}
+                      >
+                        {task.completed && (
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </button>
+                    </td>
+                    <td className="px-1 py-4 whitespace-nowrap">
+                      <TaskCategoryIndicator category={task.category} />
+                    </td>
                 <td className={`font-medium px-2 py-4 text-base ${task.completed ? 'line-through' : ''}`} 
                     style={{ color: task.completed ? 'rgb(var(--color-text-muted))' : 'rgb(var(--color-text-primary))' }}>
                   <div className="truncate" title={task.name}>
