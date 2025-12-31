@@ -303,7 +303,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent
         showCloseButton={false}
-        className="p-0 border-0 bg-transparent shadow-none sm:max-w-4xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto"
+        className="p-0 border-0 bg-transparent shadow-none sm:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl 3xl:max-w-[1600px] w-full min-h-[50vh] 3xl:min-h-[85vh] max-h-[calc(100vh-2rem)] overflow-y-auto"
       >
         <div className="rounded-2xl shadow-2xl w-full transition-colors" style={{ backgroundColor: 'rgb(var(--color-surface))' }}>
           {/* Header */}
@@ -373,7 +373,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                       style={{
                         backgroundColor: okrFields.name ? undefined : 'rgb(var(--color-surface))',
                         color: 'rgb(var(--color-text-primary))',
-                        borderColor: errors.name ? 'rgb(var(--color-error))' : (okrFields.name ? undefined : undefined)
+                        borderColor: errors.name ? 'rgb(var(--error))' : (okrFields.name ? undefined : undefined)
                       }}
                       placeholder="Entrez le nom de la tâche"
                       aria-describedby={errors.name ? 'name-error' : undefined}
