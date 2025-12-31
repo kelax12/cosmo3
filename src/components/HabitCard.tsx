@@ -76,7 +76,7 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, externalIsEditing, onExter
   };
 
   const compactDays = generateDays(7, true);
-  const detailedDays = generateDays(21, true);
+  const detailedDays = generateDays(30, true);
 
   const handleDayClick = (date: string) => {
     toggleHabitCompletion(habit.id, date);
@@ -302,50 +302,50 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, externalIsEditing, onExter
             </div>
           </div>
 
-          {/* Vue détaillée */}
-          {showDetails && (
-            <div className="border-t border-slate-200 pt-4">
-              <h4 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-3">Suivi détaillé (3 semaines)</h4>
-                <div className="grid grid-cols-7 gap-2">
-                  {detailedDays.map(day => {
-                    const isCompleted = habit.completions[day.date];
-                    const createdDate = habit.createdAt ? habit.createdAt.split('T')[0] : '';
-                    const isBeforeCreation = createdDate ? day.date < createdDate : false;
-                    
-                    return (
-                      <div key={day.date} className="flex flex-col items-center">
-                        <div className="text-xs text-slate-500 mb-1">{day.dayName}</div>
-                          <button
-                            onClick={() => !isBeforeCreation && handleDayClick(day.date)}
-                            disabled={isBeforeCreation}
-                            className={`w-8 h-8 rounded-lg border-2 transition-all flex items-center justify-center ${
-                              day.isToday 
-                                ? 'border-slate-900 dark:border-slate-100 bg-slate-50 dark:bg-slate-800' 
-                                : 'border-slate-200 dark:border-slate-700'
-                            } ${
-                              isCompleted 
-                                ? 'border-blue-500 text-white' 
-                                : isBeforeCreation
-                                  ? 'opacity-30 grayscale cursor-not-allowed bg-slate-100 dark:bg-slate-900 border-transparent'
-                                  : 'hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
-                            }`}
+            {/* Vue détaillée */}
+            {showDetails && (
+              <div className="border-t border-slate-200 pt-4">
+                <h4 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-3">Suivi détaillé (30 jours)</h4>
+                  <div className="grid grid-cols-10 gap-1">
+                    {detailedDays.map(day => {
+                      const isCompleted = habit.completions[day.date];
+                      const createdDate = habit.createdAt ? habit.createdAt.split('T')[0] : '';
+                      const isBeforeCreation = createdDate ? day.date < createdDate : false;
+                      
+                      return (
+                        <div key={day.date} className="flex flex-col items-center">
+                          <div className="text-[10px] text-slate-500 mb-0.5">{day.dayName}</div>
+                            <button
+                              onClick={() => !isBeforeCreation && handleDayClick(day.date)}
+                              disabled={isBeforeCreation}
+                              className={`w-8 h-8 rounded-md border-2 transition-all flex items-center justify-center ${
+                                day.isToday 
+                                  ? 'border-slate-900 dark:border-slate-100 bg-slate-50 dark:bg-slate-800' 
+                                  : 'border-slate-200 dark:border-slate-700'
+                              } ${
+                                isCompleted 
+                                  ? 'border-blue-500 text-white' 
+                                  : isBeforeCreation
+                                    ? 'opacity-30 grayscale cursor-not-allowed bg-slate-100 dark:bg-slate-900 border-transparent'
+                                    : 'hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                              }`}
 style={{
-                                backgroundColor: isCompleted ? '#2563EB' : undefined
-                              }}
-                          >
-                            {isCompleted ? (
-                              <CheckCircle size={14} />
-                            ) : isBeforeCreation ? (
-                              <Circle size={12} className="opacity-10" />
-                            ) : (
-                              <span className="text-xs text-slate-600 dark:text-slate-400">{day.dayNumber}</span>
-                            )}
-                          </button>
+                                  backgroundColor: isCompleted ? '#2563EB' : undefined
+                                }}
+                            >
+                              {isCompleted ? (
+                                <CheckCircle size={16} />
+                              ) : isBeforeCreation ? (
+                                <Circle size={14} className="opacity-10" />
+                              ) : (
+                                <span className="text-xs text-slate-600 dark:text-slate-400">{day.dayNumber}</span>
+                              )}
+                            </button>
 
-                      </div>
-                    );
-                  })}
-                </div>
+                        </div>
+                      );
+                    })}
+                  </div>
 
             </div>
           )}
