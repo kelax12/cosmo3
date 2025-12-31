@@ -61,10 +61,8 @@ const TasksPage: React.FC = () => {
     setSelectedListId(null);
   };
 
-    // Filter tasks based on completion status and selected list
-    let filteredTasks = showCompleted 
-      ? tasks.filter(task => task.completed)
-      : tasks.filter(task => !task.completed);
+    // Base filtering (Search, Categories, Priority, List)
+    let filteredTasks = tasks;
 
     // Apply search filter
     if (searchTerm) {
@@ -88,14 +86,13 @@ const TasksPage: React.FC = () => {
 
     // If a list is selected, filter tasks by that list
     if (selectedListId) {
-
-    const selectedList = lists.find(list => list.id === selectedListId);
-    if (selectedList) {
-      filteredTasks = filteredTasks.filter(task => selectedList.taskIds.includes(task.id));
+      const selectedList = lists.find(list => list.id === selectedListId);
+      if (selectedList) {
+        filteredTasks = filteredTasks.filter(task => selectedList.taskIds.includes(task.id));
+      }
     }
-  }
 
-  const selectedList = selectedListId ? lists.find(list => list.id === selectedListId) : null;
+    const selectedList = selectedListId ? lists.find(list => list.id === selectedListId) : null;
 
   const colorOptions = [
     { value: 'blue', color: '#3B82F6', name: 'Bleu' },
