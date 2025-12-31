@@ -2,7 +2,17 @@ import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Calendar, Clock, Flame } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
-import { calculateWorkTimeForDate } from '../lib/workTimeCalculator';
+import { calculateWorkTimeForPeriod } from '../lib/workTimeCalculator';
+
+const calculateWorkTimeForDate = (
+  date: Date,
+  data: { tasks: any[]; events: any[]; habits: any[]; okrs: any[] }
+): number => {
+  const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+  const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+  const result = calculateWorkTimeForPeriod(startDate, endDate, data);
+  return result.totalTime;
+};
 
 const DashboardChart: React.FC = () => {
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
