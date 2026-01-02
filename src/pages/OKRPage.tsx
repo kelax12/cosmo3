@@ -219,9 +219,10 @@ const OKRPage: React.FC = () => {
         <div className="flex gap-2 flex-wrap">
             <button
             onClick={() => setSelectedCategory('all')}
-            className="px-3 py-1 rounded-full text-sm font-medium transition-all"
+            className="px-3 py-1 rounded-full text-sm font-medium transition-all border"
             style={{
-              backgroundColor: selectedCategory === 'all' ? 'rgb(var(--color-accent) / 0.1)' : 'rgb(var(--color-hover))',
+              backgroundColor: selectedCategory === 'all' ? 'rgb(var(--color-accent) / 0.1)' : 'rgb(var(--color-chip-bg))',
+              borderColor: selectedCategory === 'all' ? 'rgb(var(--color-accent) / 0.3)' : 'rgb(var(--color-chip-border))',
               color: selectedCategory === 'all' ? 'rgb(var(--color-accent))' : 'rgb(var(--color-text-secondary))'
             }}>
 
@@ -229,9 +230,10 @@ const OKRPage: React.FC = () => {
             </button>
             <button
             onClick={() => setSelectedCategory('finished')}
-            className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all"
+            className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all border"
             style={{
-              backgroundColor: selectedCategory === 'finished' ? 'rgb(var(--color-accent) / 0.1)' : 'rgb(var(--color-hover))',
+              backgroundColor: selectedCategory === 'finished' ? 'rgb(var(--color-accent) / 0.1)' : 'rgb(var(--color-chip-bg))',
+              borderColor: selectedCategory === 'finished' ? 'rgb(var(--color-accent) / 0.3)' : 'rgb(var(--color-chip-border))',
               color: selectedCategory === 'finished' ? 'rgb(var(--color-accent))' : 'rgb(var(--color-text-secondary))'
             }}>
 
@@ -242,9 +244,10 @@ const OKRPage: React.FC = () => {
             <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
-              className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all hover:scale-105 hover:brightness-110 active:scale-95 shadow-sm"
+              className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all hover:scale-105 hover:brightness-110 active:scale-95 border"
               style={{
-                backgroundColor: selectedCategory === category.id ? getColorHex(category.color) : 'rgb(var(--color-hover))',
+                backgroundColor: selectedCategory === category.id ? getColorHex(category.color) : 'rgb(var(--color-chip-bg))',
+                borderColor: selectedCategory === category.id ? getColorHex(category.color) : 'rgb(var(--color-chip-border))',
                 color: selectedCategory === category.id ? '#ffffff' : 'rgb(var(--color-text-secondary))',
                 boxShadow: selectedCategory === category.id ? `0 4px 12px ${getColorHex(category.color)}40` : 'none'
               }}>
