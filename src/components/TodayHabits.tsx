@@ -1,5 +1,5 @@
 import React from 'react';
-import { Repeat, Clock, CheckCircle, Circle, Check } from 'lucide-react';
+import { Repeat, Clock, Check } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,61 +21,59 @@ const TodayHabits: React.FC = () => {
 
   return (
     <div className="card p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800/30">
-          <Repeat size={24} className="text-purple-700 dark:text-purple-400" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-[rgb(var(--color-text-primary))]">Habitudes du jour</h2>
-          <p className="text-[rgb(var(--color-text-secondary))] text-sm">
-            {completedCount}/{todayHabits.length} complétées • {Math.floor(totalTime / 60)}h{totalTime % 60}min
-          </p>
-        </div>
+    <div className="flex items-center gap-3 mb-6">
+      <div className="p-2 bg-indigo-50 dark:bg-purple-900/20 rounded-xl border border-indigo-100 dark:border-purple-800/30">
+        <Repeat size={24} className="text-indigo-600 dark:text-purple-400" />
       </div>
+      <div>
+        <h2 className="text-xl font-bold text-[rgb(var(--color-text-primary))]">Habitudes du jour</h2>
+        <p className="text-[rgb(var(--color-text-secondary))] text-sm">
+          {completedCount}/{todayHabits.length} complétées • {Math.floor(totalTime / 60)}h{totalTime % 60}min
+        </p>
+      </div>
+    </div>
 
-      <div className="space-y-4">
-        {todayHabits.map((habit) =>
-        <div
-          key={habit.id}
+    <div className="space-y-4">
+      {todayHabits.map((habit) =>
+      <div
+        key={habit.id}
           className={`p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:scale-105 hover:shadow-lg ${
             habit.completedToday ?
-            'bg-blue-100 dark:bg-blue-900/20 border-blue-300 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/40 hover:border-blue-400 dark:hover:border-blue-700' :
-            'bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:border-yellow-400 dark:hover:border-yellow-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`
+            'bg-blue-700 dark:bg-blue-900/20 border-blue-300 dark:border-blue-800' :
+            'bg-[rgb(var(--color-hover))] dark:bg-gray-800/50 border-[rgb(var(--color-border))] dark:border-gray-700 hover:border-blue-400 dark:hover:border-yellow-500 hover:bg-slate-100 dark:hover:bg-gray-800'}`
             }
             onClick={(e) => {
-              // Only toggle completion if clicking the circle icon area
               if ((e.target as HTMLElement).closest('.completion-toggle')) {
                 toggleHabitCompletion(habit.id, today);
               } else {
-                // Otherwise navigate to habits page with this habit
                 navigate('/habits', { state: { selectedHabitId: habit.id } });
               }
             }}>
 
               <div className="flex items-center gap-4">
                   <div className="flex-shrink-0 completion-toggle" onClick={(e) => e.stopPropagation()}>
-                    <div
-                      onClick={() => toggleHabitCompletion(habit.id, today)}
-                      className={`h-7 w-7 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
-                        habit.completedToday 
-                          ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md' 
-                          : 'bg-white border-slate-300 dark:bg-slate-800 dark:border-slate-600 text-transparent hover:border-blue-400'
-                      }`}
-                    >
+                      <div
+                        onClick={() => toggleHabitCompletion(habit.id, today)}
+                        className={`h-7 w-7 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                          habit.completedToday 
+                            ? 'bg-white text-blue-600 border-white dark:bg-blue-500 dark:text-white dark:border-blue-600 shadow-md' 
+                            : 'bg-slate-200 border-slate-300 dark:bg-slate-800 dark:border-slate-600 text-transparent hover:border-blue-500 hover:bg-blue-100'
+                        }`}
+                      >
                       <Check className="h-4 w-4" strokeWidth={4} />
                     </div>
                   </div>
                 
-                <div className="flex-1">
-                  <h3 className={`font-bold ${habit.completedToday ? 'text-blue-800 dark:text-blue-300 line-through' : 'text-[rgb(var(--color-text-primary))]'}`}>
-                    {habit.name}
-                  </h3>
+                  <div className="flex-1">
+                    <h3 className={`font-bold ${habit.completedToday ? 'text-white dark:text-blue-300 line-through' : 'text-[rgb(var(--color-text-primary))]'}`}>
+                      {habit.name}
+                    </h3>
                 <div className="flex items-center gap-4 mt-1">
-                  <div className="flex items-center gap-1 text-sm text-[rgb(var(--color-text-secondary))]">
+                  <div className={`flex items-center gap-1 text-sm ${habit.completedToday ? 'text-blue-100 dark:text-blue-400/80' : 'text-[rgb(var(--color-text-secondary))]'}`}>
                     <Clock size={14} />
                     <span>{habit.estimatedTime} min</span>
                   </div>
-                  <div className="flex items-center gap-1 text-sm text-orange-800 dark:text-orange-400 font-medium">
+                  <div className={`flex items-center gap-1 text-sm font-medium ${habit.completedToday ? 'text-white/90 dark:text-orange-400' : 'text-orange-600 dark:text-orange-400'}`}>
                     <span>🔥</span>
                     <span>{habit.streak} jours</span>
                   </div>
