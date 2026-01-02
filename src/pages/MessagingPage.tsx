@@ -502,8 +502,8 @@ const MessagingPage: React.FC = () => {
             onClick={switchToMessagesTab}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'messages'
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             Messages
@@ -512,8 +512,8 @@ const MessagingPage: React.FC = () => {
             onClick={switchToFriendsTab}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'friends'
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             Amis
@@ -549,13 +549,13 @@ const MessagingPage: React.FC = () => {
             <div
               key={conv.id}
               onClick={() => setSelectedConversation(conv.id)}
-              className={`p-4 cursor-pointer transition-colors hover:bg-gray-50 border-l-4 ${
-                selectedConversation === conv.id 
-                  ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-400' 
-                  : isPinned 
-                    ? 'border-yellow-400 dark:border-yellow-500 conversation-pinned'
-                    : 'border-transparent hover:bg-gray-50 dark:hover:bg-slate-700'
-              }`}
+                className={`p-4 cursor-pointer transition-colors border-l-4 ${
+                  selectedConversation === conv.id 
+                    ? 'border-blue-500 dark:border-blue-400' 
+                    : isPinned 
+                      ? 'border-yellow-400 dark:border-yellow-500 conversation-pinned'
+                      : 'border-transparent'
+                }`}
             >
               <div className="flex items-center gap-3">
                 {/* Avatar ou groupe d'avatars */}
@@ -642,7 +642,7 @@ const MessagingPage: React.FC = () => {
                     setSelectedConversation(friend.id);
                     setActiveTab('messages');
                   }}
-                  className="p-3 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg border border-gray-100 dark:border-slate-600"
+                    className="p-3 cursor-pointer transition-colors rounded-lg border border-gray-100 dark:border-slate-600"
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative">
