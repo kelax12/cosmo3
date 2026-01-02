@@ -12,10 +12,7 @@ import MessagingPage from './pages/MessagingPage';
 import PremiumPage from './pages/PremiumPage';
 import SettingsPage from './pages/SettingsPage';
 import { TaskProvider, useTasks } from './context/TaskContext';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
-import { ThemeProvider } from 'next-themes';
 import HoverReceiver from "@/visual-edits/VisualEditsMessenger";
 
 function AppContent() {
@@ -26,7 +23,7 @@ function AppContent() {
     return <LandingPage />;
   }
 
-  // Si l'utilisateur est connecté, afficher l'application avec redirection automatique vers le dashboard
+  // Si l'utilisateur est connecté, afficher l'application
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
@@ -45,22 +42,14 @@ function AppContent() {
   );
 }
 
-const queryClient = new QueryClient();
-
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <TaskProvider>
-        <TooltipProvider>
-          <Toaster />
-          <HoverReceiver />
-          <BrowserRouter>
-            <AppContent />
-          </BrowserRouter>
-        </TooltipProvider>
-      </TaskProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <TaskProvider>
+    <Toaster />
+    <HoverReceiver />
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  </TaskProvider>
 );
 
 export default App;
