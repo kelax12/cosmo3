@@ -118,58 +118,58 @@ const TasksPage: React.FC = () => {
           transition={{ delay: 0.1 }}
           className="flex justify-between items-center"
         >
-          <div>
-            <motion.h1 
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2"
-            >
-              To do list
-            </motion.h1>
-            <motion.p 
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-slate-600 dark:text-slate-400"
-            >
-              Gérez vos tâches efficacement
-            </motion.p>
-          </div>
-          
-            <motion.div 
-              initial={{ x: 20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="flex items-center gap-4"
-            >
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowListManager(!showListManager)}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-all shadow-sm border ${
-                  showListManager
-                    ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
-                    : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700'
-                }`}
+            <div>
+              <motion.h1 
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-2"
               >
-                <List size={20} />
-                <span>Gérer les listes</span>
-              </motion.button>
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowDeadlineCalendar(!showDeadlineCalendar)}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-all shadow-sm border ${
-                  showDeadlineCalendar
-                    ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
-                    : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700'
-                }`}
+                To do list
+              </motion.h1>
+              <motion.p 
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-slate-500 dark:text-slate-400 font-medium"
               >
-                <CalendarDays size={20} />
-                <span>Calendrier des deadlines</span>
-              </motion.button>
-            </motion.div>
+                Gérez vos tâches efficacement
+              </motion.p>
+            </div>
+            
+              <motion.div 
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-center gap-4"
+              >
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowListManager(!showListManager)}
+                  className={`flex items-center gap-2 rounded-lg px-4 py-2.5 transition-all shadow-sm border font-medium ${
+                    showListManager
+                      ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <List size={20} className={showListManager ? 'text-white' : 'text-blue-600'} />
+                  <span>Gérer les listes</span>
+                </motion.button>
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowDeadlineCalendar(!showDeadlineCalendar)}
+                  className={`flex items-center gap-2 rounded-lg px-4 py-2.5 transition-all shadow-sm border font-medium ${
+                    showDeadlineCalendar
+                      ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <CalendarDays size={20} className={showDeadlineCalendar ? 'text-white' : 'text-blue-600'} />
+                  <span>Calendrier des deadlines</span>
+                </motion.button>
+              </motion.div>
         </motion.header>
 
         <AnimatePresence>
@@ -218,53 +218,53 @@ const TasksPage: React.FC = () => {
                       <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Accès rapide aux listes</h3>
 
                       <div className="flex flex-wrap gap-3">
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => {
-                            clearListFilter();
-                          }}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm border ${
-                            !selectedListId
-                              ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:border-slate-600'
-                          }`}
-                        >
-                          Toutes les tâches
-                        </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => {
+                              clearListFilter();
+                            }}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm border ${
+                              !selectedListId
+                                ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
+                                : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:border-slate-700'
+                            }`}
+                          >
+                            Toutes les tâches
+                          </motion.button>
 
-                        {lists.map((list) => {
-                          const colorOption = colorOptions.find(c => c.value === list.color);
-                          const isSelected = selectedListId === list.id;
+                          {lists.map((list) => {
+                            const colorOption = colorOptions.find(c => c.value === list.color);
+                            const isSelected = selectedListId === list.id;
 
-                          return (
-                            <button
-                              key={list.id}
-                              onClick={() => {
-                                handleListSelect(list.id);
-                              }}
-                              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border shadow-sm ${
-                                isSelected
-                                  ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
-                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:border-slate-600'
-                              }`}
-                            >
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colorOption?.color || '#3B82F6' }} />
-                              <span>{list.name}</span>
-                              <span className="text-xs opacity-60 ml-1">
-                                {list.taskIds.filter(taskId => {
-                                  const task = tasks.find(t => t.id === taskId);
-                                  return task && !task.completed;
-                                }).length}
-                              </span>
-                              {isSelected && (
-                                <div className="text-white">
-                                  <X size={14} className="ml-1 hover:text-red-200" />
-                                </div>
-                              )}
-                            </button>
-                          );
-                        })}
+                            return (
+                              <button
+                                key={list.id}
+                                onClick={() => {
+                                  handleListSelect(list.id);
+                                }}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border shadow-sm ${
+                                  isSelected
+                                    ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
+                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:border-slate-700'
+                                }`}
+                              >
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colorOption?.color || '#3B82F6' }} />
+                                <span>{list.name}</span>
+                                <span className="text-xs opacity-60 ml-1">
+                                  {list.taskIds.filter(taskId => {
+                                    const task = tasks.find(t => t.id === taskId);
+                                    return task && !task.completed;
+                                  }).length}
+                                </span>
+                                {isSelected && (
+                                  <div className="text-white">
+                                    <X size={14} className="ml-1 hover:text-red-200" />
+                                  </div>
+                                )}
+                              </button>
+                            );
+                          })}
                       </div>
 
                       <AnimatePresence>
