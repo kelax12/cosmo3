@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Target, CheckSquare, TrendingUp, Zap, Award, Leaf } from 'lucide-react';
+import { Repeat, Target, CheckSquare, Calendar, Zap, Award, Leaf } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
 import DashboardChart from '../components/DashboardChart';
 import TodayHabits from '../components/TodayHabits';
@@ -9,7 +9,7 @@ import CollaborativeTasks from '../components/CollaborativeTasks';
 import ActiveOKRs from '../components/ActiveOKRs';
 
 const DashboardPage: React.FC = () => {
-  const { user, tasks, habits, okrs, isPremium } = useTasks();
+  const { user, tasks, habits, okrs, events, isPremium } = useTasks();
 
   if (!user) return null;
 
@@ -31,7 +31,13 @@ const DashboardPage: React.FC = () => {
     new Date(task.completedAt).toDateString() === new Date().toDateString()
   ).length;
 
-  const activeOKRs = okrs.filter(okr => !okr.completed);
+    const activeOKRs = okrs.filter(okr => !okr.completed);
+
+    // Calculer les événements d'aujourd'hui
+    const todayEvents = events.filter(event => {
+      const eventDate = new Date(event.start).toDateString();
+      return eventDate === new Date().toDateString();
+    });
 
   // Animation variants
   const containerVariants = {
@@ -56,36 +62,36 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const statCards = [
-    {
-      icon: CheckSquare,
-      label: 'Tâches complétées',
-      value: completedTasksToday,
-      subtitle: "Aujourd'hui",
-      color: 'blue'
-    },
-    {
-      icon: Target,
-      label: 'OKR actifs',
-      value: activeOKRs.length,
-      subtitle: 'En cours',
-      color: 'blue'
-    },
-    {
-      icon: Clock,
-      label: 'Habitudes',
-      value: todayHabits.length,
-      subtitle: 'Réalisées',
-      color: 'blue'
-    },
-    {
-      icon: TrendingUp,
-      label: 'Productivité',
-      value: '+12%',
-      subtitle: 'Cette semaine',
-      color: 'blue'
-    }
-  ];
+    const statCards = [
+      {
+        icon: CheckSquare,
+        label: 'Tâches complétées',
+        value: completedTasksToday,
+        subtitle: "Aujourd'hui",
+        color: 'blue'
+      },
+      {
+        icon: Calendar,
+        label: 'Agenda',
+        value: todayEvents.length,
+        subtitle: "Événements aujourd'hui",
+        color: 'blue'
+      },
+      {
+        icon: Target,
+        label: 'OKR actifs',
+        value: activeOKRs.length,
+        subtitle: 'En cours',
+        color: 'blue'
+      },
+      {
+        icon: Repeat,
+        label: 'Habitudes',
+        value: todayHabits.length,
+        subtitle: 'Réalisées',
+        color: 'blue'
+      }
+    ];
 
   return (
     <div className="min-h-screen bg-[rgb(var(--color-background))] p-4 sm:p-6 lg:p-8 transition-colors duration-300">
@@ -132,35 +138,35 @@ const DashboardPage: React.FC = () => {
             className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6"
             variants={containerVariants}
           >
-            {statCards.map((stat, index) => (
-              <motion.div
-                key={index}
-                className="relative overflow-hidden group cursor-pointer"
-                variants={itemVariants}
-                whileHover={{ y: -4, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              >
-                <div className="card p-5 lg:p-6 h-full bg-white dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/50 rounded-2xl shadow-sm hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-3">
-                      <p className="text-sm text-[rgb(var(--color-text-secondary))] font-medium">
-                        {stat.label}
-                      </p>
-                      <motion.p 
-                        className="text-3xl lg:text-4xl font-bold text-blue-600 dark:text-blue-400"
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
-                      >
-                        {stat.value}
-                      </motion.p>
-                      <p className="text-xs text-[rgb(var(--color-text-secondary))] flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                        {stat.subtitle}
+              {statCards.map((stat, index) => (
+                <motion.div
+                  key={index}
+                  className="relative overflow-hidden group cursor-pointer"
+                  variants={itemVariants}
+                  whileHover={{ y: -2 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                >
+                  <div className="p-5 lg:p-6 h-full bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl transition-all duration-200 hover:shadow-md">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2">
+                        <p className="text-sm text-[rgb(var(--color-text-secondary))] font-medium">
+                          {stat.label}
+                        </p>
+                        <motion.p 
+                          className="text-3xl lg:text-4xl font-bold text-[rgb(var(--color-text-primary))]"
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
+                        >
+                          {stat.value}
+                        </motion.p>
+                        <p className="text-xs text-[rgb(var(--color-text-muted))] flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--color-accent))]" />
+                          {stat.subtitle}
                       </p>
                     </div>
-                    <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50">
-                      <stat.icon size={22} className="text-blue-600 dark:text-blue-400" strokeWidth={2} />
+                    <div className="p-3 rounded-xl bg-[rgb(var(--color-accent)/0.1)] border border-[rgb(var(--color-accent)/0.2)]">
+                      <stat.icon size={22} className="text-[rgb(var(--color-accent))]" strokeWidth={2} />
                     </div>
                   </div>
                 </div>
