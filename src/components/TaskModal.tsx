@@ -301,11 +301,11 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent
-        showCloseButton={false}
-        className="p-0 border-0 bg-transparent shadow-none sm:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl 3xl:max-w-[1600px] w-full min-h-[50vh] 3xl:min-h-[85vh] max-h-[calc(100vh-2rem)] overflow-y-auto"
-      >
-        <div className="rounded-2xl shadow-2xl w-full transition-colors" style={{ backgroundColor: 'rgb(var(--color-surface))' }}>
+        <DialogContent
+          showCloseButton={false}
+          className="p-0 border-0 sm:bg-transparent sm:shadow-none sm:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl 3xl:max-w-[1600px] w-full min-h-[50vh] 3xl:min-h-[85vh] max-h-[90vh] sm:max-h-[calc(100vh-2rem)] overflow-y-auto"
+        >
+          <div className="sm:rounded-2xl sm:shadow-2xl w-full transition-colors h-full min-h-inherit" style={{ backgroundColor: 'rgb(var(--color-surface))' }}>
           {/* Header */}
           <div className="flex justify-between items-center px-6 py-4 border-b bg-gradient-to-r from-blue-50 dark:from-blue-900/20 to-purple-50 dark:to-purple-900/20 transition-colors" style={{ borderColor: 'rgb(var(--color-border))' }}>
             <div className="flex items-center gap-3">
