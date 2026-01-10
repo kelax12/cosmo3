@@ -205,8 +205,8 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onFormToggle, expanded = fals
 
   return (
     <Dialog open={isFormOpen} onOpenChange={handleFormToggle}>
-      <DialogContent showCloseButton={false} className="p-0 border-0 bg-transparent shadow-none sm:max-w-4xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto">
-        <div className="rounded-2xl shadow-2xl w-full transition-colors overflow-hidden" style={{ backgroundColor: 'rgb(var(--color-surface))' }}>
+      <DialogContent showCloseButton={false} className="p-0 border-0 sm:bg-transparent sm:shadow-none sm:max-w-4xl w-full max-h-[90vh] sm:max-h-[calc(100vh-2rem)] overflow-y-auto">
+        <div className="sm:rounded-2xl sm:shadow-2xl w-full transition-colors overflow-hidden h-full min-h-inherit" style={{ backgroundColor: 'rgb(var(--color-surface))' }}>
           {/* Header */}
             <div className="flex justify-between items-center px-6 py-4 border-b bg-gradient-to-r from-blue-50 dark:from-blue-900/20 to-purple-50 dark:to-purple-900/20 transition-colors" style={{ borderColor: 'rgb(var(--color-border))' }}>
               <div className="flex items-center gap-3">
@@ -613,3 +613,4 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onFormToggle, expanded = fals
 };
 
 export default AddTaskForm;
+
