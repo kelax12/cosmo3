@@ -170,70 +170,73 @@ const TaskToEventModal: React.FC<TaskToEventModalProps> = ({
 
               </div>
 
-                {/* Planification */}
-                <div
-                  className="p-2 rounded-xl border transition-colors"
-                  style={{
-                    borderColor: 'rgb(var(--color-border))'
-                  }}>
+                  {/* Planification */}
+                  <div
+                    className="p-4 rounded-2xl border transition-colors shadow-inner"
+                    style={{ 
+                      backgroundColor: 'rgb(var(--color-surface))',
+                      borderColor: 'rgb(var(--color-border))'
+                    }}>
 
-                  <div className="grid grid-cols-1 gap-1">
-                    {/* Début */}
-                    <div 
-                      className="group p-2 rounded-lg"
-                      style={{ backgroundColor: 'rgb(var(--color-surface))' }}>
-                      <div className="flex items-center justify-between mb-0.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                          <span
-                            className="text-sm font-semibold"
-                            style={{ color: 'rgb(var(--color-text-primary))' }}>
-
-                            Date & Heure de début
-                          </span>
-                        </div>
-                          {startTime &&
+                      <div className="grid grid-cols-1 gap-1">
+                        {/* Début */}
+                        <div 
+                          className="group p-2 rounded-xl transition-colors hover:bg-slate-500/5 dark:hover:bg-white/5"
+                          style={{ backgroundColor: 'rgb(var(--color-surface))' }}
+                        >
+                        <div className="flex items-center justify-between mb-0.5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                             <span
-                              className="text-xs font-mono font-bold px-2 py-0.5 rounded-md border transition-colors"
-                              style={{
-                                color: 'rgb(var(--color-success))',
-                                borderColor: 'rgba(var(--color-success), 0.2)'
-                              }}>
-                              {formatTimeDisplay(startTime)}
+                              className="text-sm font-semibold"
+                              style={{ color: 'rgb(var(--color-text-primary))' }}>
+  
+                              Date & Heure de début
                             </span>
-                          }
-                      </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <div className="relative flex-1">
-                              <DatePicker
-                                value={startDate}
-                                onChange={(date) => setStartDate(date)}
-                                placeholder="Sélectionner une date"
-                                className="h-[42px]"
-                              />
                           </div>
-
-                          <div className="relative w-full sm:w-36">
-                            <input
-                              type="time"
-                              value={startTime}
-                              onChange={(e) => setStartTime(e.target.value)}
-                              placeholder="hh:mm"
-                              className="w-full px-3 py-2.5 border rounded-lg text-sm font-mono font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:border-blue-300"
-                              style={{
-                                backgroundColor: 'rgb(var(--color-surface))',
-                                color: 'rgb(var(--color-text-primary))',
-                                borderColor: 'rgb(var(--color-border))'
-                              }}
-                              required />
-                          </div>
+                            {startTime &&
+                              <span
+                                className="text-xs font-mono font-bold px-2 py-0.5 rounded-md border transition-colors"
+                                style={{
+                                  color: 'rgb(var(--color-success))',
+                                  borderColor: 'rgba(var(--color-success), 0.2)'
+                                }}>
+                                {formatTimeDisplay(startTime)}
+                              </span>
+                            }
                         </div>
-                    </div>
-
-                    {/* Fin */}
-                    <div 
-                      className="group p-2 rounded-lg"
-                      style={{ backgroundColor: 'rgb(var(--color-surface))' }}>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <div className="relative flex-1">
+                                <DatePicker
+                                  value={startDate}
+                                  onChange={(date) => setStartDate(date)}
+                                  placeholder="Sélectionner une date"
+                                  className="h-[42px]"
+                                />
+                            </div>
+  
+                            <div className="relative w-full sm:w-36">
+                              <input
+                                type="time"
+                                value={startTime}
+                                onChange={(e) => setStartTime(e.target.value)}
+                                placeholder="hh:mm"
+                                className="w-full px-3 py-2.5 border rounded-lg text-sm font-mono font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:border-blue-300"
+                                style={{
+                                  backgroundColor: 'rgb(var(--color-surface))',
+                                  color: 'rgb(var(--color-text-primary))',
+                                  borderColor: 'rgb(var(--color-border))'
+                                }}
+                                required />
+                            </div>
+                          </div>
+                      </div>
+  
+                      {/* Fin */}
+                      <div 
+                        className="group p-2 rounded-xl transition-colors hover:bg-slate-500/5 dark:hover:bg-white/5"
+                        style={{ backgroundColor: 'rgb(var(--color-surface))' }}
+                      >
                       <div className="flex items-center justify-between mb-0.5">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 bg-red-500 rounded-full"></div>
@@ -456,3 +459,4 @@ const TaskToEventModal: React.FC<TaskToEventModalProps> = ({
 };
 
 export default TaskToEventModal;
+
