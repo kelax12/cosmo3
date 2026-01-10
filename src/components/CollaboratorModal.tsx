@@ -19,7 +19,7 @@ const getInitials = (value: string) => {
 };
 
 const CollaboratorModal: React.FC<CollaboratorModalProps> = ({ isOpen, onClose, taskId }) => {
-  const { tasks, updateTask, friends } = useTasks();
+  const { tasks, updateTask, friends, shareTask } = useTasks();
   const task = tasks.find((t) => t.id === taskId);
 
   const [input, setInput] = useState('');
@@ -52,7 +52,13 @@ const CollaboratorModal: React.FC<CollaboratorModalProps> = ({ isOpen, onClose, 
       setInput('');
       return;
     }
-    setCollaborators([...assignedCollaborators, value]);
+    // Check if it's a known friend
+    const friend = friends.find(f => f.email === value || f.id === value);
+    if (friend) {
+      shareTask(task.id, friend.id, 'editor');
+    } else {
+      setCollaborators([...assignedCollaborators, value]);
+    }
     setInput('');
   };
 
@@ -60,7 +66,7 @@ const CollaboratorModal: React.FC<CollaboratorModalProps> = ({ isOpen, onClose, 
     if (assignedCollaborators.includes(friendId)) {
       setCollaborators(assignedCollaborators.filter((c) => c !== friendId));
     } else {
-      setCollaborators([...assignedCollaborators, friendId]);
+      shareTask(task.id, friendId, 'editor');
     }
   };
 
