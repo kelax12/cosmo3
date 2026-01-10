@@ -106,221 +106,181 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, externalIsEditing, onExter
     }
   };
 
+  const [isHovered, setIsHovered] = useState(false);
+
   const habitColor = habit.color.startsWith('#') 
     ? habit.color 
     : (colorOptions.find(c => c.value === habit.color)?.color || '#3B82F6');
 
-  return (
-    <div className="card p-6 hover:shadow-md transition-all">
-      {isEditing ? (
-        /* Mode édition */
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Modifier l'habitude</h3>
-            <button
-              onClick={handleCancelEdit}
-              className="flex items-center gap-1 px-3 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-sm"
-            >
-              <X size={14} />
-              Annuler
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Nom de l'habitude
-              </label>
-              <input
-                type="text"
-                value={editData.name}
-                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                onKeyDown={handleKeyDown}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              />
+    return (
+      <div 
+        className="card p-4 md:p-6 hover:shadow-md transition-all cursor-pointer"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {isEditing ? (
+          /* Mode édition */
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Modifier l'habitude</h3>
+              <button
+                onClick={handleCancelEdit}
+                className="flex items-center gap-1 px-3 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-sm"
+              >
+                <X size={14} />
+                Annuler
+              </button>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Temps estimé (min)
-              </label>
-              <input
-                type="number"
-                value={editData.estimatedTime}
-                onChange={(e) => setEditData({ ...editData, estimatedTime: Number(e.target.value) })}
-                onKeyDown={handleKeyDown}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                min="1"
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Couleur
-            </label>
-            <div className="flex gap-2">
-              {colorOptions.map(option => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setEditData({ ...editData, color: option.value })}
-                  className={`w-8 h-8 rounded-lg border-2 transition-all hover:scale-105 ${
-                    editData.color === option.value ? 'border-slate-900 scale-110' : 'border-slate-300'
-                  }`}
-                  style={{ backgroundColor: option.color }}
-                />
-              ))}
-            </div>
-          </div>
-          
-          <div className="flex justify-end pt-4">
-            <button
-              onClick={handleSaveEdit}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-colors font-medium"
-            >
-              <Save size={16} />
-              Sauvegarder
-            </button>
-          </div>
-        </div>
-      ) : (
-        /* Mode affichage normal */
-        <>
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: habitColor }}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{habit.name}</h3>
-                <div className="flex items-center gap-4 mt-1 text-sm text-slate-600">
-                  <div className="flex items-center gap-1">
-                    <Clock size={14} />
-                    <span>{habit.estimatedTime} min</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Flame size={14} className="text-orange-500" />
-                    <span>{habit.streak} jours</span>
-                  </div>
-                </div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Nom de l'habitude
+                </label>
+                <input
+                  type="text"
+                  value={editData.name}
+                  onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                  onKeyDown={handleKeyDown}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Temps estimé (min)
+                </label>
+                <input
+                  type="number"
+                  value={editData.estimatedTime}
+                  onChange={(e) => setEditData({ ...editData, estimatedTime: Number(e.target.value) })}
+                  onKeyDown={handleKeyDown}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  min="1"
+                />
               </div>
             </div>
             
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setShowDetails(!showDetails)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                    showDetails 
-                      ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' 
-                      : 'text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <Calendar size={16} />
-                </button>
-                <button 
-                  onClick={() => setIsEditing(true)}
-                  className="p-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                >
-                  <Edit2 size={16} />
-                </button>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button 
-                        className="p-2 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Êtes-vous sûr de vouloir supprimer l'habitude "{habit.name}" ? Cette action est irréversible.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Annuler</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deleteHabit(habit.id)}
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                      Supprimer
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Couleur
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {colorOptions.map(option => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setEditData({ ...editData, color: option.value })}
+                    className={`w-8 h-8 rounded-lg border-2 transition-all hover:scale-105 ${
+                      editData.color === option.value ? 'border-slate-900 scale-110' : 'border-slate-300'
+                    }`}
+                    style={{ backgroundColor: option.color }}
+                  />
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex justify-end pt-4">
+              <button
+                onClick={handleSaveEdit}
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-colors font-medium"
+              >
+                <Save size={16} />
+                Sauvegarder
+              </button>
             </div>
           </div>
-
-          {/* Calendrier compact - toujours visible */}
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">7 derniers jours</span>
-            </div>
-            <div className="flex gap-2">
-                {compactDays.map(day => {
-                  const isCompleted = habit.completions[day.date];
-                  const createdDate = habit.createdAt ? habit.createdAt.split('T')[0] : '';
-                  const isBeforeCreation = createdDate ? day.date < createdDate : false;
-                  
-                  return (
-                    <div key={day.date} className="flex flex-col items-center">
-                      <div className="text-xs text-slate-500 mb-1 font-medium">{day.dayName}</div>
-                          <button
-                            onClick={() => !isBeforeCreation && handleDayClick(day.date)}
-                            disabled={isBeforeCreation}
-                            className={`w-8 h-8 rounded-lg border-2 transition-all flex items-center justify-center ${
-                              day.isToday 
-                                ? 'border-slate-900 dark:border-slate-100 bg-slate-50 dark:bg-slate-800' 
-                                : 'border-slate-200 dark:border-slate-700'
-                            } ${
-                              isCompleted 
-                                ? 'border-blue-500 text-white' 
-                                : isBeforeCreation
-                                  ? 'opacity-30 grayscale cursor-not-allowed bg-slate-100 dark:bg-slate-900 border-transparent'
-                                  : 'hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
-                            }`}
-                            style={{
-                              backgroundColor: isCompleted ? '#2563EB' : undefined
-                            }}
-                          >
-                            {isCompleted ? (
-                              <CheckCircle size={16} />
-                            ) : isBeforeCreation ? (
-                              <Circle size={14} className="opacity-10" />
-                            ) : (
-                              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{day.dayNumber}</span>
-                            )}
-                          </button>
-
+        ) : (
+          /* Mode affichage normal */
+          <>
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-4 h-4 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: habitColor }}
+                />
+                <div>
+                  <h3 className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-100 leading-tight">{habit.name}</h3>
+                  <div className="flex items-center gap-4 mt-1 text-xs md:text-sm text-slate-600">
+                    <div className="flex items-center gap-1">
+                      <Clock size={12} className="md:w-3.5 md:h-3.5" />
+                      <span>{habit.estimatedTime} min</span>
                     </div>
-                  );
-                })}
-
+                    <div className="flex items-center gap-1">
+                      <Flame size={12} className="md:w-3.5 md:h-3.5 text-orange-500" />
+                      <span>{habit.streak} jours</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+                <div className="flex items-center gap-1 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-2 sm:pt-0">
+                  <button
+                    onClick={() => setShowDetails(!showDetails)}
+                    className={`flex items-center gap-2 p-2 md:px-3 md:py-2 rounded-lg transition-colors ${
+                      showDetails 
+                        ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' 
+                        : 'text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <Calendar size={18} className="md:w-4 md:h-4" />
+                    <span className="text-xs font-medium md:hidden">Historique</span>
+                  </button>
+                  <button 
+                    onClick={() => setIsEditing(true)}
+                    className="p-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                  >
+                    <Edit2 size={18} className="md:w-4 md:h-4" />
+                  </button>
+                  <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button 
+                          className="p-2 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={18} className="md:w-4 md:h-4" />
+                        </button>
+                      </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Êtes-vous sûr de vouloir supprimer l'habitude "{habit.name}" ? Cette action est irréversible.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteHabit(habit.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                      >
+                        Supprimer
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
-          </div>
-
-            {/* Vue détaillée */}
-            {showDetails && (
-              <div className="border-t border-slate-200 pt-4">
-                <h4 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-3">Suivi détaillé (30 jours)</h4>
-                  <div className="grid grid-cols-10 gap-1">
-                    {detailedDays.map(day => {
-                      const isCompleted = habit.completions[day.date];
-                      const createdDate = habit.createdAt ? habit.createdAt.split('T')[0] : '';
-                      const isBeforeCreation = createdDate ? day.date < createdDate : false;
-                      
-                      return (
-                        <div key={day.date} className="flex flex-col items-center">
-                          <div className="text-[10px] text-slate-500 mb-0.5">{day.dayName}</div>
+  
+            {/* Calendrier compact - toujours visible */}
+            <div className="mb-4 overflow-x-auto pb-2 -mx-1 px-1 hide-scrollbar">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs md:text-sm font-medium text-slate-700 dark:text-slate-300">7 derniers jours</span>
+              </div>
+              <div className="flex gap-2 min-w-max">
+                  {compactDays.map(day => {
+                    const isCompleted = habit.completions[day.date];
+                    const createdDate = habit.createdAt ? habit.createdAt.split('T')[0] : '';
+                    const isBeforeCreation = createdDate ? day.date < createdDate : false;
+                    
+                    return (
+                      <div key={day.date} className="flex flex-col items-center">
+                        <div className="text-[10px] md:text-xs text-slate-500 mb-1 font-medium">{day.dayName}</div>
                             <button
                               onClick={() => !isBeforeCreation && handleDayClick(day.date)}
                               disabled={isBeforeCreation}
-                              className={`w-8 h-8 rounded-md border-2 transition-all flex items-center justify-center ${
+                              className={`w-9 h-9 md:w-10 md:h-10 rounded-lg border-2 transition-all flex items-center justify-center ${
                                 day.isToday 
-                                  ? 'border-slate-900 dark:border-slate-100 bg-slate-50 dark:bg-slate-800' 
+                                  ? 'border-slate-900 dark:border-slate-100 bg-slate-50 dark:bg-slate-800 shadow-sm' 
                                   : 'border-slate-200 dark:border-slate-700'
                               } ${
                                 isCompleted 
@@ -329,30 +289,78 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, externalIsEditing, onExter
                                     ? 'opacity-30 grayscale cursor-not-allowed bg-slate-100 dark:bg-slate-900 border-transparent'
                                     : 'hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
                               }`}
-style={{
-                                  backgroundColor: isCompleted ? '#2563EB' : undefined
-                                }}
+                              style={{
+                                backgroundColor: isCompleted ? '#2563EB' : undefined
+                              }}
                             >
                               {isCompleted ? (
-                                <CheckCircle size={16} />
+                                <CheckCircle size={18} className="md:w-5 md:h-5" />
                               ) : isBeforeCreation ? (
                                 <Circle size={14} className="opacity-10" />
                               ) : (
-                                <span className="text-xs text-slate-600 dark:text-slate-400">{day.dayNumber}</span>
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{day.dayNumber}</span>
                               )}
                             </button>
-
-                        </div>
-                      );
-                    })}
-                  </div>
-
+  
+                      </div>
+                    );
+                  })}
+  
+              </div>
             </div>
-          )}
-        </>
-      )}
-    </div>
-  );
+  
+              {/* Vue détaillée */}
+              {showDetails && (
+                <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-2">
+                  <h4 className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-100 mb-3">Suivi détaillé (30 jours)</h4>
+                    <div className="grid grid-cols-6 sm:grid-cols-10 gap-2">
+                      {detailedDays.map(day => {
+                        const isCompleted = habit.completions[day.date];
+                        const createdDate = habit.createdAt ? habit.createdAt.split('T')[0] : '';
+                        const isBeforeCreation = createdDate ? day.date < createdDate : false;
+                        
+                        return (
+                          <div key={day.date} className="flex flex-col items-center">
+                            <div className="text-[9px] md:text-[10px] text-slate-500 mb-0.5">{day.dayName}</div>
+                              <button
+                                onClick={() => !isBeforeCreation && handleDayClick(day.date)}
+                                disabled={isBeforeCreation}
+                                className={`w-8 h-8 md:w-9 md:h-9 rounded-md border-2 transition-all flex items-center justify-center ${
+                                  day.isToday 
+                                    ? 'border-slate-900 dark:border-slate-100 bg-slate-50 dark:bg-slate-800' 
+                                    : 'border-slate-200 dark:border-slate-700'
+                                } ${
+                                  isCompleted 
+                                    ? 'border-blue-500 text-white' 
+                                    : isBeforeCreation
+                                      ? 'opacity-30 grayscale cursor-not-allowed bg-slate-100 dark:bg-slate-900 border-transparent'
+                                      : 'hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                                }`}
+                                style={{
+                                  backgroundColor: isCompleted ? '#2563EB' : undefined
+                                }}
+                              >
+                                {isCompleted ? (
+                                  <CheckCircle size={14} className="md:w-4 md:h-4" />
+                                ) : isBeforeCreation ? (
+                                  <Circle size={12} className="opacity-10" />
+                                ) : (
+                                  <span className="text-[10px] md:text-xs text-slate-600 dark:text-slate-400">{day.dayNumber}</span>
+                                )}
+                              </button>
+  
+                          </div>
+                        );
+                      })}
+                    </div>
+  
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
 };
 
 export default HabitCard;
+
