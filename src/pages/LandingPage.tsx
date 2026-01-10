@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTasks } from '../context/TaskContext';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle, 
@@ -19,7 +20,7 @@ import {
   Workflow, 
   Database, 
   Layers, 
-  Infinity 
+  Infinity as InfinityIcon 
 } from 'lucide-react';
 
 // --- DONNÉES STATIQUES (Optimisation) ---
@@ -37,7 +38,8 @@ const FEATURES = [
       'Organisation de vos tâches avancée',
       'Collaboration en équipe simplifiée'
     ],
-    gradient: 'from-blue-500 to-cyan-500'
+    gradient: 'from-blue-500 to-cyan-500',
+    path: '/tasks'
   },
   {
     icon: Calendar,
@@ -51,7 +53,8 @@ const FEATURES = [
       'Synchronisation multi-appareils instantanée',
       'Organisation intelligente des événements'
     ],
-    gradient: 'from-purple-500 to-pink-500'
+    gradient: 'from-purple-500 to-pink-500',
+    path: '/agenda'
   },
   {
     icon: Target,
@@ -65,7 +68,8 @@ const FEATURES = [
       'Métriques de performance avancées',
       'Ayez une vue d\'ensemble sur votre progression'
     ],
-    gradient: 'from-green-500 to-emerald-500'
+    gradient: 'from-green-500 to-emerald-500',
+    path: '/okr'
   },
   {
     icon: Zap,
@@ -79,7 +83,8 @@ const FEATURES = [
       'Analyse de productivité intégrée',
       'Streaks et défis personnalisés'
     ],
-    gradient: 'from-orange-500 to-red-500'
+    gradient: 'from-orange-500 to-red-500',
+    path: '/habits'
   }
 ];
 
@@ -118,36 +123,40 @@ const TESTIMONIALS = [
   }
 ];
 
-const USE_CASES = [
-  {
-    profile: 'Étudiants',
-    icon: '🎓',
-    title: 'Excellence académique',
-    description: 'Gérez vos cours, devoirs et révisions avec une planification intelligente qui s\'adapte à votre rythme d\'apprentissage.',
-    features: ['Planning de révisions optimisé', 'Suivi des notes et objectifs', 'Vision globale + réduction du stress']
-  },
-  {
-    profile: 'Professionnels',
-    icon: '💼',
-    title: 'Performance maximale',
-    description: 'Boostez votre carrière avec des outils de productivité qui transforment votre façon de travailler et d\'atteindre vos objectifs.',
-    features: ['Gestion de projets avancée', 'OKR et développement personnel', 'Système de priorisation intelligent']
-  },
-  {
-    profile: 'Équipes',
-    icon: '👥',
-    title: 'Collaboration fluide',
-    description: 'Synchronisez votre équipe avec des outils collaboratifs qui alignent tous les membres sur les mêmes objectifs stratégiques.',
-    features: ['Partage de tâches intelligent', 'Communication intégrée', 'Tableaux de bord équipe']
-  },
-  {
-    profile: 'Entrepreneurs',
-    icon: '🚀',
-    title: 'Croissance accélérée',
-    description: 'Pilotez votre startup avec des métriques précises et des automatisations qui vous font gagner un temps précieux.',
-    features: ['Organisation multi-projets avancée', 'Délégation et suivi des tâches', 'Planification stratégique intégrée']
-  }
-];
+  const USE_CASES = [
+    {
+      profile: 'Étudiants',
+      icon: '🎓',
+      title: 'Excellence académique',
+      description: 'Gérez vos cours, devoirs et révisions avec une planification intelligente qui s\'adapte à votre rythme d\'apprentissage.',
+      features: ['Planning de révisions optimisé', 'Suivi des notes et objectifs', 'Vision globale + réduction du stress'],
+      path: '/tasks'
+    },
+    {
+      profile: 'Professionnels',
+      icon: '💼',
+      title: 'Performance maximale',
+      description: 'Boostez votre carrière avec des outils de productivité qui transforment votre façon de travailler et d\'atteindre vos objectifs.',
+      features: ['Gestion de projets avancée', 'OKR et développement personnel', 'Système de priorisation intelligent'],
+      path: '/dashboard'
+    },
+    {
+      profile: 'Équipes',
+      icon: '👥',
+      title: 'Collaboration fluide',
+      description: 'Synchronisez votre équipe avec des outils collaboratifs qui alignent tous les membres sur les mêmes objectifs stratégiques.',
+      features: ['Partage de tâches intelligent', 'Communication intégrée', 'Tableaux de bord équipe'],
+      path: '/messaging'
+    },
+    {
+      profile: 'Entrepreneurs',
+      icon: '🚀',
+      title: 'Croissance accélérée',
+      description: 'Pilotez votre startup avec des métriques précises et des automatisations qui vous font gagner un temps précieux.',
+      features: ['Organisation multi-projets avancée', 'Délégation et suivi des tâches', 'Planification stratégique intégrée'],
+      path: '/okr'
+    }
+  ];
 
 const ADVANCED_FEATURES = [
   {
@@ -176,7 +185,7 @@ const ADVANCED_FEATURES = [
     description: 'Vos données sont automatiquement sauvegardées et protégées contre toute perte accidentelle'
   },
   {
-    icon: Infinity,
+    icon: InfinityIcon,
     title: 'Collaboration simplifiée',
     description: 'Partagez vos projets et collaborez facilement avec votre équipe grâce aux fonctionnalités de partage intégrées'
   }
@@ -295,6 +304,8 @@ const MockLoginModal = ({ isOpen, onClose, mode }: { isOpen: boolean; onClose: (
 // --- MAIN COMPONENT ---
 
 const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { login } = useTasks();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginMode, setLoginMode] = useState<'login' | 'register'>('login');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -316,6 +327,13 @@ const LandingPage: React.FC = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleFeatureClick = async (path: string) => {
+    const success = await login('demo@cosmo.app', 'demo');
+    if (success) {
+      navigate(path);
+    }
+  };
 
   const handleLoginClick = () => {
     setLoginMode('login');
@@ -348,12 +366,12 @@ const LandingPage: React.FC = () => {
           <div className="flex justify-between items-center">
             {/* Logo avec effet néon */}
             <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-              <div className="relative group">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 transition-transform group-hover:scale-105">
-                  <Target size={24} className="text-white" />
+                <div className="relative group">
+                  <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 transition-transform group-hover:scale-105">
+                    <img src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/b4ddfaeb-2a04-4c84-84c7-5a56cde957c5/image-1767984831202.png?width=8000&height=8000&resize=contain" alt="Cosmo" className="w-full h-full object-contain bg-white/10" />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur-lg opacity-30 animate-pulse"></div>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur-lg opacity-30 animate-pulse"></div>
-              </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
                 Cosmo
               </span>
@@ -433,14 +451,14 @@ const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Hero Section Ultra Technologique */}
-      <section className="relative py-20 lg:py-32 overflow-hidden">
-        {/* Effets de fond animés */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-full blur-3xl"></div>
-        </div>
+        {/* Hero Section Ultra Technologique */}
+        <section className="relative py-20 lg:py-32 overflow-hidden">
+          {/* Effets de fond animés */}
+          <div className="absolute inset-0">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+          </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -616,7 +634,10 @@ const LandingPage: React.FC = () => {
                     ))}
                   </div>
 
-                  <button className={`group bg-gradient-to-r ${feature.gradient} hover:shadow-lg hover:shadow-blue-500/25 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 transform flex items-center justify-center gap-2 w-full sm:w-auto`}>
+                  <button 
+                    onClick={() => handleFeatureClick(feature.path)}
+                    className={`group bg-gradient-to-r ${feature.gradient} hover:shadow-lg hover:shadow-blue-500/25 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 transform flex items-center justify-center gap-2 w-full sm:w-auto`}
+                  >
                     En savoir plus
                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform sm:w-4.5 sm:h-4.5" />
                   </button>
@@ -657,14 +678,14 @@ const LandingPage: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {USE_CASES.map((useCase, index) => (
-              <motion.div 
-                key={index} 
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-                className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10"
-              >
+                <motion.div 
+                  key={index} 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -5 }}
+                  className="group bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-slate-700/80 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10"
+                >
                 <div className="flex items-center gap-4 mb-6">
                   <div className="text-4xl">{useCase.icon}</div>
                   <div>
@@ -672,16 +693,23 @@ const LandingPage: React.FC = () => {
                     <p className="text-blue-400 font-semibold">{useCase.title}</p>
                   </div>
                 </div>
-                <p className="text-slate-300 mb-6 leading-relaxed">{useCase.description}</p>
-                <div className="space-y-3">
-                  {useCase.features.map((feature, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <CheckCircle size={16} className="text-green-400 flex-shrink-0" />
-                      <span className="text-slate-300 font-medium">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
+                  <p className="text-slate-300 mb-6 leading-relaxed">{useCase.description}</p>
+                  <div className="space-y-3 mb-8">
+                    {useCase.features.map((feature, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <CheckCircle size={16} className="text-green-400 flex-shrink-0" />
+                        <span className="text-slate-300 font-medium">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => handleFeatureClick(useCase.path)}
+                    className="w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-blue-500/50 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 group"
+                  >
+                    En savoir plus
+                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform text-blue-400" />
+                  </button>
+                </motion.div>
             ))}
           </div>
         </div>
@@ -700,7 +728,7 @@ const LandingPage: React.FC = () => {
           </div>
 
           <div className="relative">
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-12 text-center overflow-hidden min-h-[400px] flex flex-col justify-center">
+            <div className="bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-3xl p-12 text-center overflow-hidden min-h-[400px] flex flex-col justify-center">
               <div className="flex justify-center mb-6">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} size={24} className="text-yellow-400 fill-current" />
@@ -763,15 +791,15 @@ const LandingPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {ADVANCED_FEATURES.map((feature, index) => (
-              <motion.div 
-                key={index} 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
-                className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300"
-              >
+                <motion.div 
+                  key={index} 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: 1.05 }}
+                  className="group bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:bg-slate-700/80 transition-all duration-300"
+                >
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/20">
                   <feature.icon size={32} className="text-white" />
                 </div>
@@ -828,12 +856,12 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <Target size={24} className="text-white" />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center">
+                    <img src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/b4ddfaeb-2a04-4c84-84c7-5a56cde957c5/image-1767984831202.png?width=8000&height=8000&resize=contain" alt="Cosmo" className="w-full h-full object-contain bg-white/10" />
+                  </div>
+                  <span className="text-2xl font-bold text-white">Cosmo</span>
                 </div>
-                <span className="text-2xl font-bold text-white">Cosmo</span>
-              </div>
               <p className="text-slate-400">
                 La plateforme de productivité nouvelle génération qui transforme votre façon de travailler.
               </p>
