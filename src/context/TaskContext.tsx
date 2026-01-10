@@ -15,6 +15,7 @@ export type Task = {
   collaborators?: string[];
   sharedBy?: string;
   permissions?: 'responsible' | 'editor' | 'observer';
+  collaboratorValidations?: { [key: string]: boolean };
 };
 
 export type TaskList = {
@@ -57,6 +58,7 @@ export type Message = {
   content: string;
   timestamp: string;
   read: boolean;
+  taskId?: string;
 };
 
 export type FriendRequest = {
@@ -151,11 +153,11 @@ type TaskContextType = {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  watchAd: () => void;
-  consumePremiumToken: () => void;
-  isPremium: () => boolean;
-  sendMessage: (receiverId: string, content: string) => void;
-  sendFriendRequest: (receiverId: string) => void;
+    watchAd: () => void;
+    consumePremiumToken: () => void;
+    isPremium: () => boolean;
+    sendMessage: (receiverId: string, content: string, taskId?: string) => void;
+    sendFriendRequest: (receiverId: string) => void;
   acceptFriendRequest: (requestId: string) => void;
   rejectFriendRequest: (requestId: string) => void;
   shareTask: (taskId: string, userId: string, permission: 'responsible' | 'editor' | 'observer') => void;
@@ -172,9 +174,10 @@ type TaskContextType = {
   updateCategory: (id: string, updates: Partial<Category>) => void;
   deleteCategory: (id: string) => void;
   addOKRCategory: (category: OKRCategory) => void;
-  updateOKRCategory: (id: string, updates: Partial<OKRCategory>) => void;
-  deleteOKRCategory: (id: string) => void;
-};
+    updateOKRCategory: (id: string, updates: Partial<OKRCategory>) => void;
+    deleteOKRCategory: (id: string) => void;
+    markMessagesAsRead: () => void;
+  };
 
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -183,6 +186,8 @@ const initialTasks: Task[] = [
   { id: '1', name: 'Rédaction rapport SEO', priority: 5, category: 'blue', deadline: '2025-06-13T00:00:00.000Z', estimatedTime: 120, createdAt: '2025-05-29T00:00:00.000Z', bookmarked: true, completed: false },
   { id: '2', name: 'Optimisation base de données', priority: 4, category: 'red', deadline: '2025-06-15T00:00:00.000Z', estimatedTime: 180, createdAt: '2025-05-30T00:00:00.000Z', bookmarked: false, completed: false },
   { id: '3', name: 'Design Système UI', priority: 3, category: 'purple', deadline: '2025-06-20T00:00:00.000Z', estimatedTime: 300, createdAt: '2025-05-31T00:00:00.000Z', bookmarked: true, completed: false },
+  { id: 'c1', name: 'Audit Accessibilité Web', priority: 4, category: 'blue', deadline: '2025-06-14T00:00:00.000Z', estimatedTime: 120, createdAt: '2025-06-01T00:00:00.000Z', bookmarked: false, completed: false, isCollaborative: true, sharedBy: 'Marie Dupont', collaborators: ['Utilisateur Demo', 'Thomas Laurent'], permissions: 'editor' },
+  { id: 'c2', name: 'Refactoring CSS Modules', priority: 2, category: 'purple', deadline: '2025-06-16T00:00:00.000Z', estimatedTime: 90, createdAt: '2025-06-02T00:00:00.000Z', bookmarked: true, completed: false, isCollaborative: true, sharedBy: 'Sophia Martin', collaborators: ['Utilisateur Demo'], permissions: 'responsible' },
   { id: '4', name: 'Réunion client - Roadmap', priority: 5, category: 'orange', deadline: '2025-06-12T10:00:00.000Z', estimatedTime: 60, createdAt: '2025-06-01T00:00:00.000Z', bookmarked: false, completed: false },
   { id: '5', name: 'Audit sécurité Cloud', priority: 4, category: 'red', deadline: '2025-06-25T00:00:00.000Z', estimatedTime: 240, createdAt: '2025-06-02T00:00:00.000Z', bookmarked: false, completed: false },
   { id: '6', name: 'Formation TypeScript avancée', priority: 2, category: 'green', deadline: '2025-07-01T00:00:00.000Z', estimatedTime: 480, createdAt: '2025-06-03T00:00:00.000Z', bookmarked: true, completed: false },
@@ -210,8 +215,10 @@ const initialTasks: Task[] = [
 ];
 
 const initialFriends: User[] = [
+  { id: 'marie-dupont', name: 'Marie Dupont', email: 'marie@example.com', avatar: '👩‍💼', premiumTokens: 5, premiumWinStreak: 12, lastTokenConsumption: new Date().toISOString(), autoValidation: true },
+  { id: 'thomas-laurent', name: 'Thomas Laurent', email: 'thomas@example.com', avatar: '👨‍💻', premiumTokens: 0, premiumWinStreak: 0, lastTokenConsumption: new Date().toISOString(), autoValidation: false },
+  { id: 'sophia-martin', name: 'Sophia Martin', email: 'sophia@example.com', avatar: '👩‍🔬', premiumTokens: 2, premiumWinStreak: 3, lastTokenConsumption: new Date().toISOString(), autoValidation: false },
   { id: 'f1', name: 'Alice Martin', email: 'alice@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alice', premiumTokens: 0, premiumWinStreak: 0, lastTokenConsumption: new Date().toISOString(), autoValidation: false },
-  { id: 'f2', name: 'Thomas Bernard', email: 'thomas@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Thomas', premiumTokens: 0, premiumWinStreak: 0, lastTokenConsumption: new Date().toISOString(), autoValidation: false },
   { id: 'f3', name: 'Sophie Petit', email: 'sophie@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie', premiumTokens: 5, premiumWinStreak: 12, lastTokenConsumption: new Date().toISOString(), autoValidation: true },
   { id: 'f4', name: 'Lucas Dubois', email: 'lucas@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lucas', premiumTokens: 2, premiumWinStreak: 3, lastTokenConsumption: new Date().toISOString(), autoValidation: false },
   { id: 'f5', name: 'Emma Leroy', email: 'emma@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma', premiumTokens: 10, premiumWinStreak: 25, lastTokenConsumption: new Date().toISOString(), autoValidation: true }
@@ -285,50 +292,73 @@ const initialHabits: Habit[] = (() => {
 })();
 
 const initialOKRs: OKR[] = [
-  {
+    {
     id: '1',
-    title: 'Lancement Produit V2',
-    description: 'Atteindre 10k utilisateurs actifs d\'ici la fin de l\'année',
-    category: 'professional',
-    startDate: '2025-01-01',
-    endDate: '2025-12-31',
+    title: 'Sport',
+    description: 'améliorer ma santé',
+    category: 'health',
+    startDate: '2026-01-01',
+    endDate: '2026-02-01',
     completed: false,
     estimatedTime: 1200,
     keyResults: [
-      { id: '1-1', title: 'Atteindre 10,000 MAU', currentValue: 4500, targetValue: 10000, unit: 'utilisateurs', completed: false, estimatedTime: 500, history: [{ date: '2025-03-01', increment: 1500 }, { date: '2025-06-01', increment: 3000 }] },
-      { id: '1-2', title: 'Taux de rétention > 40%', currentValue: 32, targetValue: 40, unit: '%', completed: false, estimatedTime: 300 },
-      { id: '1-3', title: 'Note App Store 4.8+', currentValue: 4.6, targetValue: 4.8, unit: 'étoiles', completed: false, estimatedTime: 200 }
-    ],
+        { id: '1-1', title: 'Faire 30 séances haut du corps', currentValue: 12, targetValue: 30, unit: 'séances', completed: false, estimatedTime: 60, history: [{ date: '2026-01-02', increment: 2 }, { date: '2026-01-05', increment: 3 }, { date: '2026-01-08', increment: 4 }, { date: '2026-01-12', increment: 3 }] },
+        { id: '1-2', title: '10 séances bas du corps', currentValue: 4, targetValue: 10, unit: 'séances', completed: false, estimatedTime: 60, history: [{ date: '2026-01-03', increment: 2 }, { date: '2026-01-10', increment: 2 }] },
+        { id: '1-3', title: '8 séances de cardio', currentValue: 3, targetValue: 8, unit: 'séances', completed: false, estimatedTime: 45, history: [{ date: '2026-01-04', increment: 1 }, { date: '2026-01-11', increment: 2 }] },
+        { id: '1-4', title: "5 séances d'étirements", currentValue: 2, targetValue: 5, unit: 'séances', completed: false, estimatedTime: 15, history: [{ date: '2026-01-06', increment: 1 }, { date: '2026-01-13', increment: 1 }] }
+      ],
   },
-  {
-    id: '2',
-    title: 'Excellence Technique',
-    description: 'Réduire la dette technique et améliorer les performances',
-    category: 'learning',
-    startDate: '2025-04-01',
-    endDate: '2025-09-30',
-    completed: false,
-    estimatedTime: 800,
-    keyResults: [
-      { id: '2-1', title: 'Couverture de tests 90%', currentValue: 75, targetValue: 90, unit: '%', completed: false, estimatedTime: 400 },
-      { id: '2-2', title: 'Temps de réponse API < 100ms', currentValue: 145, targetValue: 100, unit: 'ms', completed: false, estimatedTime: 200 }
-    ],
-  },
-  {
-    id: '3',
-    title: 'Bien-être & Santé',
-    description: 'Maintenir un équilibre vie pro/vie perso sain',
-    category: 'health',
-    startDate: '2025-01-01',
-    endDate: '2025-12-31',
-    completed: false,
-    estimatedTime: 400,
-    keyResults: [
-      { id: '3-1', title: 'Courir un semi-marathon', currentValue: 12, targetValue: 21.1, unit: 'km', completed: false, estimatedTime: 200 },
-      { id: '3-2', title: 'Poids cible 75kg', currentValue: 78, targetValue: 75, unit: 'kg', completed: false, estimatedTime: 100 }
-    ],
-  }
-];
+    {
+      id: '2',
+      title: 'Productivité',
+      description: 'Être plus productif au quotidien',
+      category: 'professional',
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0],
+      completed: false,
+      estimatedTime: 2400,
+      keyResults: [
+        { id: '2-1', title: 'Planifier 30 journées de travail', currentValue: 10, targetValue: 30, unit: 'jours', completed: false, estimatedTime: 15 },
+        { id: '2-2', title: 'Compléter 50 tâches prioritaires', currentValue: 25, targetValue: 50, unit: 'tâches', completed: false, estimatedTime: 30 },
+        { id: '2-3', title: 'Réaliser 20 sessions de deep work', currentValue: 6, targetValue: 20, unit: 'sessions', completed: false, estimatedTime: 90 },
+        { id: '2-4', title: 'Faire 12 revues hebdomadaires', currentValue: 3, targetValue: 12, unit: 'revues', completed: false, estimatedTime: 45 }
+      ],
+    },
+    {
+      id: '3',
+      title: 'Apprentissage de l\'Anglais',
+      description: 'Améliorer mon niveau d\'anglais (écoute, lecture, oral, vocabulaire et écriture)',
+      category: 'learning',
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0],
+      completed: false,
+      estimatedTime: 3000,
+      keyResults: [
+        { id: '3-1', title: 'Réaliser 40 sessions d’écoute en anglais (≥ 20 min)', currentValue: 15, targetValue: 40, unit: 'sessions', completed: false, estimatedTime: 20 },
+        { id: '3-2', title: 'Effectuer 30 sessions de lecture en anglais', currentValue: 8, targetValue: 30, unit: 'sessions', completed: false, estimatedTime: 15 },
+        { id: '3-3', title: 'Compléter 25 sessions de pratique orale', currentValue: 5, targetValue: 25, unit: 'sessions', completed: false, estimatedTime: 15 },
+        { id: '3-4', title: 'Apprendre 500 mots de vocabulaire', currentValue: 120, targetValue: 500, unit: 'mots', completed: false, estimatedTime: 1 },
+        { id: '3-5', title: 'Écrire 20 textes courts en anglais', currentValue: 4, targetValue: 20, unit: 'textes', completed: false, estimatedTime: 15 }
+        ],
+      },
+      {
+        id: '4',
+        title: 'Habitudes',
+        description: 'Mettre en place de bonnes habitudes au quotidien',
+        category: 'personal',
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0],
+        completed: false,
+        estimatedTime: 1825,
+        keyResults: [
+          { id: '4-1', title: 'Se lever à heure régulière 20 jours', currentValue: 12, targetValue: 20, unit: 'jours', completed: false, estimatedTime: 5 },
+          { id: '4-2', title: 'Lire 15 sessions', currentValue: 6, targetValue: 15, unit: 'sessions', completed: false, estimatedTime: 30 },
+          { id: '4-3', title: 'Marcher au moins 8 000 pas 20 jours', currentValue: 8, targetValue: 20, unit: 'jours', completed: false, estimatedTime: 45 },
+          { id: '4-4', title: 'Limiter le temps d’écran 15 jours', currentValue: 5, targetValue: 15, unit: 'jours', completed: false, estimatedTime: 5 },
+          { id: '4-5', title: 'Prendre du temps pour soi 20 fois (≥ 15 min)', currentValue: 10, targetValue: 20, unit: 'fois', completed: false, estimatedTime: 15 }
+        ],
+      }
+    ];
 
 const initialEvents: CalendarEvent[] = [
   { id: 'e1', title: 'Sprint Planning', start: '2025-06-12T09:00:00.000Z', end: '2025-06-12T10:30:00.000Z', color: 'blue', taskId: '4' },
@@ -386,13 +416,21 @@ const initialOKRCategories: OKRCategory[] = [
   { id: 'learning', name: 'Apprentissage', color: 'purple', icon: '📚' },
 ];
 
+const initialMessages: Message[] = [
+  { id: 'm1', senderId: 'marie-dupont', receiverId: 'equipe-design', content: 'Salut l\'équipe ! Avez-vous vu les derniers retours sur la maquette ?', timestamp: new Date(Date.now() - 3600000 * 2).toISOString(), read: true },
+  { id: 'm2', senderId: 'thomas-laurent', receiverId: 'equipe-design', content: 'Oui, je suis en train de les intégrer. Ça devrait être prêt pour demain.', timestamp: new Date(Date.now() - 3600000 * 1.5).toISOString(), read: true },
+  { id: 'm3', senderId: 'user1', receiverId: 'equipe-design', content: 'Super Thomas ! J\'ai aussi ajouté quelques notes sur le Design Système.', timestamp: new Date(Date.now() - 3600000 * 1).toISOString(), read: true },
+  { id: 'm4', senderId: 'marie-dupont', receiverId: 'equipe-design', content: 'Parfait, on fait un point rapide à 14h ?', timestamp: new Date(Date.now() - 3600000 * 0.5).toISOString(), read: true },
+  { id: 'm5', senderId: 'thomas-laurent', receiverId: 'equipe-design', content: 'Ça me va pour 14h.', timestamp: new Date(Date.now() - 3600000 * 0.2).toISOString(), read: true },
+];
+
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [lists, setLists] = useState<TaskList[]>(initialLists);
   const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [user, setUser] = useState<User | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [habits, setHabits] = useState<Habit[]>(initialHabits);
   const [okrs, setOkrs] = useState<OKR[]>(initialOKRs);
@@ -417,27 +455,40 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return `${year}-${month}-${day}`;
   };
 
-  useEffect(() => {
-    const savedTasks = localStorage.getItem('tasks');
-    const savedLists = localStorage.getItem('taskLists');
-    const savedEvents = localStorage.getItem('events');
-    const savedCategories = localStorage.getItem('categories');
-    const savedUser = localStorage.getItem('user');
-    const savedHabits = localStorage.getItem('habits');
-    const savedOKRs = localStorage.getItem('okrs');
-    const savedOKRCategories = localStorage.getItem('okrCategories');
-    const savedFavoriteColors = localStorage.getItem('favoriteColors');
-    
-    if (savedTasks) setTasks(JSON.parse(savedTasks));
-    if (savedLists) setLists(JSON.parse(savedLists));
-    if (savedEvents) setEvents(JSON.parse(savedEvents));
-    if (savedCategories) setCategories(JSON.parse(savedCategories));
-    if (savedUser) setUser(JSON.parse(savedUser));
-    if (savedHabits) setHabits(JSON.parse(savedHabits));
-    if (savedOKRs) setOkrs(JSON.parse(savedOKRs));
-    if (savedOKRCategories) setOkrCategories(JSON.parse(savedOKRCategories));
-    if (savedFavoriteColors) setFavoriteColors(JSON.parse(savedFavoriteColors));
-  }, []);
+    useEffect(() => {
+      const savedTasks = localStorage.getItem('tasks');
+      const savedLists = localStorage.getItem('taskLists');
+      const savedEvents = localStorage.getItem('events');
+      const savedCategories = localStorage.getItem('categories');
+      const savedUser = localStorage.getItem('user');
+      const savedHabits = localStorage.getItem('habits');
+      const savedOKRs = localStorage.getItem('okrs');
+      const savedOKRCategories = localStorage.getItem('okrCategories');
+      const savedFavoriteColors = localStorage.getItem('favoriteColors');
+      
+      if (savedTasks) setTasks(JSON.parse(savedTasks));
+      if (savedLists) setLists(JSON.parse(savedLists));
+      if (savedEvents) setEvents(JSON.parse(savedEvents));
+      if (savedCategories) setCategories(JSON.parse(savedCategories));
+      if (savedUser) setUser(JSON.parse(savedUser));
+      if (savedHabits) setHabits(JSON.parse(savedHabits));
+      
+      if (savedOKRs) {
+        let parsedOKRs = JSON.parse(savedOKRs);
+          // Force update for demo OKRs to ensure they reflect the new initial state
+          parsedOKRs = parsedOKRs.map((o: any) => {
+            const demoOKR = initialOKRs.find(demo => demo.id === o.id);
+            if (demoOKR && ['1', '2', '3', '4'].includes(o.id)) {
+              return demoOKR;
+            }
+            return o;
+          });
+        setOkrs(parsedOKRs);
+      }
+      
+      if (savedOKRCategories) setOkrCategories(JSON.parse(savedOKRCategories));
+      if (savedFavoriteColors) setFavoriteColors(JSON.parse(savedFavoriteColors));
+    }, []);
 
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -492,9 +543,13 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addOKRCategory = (category: OKRCategory) => setOkrCategories(prev => [...prev, category]);
   const updateOKRCategory = (id: string, updates: Partial<OKRCategory>) => setOkrCategories(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
-  const deleteOKRCategory = (id: string) => setOkrCategories(prev => prev.filter(c => c.id !== id));
-
-  const login = async (email: string, password: string) => {
+    const deleteOKRCategory = (id: string) => setOkrCategories(prev => prev.filter(c => c.id !== id));
+  
+    const markMessagesAsRead = () => {
+      setMessages(prev => prev.map(msg => msg.receiverId === user?.id ? { ...msg, read: true } : msg));
+    };
+  
+    const login = async (email: string, password: string) => {
     if (email === 'demo@cosmo.app' && password === 'demo') {
       setUser(defaultUser);
       return true;
@@ -527,13 +582,21 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return user.premiumTokens > 0;
   };
 
-  const sendMessage = (receiverId: string, content: string) => {
-    const newMessage: Message = { id: Date.now().toString(), senderId: user?.id || '', receiverId, content, timestamp: new Date().toISOString(), read: false };
+  const sendMessage = (receiverId: string, content: string, taskId?: string) => {
+    const newMessage: Message = { 
+      id: Date.now().toString(), 
+      senderId: user?.id || 'user1', 
+      receiverId, 
+      content, 
+      timestamp: new Date().toISOString(), 
+      read: false,
+      taskId
+    };
     setMessages(prev => [...prev, newMessage]);
   };
 
   const sendFriendRequest = (receiverId: string) => {
-    const newRequest: FriendRequest = { id: Date.now().toString(), senderId: user?.id || '', receiverId, status: 'pending', timestamp: new Date().toISOString() };
+    const newRequest: FriendRequest = { id: Date.now().toString(), senderId: user?.id || 'user1', receiverId, status: 'pending', timestamp: new Date().toISOString() };
     setFriendRequests(prev => [...prev, newRequest]);
   };
 
@@ -541,7 +604,21 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const rejectFriendRequest = (requestId: string) => setFriendRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'rejected' } : r));
 
   const shareTask = (taskId: string, userId: string, permission: 'responsible' | 'editor' | 'observer') => {
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, isCollaborative: true, collaborators: [...(t.collaborators || []), userId], permissions: permission } : t));
+    setTasks(prev => prev.map(t => {
+      if (t.id === taskId) {
+        const isAlreadyCollaborator = t.collaborators?.includes(userId);
+        if (!isAlreadyCollaborator) {
+          sendMessage(userId, `Je t'ai partagé la tâche : ${t.name}`, taskId);
+        }
+        return { 
+          ...t, 
+          isCollaborative: true, 
+          collaborators: isAlreadyCollaborator ? t.collaborators : [...(t.collaborators || []), userId], 
+          permissions: permission 
+        };
+      }
+      return t;
+    }));
   };
 
   const addHabit = (habit: Habit) => setHabits(prev => [...prev, habit]);
@@ -613,7 +690,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     addHabit, toggleHabitCompletion, updateHabit, deleteHabit,
     addOKR, updateOKR, updateKeyResult, deleteOKR, updateUserSettings,
     addCategory, updateCategory, deleteCategory,
-    addOKRCategory, updateOKRCategory, deleteOKRCategory
+    addOKRCategory, updateOKRCategory, deleteOKRCategory,
+    markMessagesAsRead
   };
 
   return (
@@ -628,3 +706,4 @@ export const useTasks = () => {
   if (context === undefined) throw new Error('useTasks must be used within a TaskProvider');
   return context;
 };
+
