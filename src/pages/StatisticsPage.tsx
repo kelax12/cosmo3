@@ -296,12 +296,14 @@ export default function StatisticsPage() {
     { id: 'year', label: 'Par année' }
   ];
 
-  const paddingLeft = 70;
-  const paddingRight = 40;
-  const paddingTop = 40;
-  const paddingBottom = 50;
-  const chartInnerWidth = chartWidth - paddingLeft - paddingRight;
-  const chartInnerHeight = chartHeight - paddingTop - paddingBottom;
+    const isMobile = chartWidth < 640;
+    const paddingLeft = isMobile ? 50 : 70;
+    const paddingRight = isMobile ? 20 : 40;
+    const paddingTop = 40;
+    const paddingBottom = isMobile ? 70 : 50;
+    const chartInnerWidth = chartWidth - paddingLeft - paddingRight;
+    const chartInnerHeight = chartHeight - paddingTop - paddingBottom;
+
 
   const barWidth = Math.min(40, (chartInnerWidth / workTimeData.length) * 0.6);
   const barGap = (chartInnerWidth - barWidth * workTimeData.length) / (workTimeData.length + 1);
@@ -318,12 +320,12 @@ export default function StatisticsPage() {
       </div>
 
 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: "Aujourd'hui", val: globalStats.today, color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.1)' },
-            { label: "Cette semaine", val: globalStats.week, color: '#10B981', bg: 'rgba(16, 185, 129, 0.1)' },
-            { label: "Ce mois", val: globalStats.month, color: '#F97316', bg: 'rgba(249, 115, 22, 0.1)' },
-            { label: "Cette année", val: globalStats.year, color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.1)' }
-          ].map((s, idx) => (
+            {[
+              { label: "Aujourd'hui", val: globalStats.today, color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.45)' },
+              { label: "Cette semaine", val: globalStats.week, color: '#10B981', bg: 'rgba(16, 185, 129, 0.45)' },
+              { label: "Ce mois", val: globalStats.month, color: '#F97316', bg: 'rgba(249, 115, 22, 0.45)' },
+              { label: "Cette année", val: globalStats.year, color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.45)' }
+            ].map((s, idx) => (
             <div key={idx} className="card p-5">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl" style={{ backgroundColor: s.bg }}>
@@ -436,8 +438,17 @@ export default function StatisticsPage() {
                 return (
                   <g key={index} onMouseEnter={() => setHoveredPoint(index)} onMouseLeave={() => setHoveredPoint(null)} className="cursor-pointer">
                     <rect x={barX} y={barY} width={barWidth} height={Math.max(barHeight, 2)} rx="6" fill={`url(#${gradientId})`} opacity={isHovered ? 1 : 0.85} style={{ transition: 'all 0.2s ease', transform: isHovered ? 'scaleY(1.02)' : 'scaleY(1)', transformOrigin: 'bottom' }} />
-                    {isHovered && <text x={barX + barWidth / 2} y={barY - 8} textAnchor="middle" className="text-xs font-semibold" fill="rgb(var(--color-text-primary))">{formatTime(data.totalTime)}</text>}
-                    <text x={barX + barWidth / 2} y={chartHeight - paddingBottom + 20} textAnchor="middle" className="text-xs" fill="rgb(var(--color-text-muted))">{data.label}</text>
+                    {isHovered && <text x={barX + barWidth / 2} y={barY - 8} textAnchor="middle" className="text-[10px] sm:text-xs font-semibold" fill="rgb(var(--color-text-primary))">{formatTime(data.totalTime)}</text>}
+                    <text 
+                      x={barX + barWidth / 2} 
+                      y={chartHeight - paddingBottom + (isMobile ? 15 : 20)} 
+                      textAnchor={isMobile ? "start" : "middle"} 
+                      className="text-[10px] sm:text-xs" 
+                      fill="rgb(var(--color-text-muted))"
+                      transform={isMobile ? `rotate(45, ${barX + barWidth / 2}, ${chartHeight - paddingBottom + 15})` : ""}
+                    >
+                      {data.label}
+                    </text>
                   </g>
                 );
               })}
