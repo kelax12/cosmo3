@@ -37,7 +37,7 @@ const ColorManagerPopup: React.FC<ColorManagerPopupProps> = ({ isOpen, onClose }
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-6 border-b border-border/50">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-blue-500/10 text-blue-500">
+            <div className="p-2.5 rounded-2xl bg-blue-500/25 text-blue-500">
               <Palette size={24} />
             </div>
             <div>
@@ -122,12 +122,12 @@ const ColorManagerPopup: React.FC<ColorManagerPopupProps> = ({ isOpen, onClose }
                     </div>
                     {categories.length > 0 ? (
                       <div className="grid grid-cols-2 gap-3">
-                        {categories.map((cat) => (
-                          <button
-                            key={cat.id}
-                            onClick={() => handleColorSelect(cat.color)}
-                            className="flex items-center gap-3 p-3 rounded-2xl border border-border/50 bg-white/5 hover:bg-white/10 hover:border-blue-500/30 transition-all group active:scale-[0.98] relative overflow-hidden"
-                          >
+                          {categories.map((cat) => (
+                              <button
+                                key={cat.id}
+                                onClick={() => handleColorSelect(cat.color)}
+                                className="flex items-center gap-3 p-3 rounded-2xl border border-border/50 bg-white/30 hover:bg-white/45 hover:border-blue-500/30 transition-all group active:scale-[0.98] relative overflow-hidden"
+                              >
                             <div className="absolute top-0 right-0 p-1.5 opacity-20 group-hover:opacity-40 transition-opacity">
                               <Tag size={12} />
                             </div>
@@ -143,20 +143,20 @@ const ColorManagerPopup: React.FC<ColorManagerPopupProps> = ({ isOpen, onClose }
                           </button>
                         ))}
                       </div>
-                    ) : (
-                      <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-dashed border-border text-center">
-                        <p className="text-sm opacity-50">Aucune catégorie définie</p>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/15 border border-dashed border-border text-center">
+                          <p className="text-sm opacity-50">Aucune catégorie définie</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center py-12 px-6 rounded-3xl bg-gray-50/50 dark:bg-white/5 border border-dashed border-border"
-              >
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex flex-col items-center justify-center py-12 px-6 rounded-3xl bg-gray-50/50 dark:bg-white/15 border border-dashed border-border"
+                >
                 <Info size={32} className="text-blue-500/40 mb-3" />
                 <p className="text-sm font-medium text-center opacity-50 max-w-[200px]" style={{ color: 'rgb(var(--color-text-muted))' }}>
                   Cliquez sur un carré de couleur ci-dessus pour le remplacer
