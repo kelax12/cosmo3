@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { useTasks } from '../context/TaskContext';
+import { useTasks, Task } from '../context/TaskContext';
 import { Search, Clock, Bookmark, Filter, X, CheckCircle2 } from 'lucide-react';
+import TaskModal from './TaskModal';
 
 interface TaskSidebarProps {
   onClose?: () => void;
+  onDragStart?: () => void;
 }
 
-const TaskSidebar: React.FC<TaskSidebarProps> = ({ onClose }) => {
+const TaskSidebar: React.FC<TaskSidebarProps> = ({ onClose, onDragStart }) => {
   const { tasks, colorSettings, categories, events, priorityRange } = useTasks();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
   const [showTutorial, setShowTutorial] = useState(true);
+  const [selectedTaskForModal, setSelectedTaskForModal] = useState<Task | null>(null);
 
   // Filter tasks (exclude completed ones and respect priority range)
   const availableTasks = tasks.filter(task => 
@@ -125,22 +128,26 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({ onClose }) => {
             const isPlaced = isTaskPlacedInCalendar(task.id);
             
             return (
-              <div
-                key={task.id}
-                className={`external-event rounded-lg p-3 border transition-all duration-200 group select-none ${
-                  isPlaced ? 'opacity-50 cursor-not-allowed' : 'cursor-move hover:shadow-md'
-                }`}
-                  style={{ 
-                    backgroundColor: isPlaced ? 'rgb(var(--color-hover))' : 'rgb(var(--color-surface))',
-                    borderColor: 'rgb(var(--color-border))',
-                    borderLeft: `4px solid ${getCategoryColor(task.category)}`,
-                    position: 'relative',
-                    touchAction: 'none'
-                  }}
-                onMouseEnter={(e) => !isPlaced && (e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))')}
-                onMouseLeave={(e) => !isPlaced && (e.currentTarget.style.backgroundColor = 'rgb(var(--color-surface))')}
-                data-task={JSON.stringify(task)}
-              >
+                  <div
+                    key={task.id}
+                    onClick={() => setSelectedTaskForModal(task)}
+                    className={`external-event rounded-lg p-3 border group select-none ${
+                      isPlaced ? 'opacity-50 cursor-not-allowed' : 'cursor-move hover:shadow-md'
+                    }`}
+                    style={{ 
+                      backgroundColor: isPlaced ? 'rgb(var(--color-hover))' : 'rgb(var(--color-surface))',
+                      borderColor: 'rgb(var(--color-border))',
+                      borderLeft: `4px solid ${getCategoryColor(task.category)}`,
+                      position: 'relative',
+                      touchAction: 'none',
+                      transition: isPlaced ? 'none' : 'background-color 0.2s, border-color 0.2s, box-shadow 0.2s'
+                    }}
+
+                  onMouseEnter={(e) => !isPlaced && (e.currentTarget.style.backgroundColor = 'rgb(var(--color-hover))')}
+                    onMouseLeave={(e) => !isPlaced && (e.currentTarget.style.backgroundColor = 'rgb(var(--color-surface))')}
+                    onPointerDown={() => !isPlaced && onDragStart?.()}
+                    data-task={JSON.stringify(task)}
+                  >
                 {isPlaced && (
                   <div className="absolute inset-0 bg-black bg-opacity-10 rounded-lg flex items-center justify-center pointer-events-none">
                     <div className="bg-white dark:bg-slate-800 rounded-full p-2 shadow-lg">
@@ -216,10 +223,18 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({ onClose }) => {
             <p>• Les propriétés se transfèrent automatiquement</p>
             <p>• La durée définit la longueur de l'événement</p>
           </div>
-        </div>
-      )}
-    </div>
-  );
-};
+          </div>
+        )}
 
-export default TaskSidebar;
+        {selectedTaskForModal && (
+          <TaskModal 
+            task={selectedTaskForModal} 
+            isOpen={!!selectedTaskForModal} 
+            onClose={() => setSelectedTaskForModal(null)} 
+          />
+        )}
+      </div>
+    );
+  };
+  
+  export default TaskSidebar;
