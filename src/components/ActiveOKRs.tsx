@@ -27,13 +27,16 @@ const ActiveOKRs: React.FC = () => {
               </div>
             </div>
     
-            <div className="space-y-4">
-              {activeOKRs.map(okr => {
-                const progress = getProgress(okr.keyResults);
-                
-                return (
-                  <div key={okr.id} className="p-4 bg-[rgb(var(--color-hover))] rounded-xl border border-[rgb(var(--color-border))] transition-colors duration-200">
-                    <div className="flex items-center justify-between mb-3">
+              <div className="space-y-4">
+                {activeOKRs.map(okr => {
+                  const progress = getProgress(okr.keyResults);
+                  
+                  return (
+                    <div 
+                      key={okr.id} 
+                      className="p-4 bg-[rgb(var(--color-hover))] rounded-xl border border-[rgb(var(--color-border))] transition-all duration-300 hover:shadow-md hover:border-[rgb(var(--color-success)/0.5)] hover:bg-[rgb(var(--color-success)/0.05)] cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold text-[rgb(var(--color-text-primary))]">{okr.title}</h3>
                       <div className="flex items-center gap-2">
                         <TrendingUp size={16} className="text-[rgb(var(--color-success))]" />
