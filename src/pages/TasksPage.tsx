@@ -109,21 +109,21 @@ const TasksPage: React.FC = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="p-8 h-fit"
+      className="p-4 sm:p-8 h-fit"
     >
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6 sm:gap-8">
         <motion.header 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="flex justify-between items-center"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
         >
             <div>
               <motion.h1 
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-2"
+                className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 mb-1 sm:mb-2"
               >
                 To do list
               </motion.h1>
@@ -131,7 +131,7 @@ const TasksPage: React.FC = () => {
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="text-slate-500 dark:text-slate-400 font-medium"
+                className="text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base"
               >
                 Gérez vos tâches efficacement
               </motion.p>
@@ -141,33 +141,33 @@ const TasksPage: React.FC = () => {
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="flex items-center gap-4"
+                className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto"
               >
                 <motion.button 
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowListManager(!showListManager)}
-                  className={`flex items-center gap-2 rounded-lg px-4 py-2.5 transition-all shadow-sm border font-medium ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 transition-all shadow-sm border font-medium text-sm sm:text-base ${
                     showListManager
                       ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
                       : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700'
                   }`}
                 >
-                  <List size={20} className={showListManager ? 'text-white' : 'text-blue-600'} />
-                  <span>Gérer les listes</span>
+                  <List size={18} className={showListManager ? 'text-white' : 'text-blue-600'} />
+                  <span>Listes</span>
                 </motion.button>
                 <motion.button 
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowDeadlineCalendar(!showDeadlineCalendar)}
-                  className={`flex items-center gap-2 rounded-lg px-4 py-2.5 transition-all shadow-sm border font-medium ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 transition-all shadow-sm border font-medium text-sm sm:text-base ${
                     showDeadlineCalendar
                       ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
                       : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700'
                   }`}
                 >
-                  <CalendarDays size={20} className={showDeadlineCalendar ? 'text-white' : 'text-blue-600'} />
-                  <span>Calendrier des deadlines</span>
+                  <CalendarDays size={18} className={showDeadlineCalendar ? 'text-white' : 'text-blue-600'} />
+                  <span>Calendrier</span>
                 </motion.button>
               </motion.div>
         </motion.header>
