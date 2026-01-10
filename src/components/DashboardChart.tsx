@@ -53,9 +53,9 @@ const DashboardChart: React.FC = () => {
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   };
 
-  const yScaleMax = Math.max(Math.ceil(maxTime / 30) * 30, 90);
+  const yScaleMax = Math.max(Math.ceil(maxTime / 120) * 120, 120);
   const yTicks = [];
-  for (let i = 0; i <= yScaleMax; i += 30) {
+  for (let i = 0; i <= yScaleMax; i += 120) {
     yTicks.push(i);
   }
 
@@ -100,24 +100,24 @@ const DashboardChart: React.FC = () => {
       </div>
   
       <div className="relative z-10 mb-6">
-        <div className="flex">
-            {/* Y-Axis Labels */}
-            <div className="flex flex-col justify-between pr-3 py-2" style={{ height: '200px' }}>
-              {[...yTicks].reverse().map((tick) => (
-                <span key={tick} className="text-[11px] font-medium text-[rgb(var(--color-text-muted))] text-right leading-none">
-                  {formatTimeShort(tick)}
-                </span>
-              ))}
-            </div>
-  
-            {/* Chart Area */}
-            <div className="flex-1 relative" style={{ height: '200px' }}>
-              {/* Grid Lines */}
-              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-                {yTicks.map((tick) => (
-                  <div key={tick} className="border-b border-[rgb(var(--color-border)/0.5)] w-full" />
-                ))}
-              </div>
+          <div className="flex">
+                {/* Y-Axis Labels */}
+                <div className="flex flex-col justify-between pr-3 w-14" style={{ height: '200px' }}>
+                  {[...yTicks].reverse().map((tick) => (
+                    <span key={tick} className="text-[11px] font-medium text-[rgb(var(--color-text-muted))] text-right leading-none flex items-center justify-end" style={{ height: 0 }}>
+                      {formatTimeShort(tick)}
+                    </span>
+                  ))}
+                </div>
+    
+              {/* Chart Area */}
+              <div className="flex-1 relative" style={{ height: '200px' }}>
+                {/* Grid Lines */}
+                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                  {yTicks.map((tick) => (
+                    <div key={tick} className="border-b border-[rgb(var(--color-border)/0.5)] w-full" style={{ height: 0 }} />
+                  ))}
+                </div>
   
               {/* Bars Container */}
               <div className="absolute inset-0 flex items-end justify-around px-2">
@@ -185,10 +185,10 @@ const DashboardChart: React.FC = () => {
           </div>
         </div>
   
-        {/* X-Axis Labels */}
-        <div className="flex mt-3">
-          <div className="pr-3" style={{ width: '40px' }} />
-          <div className="flex-1 flex justify-around px-2">
+              {/* X-Axis Labels */}
+              <div className="flex mt-3">
+                <div className="pr-3 w-14" />
+                <div className="flex-1 flex justify-around px-2">
             {chartData.map((day, index) => {
               const isToday = index === chartData.length - 1;
               const isHovered = hoveredBar === index;
