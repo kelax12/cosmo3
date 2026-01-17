@@ -40,8 +40,10 @@ const MessagingPage: React.FC = () => {
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [activeTab, setActiveTab] = useState<'messages' | 'friends'>('messages');
   const [showAddFriendForm, setShowAddFriendForm] = useState(false);
+  const [addFriendEmail, setAddFriendEmail] = useState('');
   const [showRightSidebar, setShowRightSidebar] = useState(false);
-  const [showLeftSidebar, setShowLeftSidebar] = useState(window.innerWidth >= 1024);
+  const [showLeftSidebar, setShowLeftSidebar] = useState(true);
+  const [mobileShowChat, setMobileShowChat] = useState(false);
   const [pinnedConversations, setPinnedConversations] = useState<string[]>(['equipe-design']);
   const [deletedConversations, setDeletedConversations] = useState<string[]>([]);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
@@ -241,12 +243,12 @@ const MessagingPage: React.FC = () => {
   };
 
   const handleSendFriendRequest = () => {
-    if (!searchFriend.trim()) return;
+    if (!addFriendEmail.trim()) return;
     // In this demo, we assume the user finds an ID or email
-    const foundFriend = friends.find(f => f.email === searchFriend);
+    const foundFriend = friends.find(f => f.email === addFriendEmail);
     if (foundFriend) {
       sendFriendRequest(foundFriend.id);
-      setSearchFriend('');
+      setAddFriendEmail('');
       setShowAddFriendForm(false);
     } else {
       alert('Utilisateur non trouvé');
@@ -293,25 +295,10 @@ const MessagingPage: React.FC = () => {
   return (
 
     <div className="h-full w-full flex relative bg-gray-50 dark:bg-slate-900 transition-colors overflow-hidden">
-      
-      {showLeftSidebar && (
-        <div 
-          className="absolute inset-0 bg-black/50 z-40 lg:hidden animate-[fadeIn_0.2s_ease-out]" 
-          onClick={() => setShowLeftSidebar(false)} 
-        />
-      )}
-      <div className={`${showLeftSidebar ? 'absolute inset-y-0 left-0 z-50 w-80 shadow-2xl lg:relative lg:inset-auto lg:z-0 lg:shadow-none lg:w-80 animate-[slideInLeft_0.3s_ease-out]' : (selectedConversation ? 'hidden lg:flex lg:w-12' : 'flex w-full lg:w-80')} bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 flex flex-col transition-all duration-300 overflow-x-hidden`}>
-        <div className={`${showLeftSidebar ? 'p-4' : 'p-1 py-4'} border-b border-gray-200 dark:border-slate-700 flex flex-col transition-colors`}>
-          {showLeftSidebar ? (
+        <div className={`${mobileShowChat ? 'hidden lg:flex' : 'flex'} lg:w-80 w-full bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 flex-col transition-all duration-300 overflow-x-hidden`}>
+          <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex flex-col transition-colors">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setShowLeftSidebar(false)}
-                  className="lg:hidden p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                  title="Retour"
-                >
-                  <ChevronLeft size={20} />
-                </button>
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Messagerie</h1>
                 <button
                   onClick={() => setShowRightSidebar(true)}
@@ -324,27 +311,8 @@ const MessagingPage: React.FC = () => {
                   )}
                 </button>
               </div>
-              <button 
-                onClick={() => setShowLeftSidebar(false)}
-                className="hidden lg:block p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                title="Fermer la messagerie"
-              >
-                <X size={20} />
-              </button>
             </div>
-          ) : (
-            <div className="flex justify-center mb-0">
-              <button 
-                onClick={() => setShowLeftSidebar(true)}
-                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                title="Ouvrir la messagerie"
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
-          )}
-          
-          {showLeftSidebar && (
+            
             <div className="relative">
               <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <input
@@ -354,59 +322,56 @@ const MessagingPage: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 dark:text-white transition-colors" />
             </div>
-          )}
-        </div>
+          </div>
 
-        {showLeftSidebar ? (
-          <>
-            <div className="flex border-b border-gray-200 dark:border-slate-700 transition-colors">
+          <div className="flex border-b border-gray-200 dark:border-slate-700 transition-colors">
+            <button
+              onClick={switchToMessagesTab}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === 'messages' ?
+              'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' :
+              'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`
+              }>
+              Messages
+            </button>
+            <button
+              onClick={switchToFriendsTab}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === 'friends' ?
+              'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' :
+              'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`
+              }>
+              Amis
+            </button>
+          </div>
+
+          <div className={`p-4 border-b border-gray-200 dark:border-slate-700 transition-colors ${activeTab === 'friends' ? 'hidden lg:block' : ''}`}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Conversations récentes
+              </h3>
               <button
-                onClick={switchToMessagesTab}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'messages' ?
-                'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' :
-                'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`
-                }>
-                Messages
-              </button>
-              <button
-                onClick={switchToFriendsTab}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'friends' ?
-                'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' :
-                'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`
-                }>
-                Amis
+                onClick={handleCreateGroup}
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 p-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                title="Créer un groupe">
+                <Plus size={16} />
               </button>
             </div>
+          </div>
 
-            <div className="p-4 border-b border-gray-200 dark:border-slate-700 transition-colors">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Conversations récentes
-                </h3>
-                <button
-                  onClick={handleCreateGroup}
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 p-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
-                  title="Créer un groupe">
-                  <Plus size={16} />
-                </button>
-              </div>
-            </div>
-
-            <div className={`flex-1 overflow-y-auto overflow-x-hidden ${activeTab === 'friends' ? 'hidden' : ''}`}>
+          <div className={`flex-1 overflow-y-auto overflow-x-hidden ${activeTab === 'friends' ? 'hidden' : ''}`}>
               {sortedConversations.filter((conv) =>
               conv.name.toLowerCase().includes(searchTerm.toLowerCase())
               ).map((conv) => {
                 const isPinned = pinnedConversations.includes(conv.id);
                 return (
                     <div
-                      key={conv.id}
-                      onClick={() => {
-                        setSelectedConversation(conv.id);
-                        if (window.innerWidth < 1024) setShowLeftSidebar(false);
-                      }}
-                      className={`p-4 cursor-pointer transition-colors border-l-4 ${
+                        key={conv.id}
+                        onClick={() => {
+                          setSelectedConversation(conv.id);
+                          setMobileShowChat(true);
+                        }}
+                        className={`p-4 cursor-pointer transition-colors border-l-4 ${
                     selectedConversation === conv.id ?
                     'border-blue-500 dark:border-blue-400 bg-blue-50/30 dark:bg-blue-900/10' :
                     isPinned ?
@@ -491,12 +456,12 @@ const MessagingPage: React.FC = () => {
                   friend.name.toLowerCase().includes(searchTerm.toLowerCase())
                   ).map((friend) =>
                     <div
-                      key={friend.id}
-                      onClick={() => {
-                        setSelectedConversation(friend.id);
-                        setActiveTab('messages');
-                        if (window.innerWidth < 1024) setShowLeftSidebar(false);
-                      }}
+                        key={friend.id}
+                        onClick={() => {
+                          setSelectedConversation(friend.id);
+                          setActiveTab('messages');
+                          setMobileShowChat(true);
+                        }}
                       className="p-3 cursor-pointer transition-colors rounded-lg border border-gray-100 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700/50">
                         <div className="flex items-center gap-3">
                             <div className="relative">
@@ -525,17 +490,9 @@ const MessagingPage: React.FC = () => {
                 </div>
               </div>
             </div>
-          </>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-2">
-            <div className="transform -rotate-90 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap font-medium tracking-wider">
-              MESSAGERIE
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
 
-        <div className={`flex-1 flex flex-col bg-white dark:bg-slate-800 transition-colors ${!selectedConversation ? 'hidden lg:flex' : 'flex'}`}>
+        <div className={`flex-1 flex-col bg-white dark:bg-slate-800 transition-colors ${mobileShowChat ? 'flex' : 'hidden lg:flex'}`}>
           {currentConversation && !deletedConversations.includes(currentConversation.id) ? (
             <>
               <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-colors">
@@ -544,17 +501,12 @@ const MessagingPage: React.FC = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setShowLeftSidebar(true);
+                          setMobileShowChat(false);
                         }}
-                        className="lg:hidden p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors relative"
-                        title="Conversations"
+                        className="lg:hidden p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                        title="Retour"
                       >
-                        <MessageSquare size={24} />
-                        {totalUnreadCount > 0 && (
-                          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800 animate-pulse">
-                            {totalUnreadCount}
-                          </span>
-                        )}
+                        <ChevronLeft size={24} />
                       </button>
 
                       <div 
@@ -735,19 +687,10 @@ const MessagingPage: React.FC = () => {
             </div>
 
             <div className="p-4 border-b border-gray-200 dark:border-slate-700 transition-colors">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Ajouter un ami</h3>
-                <button onClick={() => setShowAddFriendForm(!showAddFriendForm)} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 p-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"><Plus size={16} /></button>
+                <button onClick={() => setShowAddFriendForm(true)} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 p-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"><Plus size={16} /></button>
               </div>
-              {showAddFriendForm && (
-                <div className="space-y-3">
-                  <div className="relative">
-                    <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-                    <input type="text" value={searchFriend} onChange={(e) => setSearchFriend(e.target.value)} placeholder="Email de l'ami" className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-900 dark:text-white transition-colors" />
-                  </div>
-                  <button onClick={handleSendFriendRequest} disabled={!searchFriend.trim()} className="w-full bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Envoyer une demande</button>
-                </div>
-              )}
             </div>
           </>
         )}
@@ -826,10 +769,50 @@ const MessagingPage: React.FC = () => {
               <button onClick={handleCreateGroupSubmit} disabled={!groupName.trim() || selectedFriendsForGroup.length === 0} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-50 shadow-lg shadow-blue-500/20">Créer le groupe</button>
             </div>
           </div>
-        </div>
-      )}
+          </div>
+        )}
 
-      {(showMoreOptions || showEmojiPicker || showCreateGroupModal) && (
+        {showAddFriendForm && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transition-colors"
+            >
+              <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-blue-50/50 dark:from-blue-900/10 to-purple-50/50 dark:to-purple-900/10">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Ajouter un ami</h2>
+                <button onClick={() => { setShowAddFriendForm(false); setAddFriendEmail(''); }} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors"><X size={20} /></button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Email de l'ami</label>
+                  <div className="relative">
+                    <input 
+                      type="email" 
+                      value={addFriendEmail} 
+                      onChange={(e) => setAddFriendEmail(e.target.value)} 
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleSendFriendRequest(); }}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white transition-colors" 
+                      placeholder="exemple@email.com" 
+                      autoFocus
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Entrez l'adresse email de la personne que vous souhaitez ajouter comme ami.</p>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 p-6 border-t border-gray-200 dark:border-slate-700">
+                <button onClick={() => { setShowAddFriendForm(false); setAddFriendEmail(''); }} className="px-6 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-xl font-semibold transition-colors">Annuler</button>
+                <button onClick={handleSendFriendRequest} disabled={!addFriendEmail.trim()} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-50 shadow-lg shadow-blue-500/20">
+                  Envoyer la demande
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {(showMoreOptions || showEmojiPicker || showCreateGroupModal) && (
         <div className="absolute inset-0 z-0" onClick={() => { setShowMoreOptions(false); setShowEmojiPicker(false); setShowCreateGroupModal(false); }} />
       )}
 
