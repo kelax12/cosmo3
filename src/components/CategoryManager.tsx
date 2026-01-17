@@ -49,69 +49,77 @@ export const getColorFr = (colorName: string) => {
   return names[colorName] || colorName;
 };
 
-const CategoryManager: React.FC<CategoryManagerProps> = ({
-  isOpen,
-  onClose,
-  categories,
-  onAdd,
-  onUpdate,
-  onDelete
-}) => {
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Omit<Category, 'id'>>({
-    name: '',
-    color: 'blue',
-    icon: '📂'
-  });
+  const CategoryManager: React.FC<CategoryManagerProps> = ({
+    isOpen,
+    onClose,
+    categories,
+    onAdd,
+    onUpdate,
+    onDelete
+  }) => {
+    const [isAdding, setIsAdding] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+    const [formData, setFormData] = useState<Omit<Category, 'id'>>({
+      name: '',
+      color: 'blue',
+      icon: '📂'
+    });
 
-  const listContainerRef = useRef<HTMLDivElement>(null);
-  const lastCategoryCount = useRef(categories.length);
+    const listContainerRef = useRef<HTMLDivElement>(null);
+    const lastCategoryCount = useRef(categories.length);
 
-  useEffect(() => {
-    if (categories.length > lastCategoryCount.current) {
-      setTimeout(() => {
-        listContainerRef.current?.scrollTo({
-          top: listContainerRef.current.scrollHeight,
-          behavior: 'smooth'
+    useEffect(() => {
+      if (categories.length > lastCategoryCount.current) {
+        setTimeout(() => {
+          listContainerRef.current?.scrollTo({
+            top: listContainerRef.current.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 100);
+      }
+      lastCategoryCount.current = categories.length;
+    }, [categories.length]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!formData.name.trim()) return;
+
+      if (editingId) {
+        onUpdate(editingId, formData);
+        setEditingId(null);
+      } else {
+        onAdd({
+          ...formData,
+          id: Date.now().toString()
         });
-      }, 100);
-    }
-    lastCategoryCount.current = categories.length;
-  }, [categories.length]);
+        setIsAdding(false);
+      }
+      setFormData({ name: '', color: 'blue', icon: '📂' });
+    };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-
-    if (editingId) {
-      onUpdate(editingId, formData);
-      setEditingId(null);
-    } else {
-      onAdd({
-        ...formData,
-        id: Date.now().toString()
+    const startEdit = (category: Category) => {
+      setEditingId(category.id);
+      setFormData({
+        name: category.name,
+        color: category.color,
+        icon: category.icon
       });
       setIsAdding(false);
-    }
-    setFormData({ name: '', color: 'blue', icon: '📂' });
-  };
+    };
 
-  const startEdit = (category: Category) => {
-    setEditingId(category.id);
-    setFormData({
-      name: category.name,
-      color: category.color,
-      icon: category.icon
-    });
-    setIsAdding(false);
-  };
+    const cancelEdit = () => {
+      setEditingId(null);
+      setIsAdding(false);
+      setFormData({ name: '', color: 'blue', icon: '📂' });
+    };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setIsAdding(false);
-    setFormData({ name: '', color: 'blue', icon: '📂' });
-  };
+    const confirmDelete = () => {
+      if (categoryToDelete) {
+        onDelete(categoryToDelete);
+        setCategoryToDelete(null);
+      }
+    };
 
   return (
     <AnimatePresence>
@@ -335,44 +343,82 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => startEdit(category)}
-                              className="p-2.5 bg-slate-50 dark:bg-slate-700/50 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all shadow-sm active:scale-90"
-                              title="Modifier"
-                            >
-                              <Edit2 size={18} />
-                            </button>
-                            <button
-                              onClick={() => onDelete(category.id)}
-                              className="p-2.5 bg-slate-50 dark:bg-slate-700/50 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all shadow-sm active:scale-90"
-                              title="Supprimer"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  )}
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => startEdit(category)}
+                                className="p-2.5 bg-slate-50 dark:bg-slate-700/50 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all shadow-sm active:scale-90"
+                                title="Modifier"
+                              >
+                                <Edit2 size={18} />
+                              </button>
+                              <button
+                                onClick={() => setCategoryToDelete(category.id)}
+                                className="p-2.5 bg-slate-50 dark:bg-slate-700/50 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all shadow-sm active:scale-90"
+                                title="Supprimer"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Footer */}
-            <div className="p-4 px-6 border-t dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-end">
-              <button
-                onClick={onClose}
-                className="px-8 py-2.5 bg-slate-800 hover:bg-slate-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95"
-              >
-                Fermer
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
-};
+              {/* Footer */}
+              <div className="p-4 px-6 border-t dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-end">
+                <button
+                  onClick={onClose}
+                  className="px-8 py-2.5 bg-slate-800 hover:bg-slate-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95"
+                >
+                  Fermer
+                </button>
+              </div>
+            </motion.div>
+
+            {/* Delete Confirmation Modal */}
+            <AnimatePresence>
+              {categoryToDelete && (
+                <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/70 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
+                  <motion.div 
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-700"
+                  >
+                    <div className="p-6">
+                      <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+                        <Trash2 className="text-red-600 dark:text-red-400" size={24} />
+                      </div>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Supprimer la catégorie</h3>
+                      <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
+                        Êtes-vous sûr de vouloir supprimer cette catégorie ? Cette action est irréversible.
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => setCategoryToDelete(null)}
+                          className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200"
+                        >
+                          Annuler
+                        </button>
+                        <button
+                          onClick={confirmDelete}
+                          className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-all duration-200 shadow-md shadow-red-500/20"
+                        >
+                          Supprimer
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+      </AnimatePresence>
+    );
+  };
 
 export default CategoryManager;
