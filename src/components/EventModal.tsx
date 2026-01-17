@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, Clock, Plus } from "lucide-react";
 import { Task, CalendarEvent, useTasks } from "../context/TaskContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -49,10 +49,38 @@ const EventModal: React.FC<EventModalProps> = ({
   const [endDate, setEndDate] = useState("");
   const [endTime, setEndTime] = useState("");
   const [notes, setNotes] = useState("");
-  const [color, setColor] = useState("#3B82F6");
+  const [color, setColor] = useState(categories[0]?.color || "#3B82F6");
   const [prefilledFields, setPrefilledFields] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isColorSettingsOpen, setIsColorSettingsOpen] = useState(false);
+  const [activeTimeAssistant, setActiveTimeAssistant] = useState<'start' | 'end' | null>(null);
+
+  const startTimeRef = useRef<HTMLDivElement>(null);
+  const endTimeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (activeTimeAssistant === 'start' && startTimeRef.current && !startTimeRef.current.contains(event.target as Node)) {
+        setActiveTimeAssistant(null);
+      }
+      if (activeTimeAssistant === 'end' && endTimeRef.current && !endTimeRef.current.contains(event.target as Node)) {
+        setActiveTimeAssistant(null);
+      }
+    };
+
+    if (activeTimeAssistant) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [activeTimeAssistant]);
+
+  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0'));
 
   useEffect(() => {
     if (!isOpen) return;
@@ -136,16 +164,16 @@ const EventModal: React.FC<EventModalProps> = ({
 
       if (task.category) {
         const categoryColor = categories.find((cat) => cat.id === task.category)?.color;
-        setColor(categoryColor || favoriteColors[0] || "#3B82F6");
+        setColor(categoryColor || categories[0]?.color || "#3B82F6");
       } else {
-        setColor(favoriteColors[0] || "#3B82F6");
+        setColor(categories[0]?.color || "#3B82F6");
       }
     }
 
     setPrefilledFields(prefilled);
   }, [isOpen, mode, task, event, prefilledTimeSlot, categories, favoriteColors]);
 
-  const handleFieldChange = (field: string, setter: (val: any) => void, value: any) => {
+  const handleFieldChange = <T,>(field: string, setter: (val: T) => void, value: T) => {
     setter(value);
     if (mode === 'add') {
       setPrefilledFields((prev) => {
@@ -268,7 +296,11 @@ const EventModal: React.FC<EventModalProps> = ({
   const isPrefilledMode = mode === 'add';
 
   const renderContent = () => (
-    <>
+    <div
+      className="md:rounded-2xl shadow-2xl w-full md:max-w-4xl h-full md:h-auto md:max-h-[90vh] overflow-hidden opacity-0 scale-95 animate-modal-content"
+      style={{ backgroundColor: "rgb(var(--color-surface))" }}
+      onClick={(e) => e.stopPropagation()}
+    >
       <div
         className="flex justify-between items-center px-6 py-4 border-b bg-gradient-to-r from-blue-50 dark:from-blue-900/20 to-purple-50 dark:to-purple-900/20 transition-colors"
         style={{ borderColor: "rgb(var(--color-border))" }}
@@ -301,7 +333,7 @@ const EventModal: React.FC<EventModalProps> = ({
 
       <form
         onSubmit={handleSubmit}
-        className="p-4 md:p-5 overflow-y-auto max-h-[85vh] md:max-h-none"
+        className="p-4 md:p-5 overflow-y-auto h-[calc(100%-64px)] md:h-auto md:max-h-[calc(90vh-64px)]"
       >
         <div className="flex flex-col md:grid md:grid-cols-12 gap-5">
           <div className="md:col-span-7 space-y-3">
@@ -323,31 +355,37 @@ const EventModal: React.FC<EventModalProps> = ({
                     ? "bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800"
                     : ""
                 }`}
-                style={{
-                  backgroundColor:
-                    isPrefilledMode && prefilledFields.has("title")
-                      ? undefined
-                      : "rgb(var(--color-surface))",
-                  color: "rgb(var(--color-text-primary))",
-                  borderColor:
-                    isPrefilledMode && prefilledFields.has("title")
-                      ? undefined
-                      : "rgb(var(--color-border))",
-                }}
-                placeholder="Nom de l'événement"
+                  style={{
+                    backgroundColor:
+                      isPrefilledMode && prefilledFields.has("title")
+                        ? undefined
+                        : "transparent",
+                    color: "rgb(var(--color-text-primary))",
+                    borderColor:
+                      isPrefilledMode && prefilledFields.has("title")
+                        ? undefined
+                        : "rgb(var(--color-border))",
+                  }}
+                placeholder="nom de l'événement"
                 required
               />
             </div>
 
             <div
-              className="p-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-950/40 transition-colors shadow-inner"
+              className="p-4 rounded-2xl border transition-colors relative bg-transparent"
+              style={{
+                borderColor: "rgb(var(--color-border))",
+              }}
             >
               <div className="grid grid-cols-1 gap-4">
                 <div className="group">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                      <span
+                        className="text-sm font-bold"
+                        style={{ color: "rgb(var(--color-text-primary))" }}
+                      >
                         Début de l'événement
                       </span>
                     </div>
@@ -370,7 +408,7 @@ const EventModal: React.FC<EventModalProps> = ({
                         onChange={(date) =>
                           handleFieldChange("startDate", setStartDate, date)
                         }
-                        placeholder="Sélectionner une date"
+                        placeholder="sélectionner une date"
                         className={`h-11 ${
                           isPrefilledMode && prefilledFields.has("startDate")
                             ? "border-blue-300 dark:border-blue-800"
@@ -379,24 +417,109 @@ const EventModal: React.FC<EventModalProps> = ({
                       />
                     </div>
 
-                    <div className="relative w-full sm:w-36">
-                      <input
-                        type="time"
-                        value={startTime}
-                        onChange={(e) =>
-                          handleFieldChange(
-                            "startTime",
-                            setStartTime,
-                            e.target.value
-                          )
-                        }
-                          className={`w-full px-3 py-2.5 h-11 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all hover:border-blue-400 dark:bg-slate-900/50 dark:text-white ${
-                            isPrefilledMode && prefilledFields.has("startTime")
-                              ? "border-blue-300 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/20"
-                              : "border-gray-200 dark:border-white/10 bg-white"
-                          }`}
+                      <div className="relative w-full sm:w-40" ref={startTimeRef}>
+                        <input
+                          type="time"
+                          value={startTime}
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "startTime",
+                              setStartTime,
+                              e.target.value
+                            )
+                          }
+                        className={`w-full pl-3 pr-10 py-2.5 h-11 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all hover:border-blue-400 appearance-none cursor-pointer ${
+                          isPrefilledMode && prefilledFields.has("startTime")
+                            ? "border-blue-300 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/20"
+                            : "border-gray-200 dark:border-white/10"
+                        }`}
+                          style={{
+                            backgroundColor:
+                              isPrefilledMode && prefilledFields.has("startTime")
+                                ? undefined
+                                : "transparent",
+                            color: "rgb(var(--color-text-primary))",
+                            borderColor:
+                              isPrefilledMode && prefilledFields.has("startTime")
+                                ? undefined
+                                : "rgb(var(--color-border))",
+                          }}
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setActiveTimeAssistant(activeTimeAssistant === 'start' ? null : 'start')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors"
+                        title="Choisir une heure"
+                      >
+                        <Clock
+                          size={16}
+                          style={{ color: "rgb(var(--color-text-muted))" }}
+                        />
+                      </button>
+
+                      <AnimatePresence>
+                        {activeTimeAssistant === 'start' && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                              className="absolute z-50 right-0 top-full mt-2 w-48 overflow-hidden rounded-xl border shadow-xl backdrop-blur-sm"
+                            style={{ 
+                              backgroundColor: "rgb(var(--color-surface))",
+                              borderColor: "rgb(var(--color-border))"
+                            }}
+                          >
+                            <div className="flex h-64 overflow-hidden">
+                              {/* Colonne Heures */}
+                              <div className="flex-1 overflow-y-auto py-1 border-r" style={{ borderColor: "rgb(var(--color-border))" }}>
+                                {hours.map((h) => {
+                                  const isSelected = startTime.startsWith(h);
+                                  return (
+                                    <button
+                                      key={h}
+                                      type="button"
+                                      onClick={() => {
+                                        const currentMin = startTime.split(':')[1] || '00';
+                                        handleFieldChange("startTime", setStartTime, `${h}:${currentMin}`);
+                                      }}
+                                      className={`w-full px-2 py-1.5 text-xs font-medium transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20 ${
+                                        isSelected ? 'bg-blue-500/10 text-blue-600 font-bold' : ''
+                                      }`}
+                                      style={{ color: isSelected ? undefined : "rgb(var(--color-text-primary))" }}
+                                    >
+                                      {h}h
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              {/* Colonne Minutes */}
+                              <div className="flex-1 overflow-y-auto py-1">
+                                {minutes.map((m) => {
+                                  const isSelected = startTime.endsWith(m);
+                                  return (
+                                    <button
+                                      key={m}
+                                      type="button"
+                                      onClick={() => {
+                                        const currentHour = startTime.split(':')[0] || '12';
+                                        handleFieldChange("startTime", setStartTime, `${currentHour}:${m}`);
+                                        setActiveTimeAssistant(null);
+                                      }}
+                                      className={`w-full px-2 py-1.5 text-xs font-medium transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20 ${
+                                        isSelected ? 'bg-blue-500/10 text-blue-600 font-bold' : ''
+                                      }`}
+                                      style={{ color: isSelected ? undefined : "rgb(var(--color-text-primary))" }}
+                                    >
+                                      {m}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
                 </div>
@@ -405,7 +528,10 @@ const EventModal: React.FC<EventModalProps> = ({
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                      <span
+                        className="text-sm font-bold"
+                        style={{ color: "rgb(var(--color-text-primary))" }}
+                      >
                         Fin de l'événement
                       </span>
                     </div>
@@ -428,7 +554,7 @@ const EventModal: React.FC<EventModalProps> = ({
                         onChange={(date) =>
                           handleFieldChange("endDate", setEndDate, date)
                         }
-                        placeholder="Sélectionner une date"
+                        placeholder="sélectionner une date"
                         className={`h-11 ${
                           isPrefilledMode && prefilledFields.has("endDate")
                             ? "border-blue-300 dark:border-blue-800"
@@ -437,33 +563,124 @@ const EventModal: React.FC<EventModalProps> = ({
                       />
                     </div>
 
-                    <div className="relative w-full sm:w-36">
-                      <input
-                        type="time"
-                        value={endTime}
-                        onChange={(e) =>
-                          handleFieldChange(
-                            "endTime",
-                            setEndTime,
-                            e.target.value
-                          )
-                        }
-                          className={`w-full px-3 py-2.5 h-11 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all hover:border-blue-400 dark:bg-slate-900/50 dark:text-white ${
-                            isPrefilledMode && prefilledFields.has("endTime")
-                              ? "border-blue-300 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/20"
-                              : "border-gray-200 dark:border-white/10 bg-white"
-                          }`}
+                      <div className="relative w-full sm:w-40" ref={endTimeRef}>
+                        <input
+                          type="time"
+                          value={endTime}
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "endTime",
+                              setEndTime,
+                              e.target.value
+                            )
+                          }
+                        className={`w-full pl-3 pr-10 py-2.5 h-11 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all hover:border-blue-400 appearance-none cursor-pointer ${
+                          isPrefilledMode && prefilledFields.has("endTime")
+                            ? "border-blue-300 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/20"
+                            : "border-gray-200 dark:border-white/10"
+                        }`}
+                          style={{
+                            backgroundColor:
+                              isPrefilledMode && prefilledFields.has("endTime")
+                                ? undefined
+                                : "transparent",
+                            color: "rgb(var(--color-text-primary))",
+                            borderColor:
+                              isPrefilledMode && prefilledFields.has("endTime")
+                                ? undefined
+                                : "rgb(var(--color-border))",
+                          }}
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setActiveTimeAssistant(activeTimeAssistant === 'end' ? null : 'end')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors"
+                        title="Choisir une heure"
+                      >
+                        <Clock
+                          size={16}
+                          style={{ color: "rgb(var(--color-text-muted))" }}
+                        />
+                      </button>
+
+                      <AnimatePresence>
+                        {activeTimeAssistant === 'end' && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                              className="absolute z-50 right-0 top-full mt-2 w-48 overflow-hidden rounded-xl border shadow-xl backdrop-blur-sm"
+                            style={{ 
+                              backgroundColor: "rgb(var(--color-surface))",
+                              borderColor: "rgb(var(--color-border))"
+                            }}
+                          >
+                            <div className="flex h-64 overflow-hidden">
+                              {/* Colonne Heures */}
+                              <div className="flex-1 overflow-y-auto py-1 border-r" style={{ borderColor: "rgb(var(--color-border))" }}>
+                                {hours.map((h) => {
+                                  const isSelected = endTime.startsWith(h);
+                                  return (
+                                    <button
+                                      key={h}
+                                      type="button"
+                                      onClick={() => {
+                                        const currentMin = endTime.split(':')[1] || '00';
+                                        handleFieldChange("endTime", setEndTime, `${h}:${currentMin}`);
+                                      }}
+                                      className={`w-full px-2 py-1.5 text-xs font-medium transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20 ${
+                                        isSelected ? 'bg-blue-500/10 text-blue-600 font-bold' : ''
+                                      }`}
+                                      style={{ color: isSelected ? undefined : "rgb(var(--color-text-primary))" }}
+                                    >
+                                      {h}h
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              {/* Colonne Minutes */}
+                              <div className="flex-1 overflow-y-auto py-1">
+                                {minutes.map((m) => {
+                                  const isSelected = endTime.endsWith(m);
+                                  return (
+                                    <button
+                                      key={m}
+                                      type="button"
+                                      onClick={() => {
+                                        const currentHour = endTime.split(':')[0] || '12';
+                                        handleFieldChange("endTime", setEndTime, `${currentHour}:${m}`);
+                                        setActiveTimeAssistant(null);
+                                      }}
+                                      className={`w-full px-2 py-1.5 text-xs font-medium transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20 ${
+                                        isSelected ? 'bg-blue-500/10 text-blue-600 font-bold' : ''
+                                      }`}
+                                      style={{ color: isSelected ? undefined : "rgb(var(--color-text-primary))" }}
+                                    >
+                                      {m}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
                 </div>
               </div>
 
               {calculateDuration() && (
-                <div className="mt-3.5 pt-2.5 border-t border-dashed border-gray-200 dark:border-gray-700">
+                <div
+                  className="mt-3.5 pt-2.5 border-t border-dashed"
+                  style={{ borderColor: "rgb(var(--color-border))" }}
+                >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-gray-500">
+                    <span
+                      className="text-xs font-medium"
+                      style={{ color: "rgb(var(--color-text-muted))" }}
+                    >
                       Durée totale
                     </span>
                     <div className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
@@ -493,23 +710,23 @@ const EventModal: React.FC<EventModalProps> = ({
                     ? "bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800"
                     : ""
                 }`}
-                style={{
-                  backgroundColor:
-                    isPrefilledMode && prefilledFields.has("notes")
-                      ? undefined
-                      : "rgb(var(--color-surface))",
-                  color: "rgb(var(--color-text-primary))",
-                  borderColor:
-                    isPrefilledMode && prefilledFields.has("notes")
-                      ? undefined
-                      : "rgb(var(--color-border))",
-                }}
-                placeholder="Description de l'événement"
+                  style={{
+                    backgroundColor:
+                      isPrefilledMode && prefilledFields.has("notes")
+                        ? undefined
+                        : "transparent",
+                    color: "rgb(var(--color-text-primary))",
+                    borderColor:
+                      isPrefilledMode && prefilledFields.has("notes")
+                        ? undefined
+                        : "rgb(var(--color-border))",
+                  }}
+                  placeholder="description de l'événement"
               />
             </div>
           </div>
 
-          <div className="md:col-span-5 space-y-3">
+              <div className="md:col-span-5 space-y-3">
             <div>
               <label
                 className="flex justify-between items-center text-sm font-semibold mb-2"
@@ -522,15 +739,15 @@ const EventModal: React.FC<EventModalProps> = ({
                 />
               </label>
 
-              <div className="grid grid-cols-4 gap-1.5 mb-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() =>
-                      handleFieldChange("color", setColor, cat.color)
-                    }
-                    className="relative w-full h-10 rounded-lg border-2 transition-all hover:scale-105 group"
+                <div className="grid grid-cols-4 gap-1.5 mb-2 h-[92px] overflow-y-auto pr-1 custom-scrollbar">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() =>
+                        handleFieldChange("color", setColor, cat.color)
+                      }
+                      className="relative w-full h-10 rounded-lg border-2 transition-all hover:scale-105 group shrink-0"
                     style={{
                       backgroundColor: cat.color,
                       borderColor:
@@ -556,7 +773,7 @@ const EventModal: React.FC<EventModalProps> = ({
                       </div>
                     )}
                     <span
-                      className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                      className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10"
                       style={{ color: "rgb(var(--color-text-muted))" }}
                     >
                       {cat.name}
@@ -565,64 +782,64 @@ const EventModal: React.FC<EventModalProps> = ({
                 ))}
               </div>
 
-              {categories.length > 0 && (
-                <div
-                  className="p-2.5 rounded-xl border bg-opacity-30 transition-colors"
-                  style={{
-                    borderColor: "rgb(var(--color-border))",
-                  }}
-                >
+                {categories.length > 0 && (
+                  <div
+                    className="p-2.5 rounded-xl border bg-transparent transition-colors overflow-hidden"
+                    style={{
+                      borderColor: "rgb(var(--color-border))",
+                    }}
+                  >
                   <h4
                     className="text-[12px] font-bold uppercase tracking-widest mb-2"
                     style={{ color: "rgb(var(--color-text-muted))" }}
                   >
                     Légende des catégories
                   </h4>
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                    {categories.map((cat) => (
-                      <div key={cat.id} className="flex items-center gap-1.5">
-                        <div
-                          className="w-2 h-2 rounded-full shadow-sm"
-                          style={{ backgroundColor: cat.color }}
-                        />
-                        <span
-                          className="text-[13px] font-medium truncate"
-                          style={{ color: "rgb(var(--color-text-primary))" }}
-                        >
-                          {cat.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 max-h-[100px] overflow-y-auto pr-1 custom-scrollbar">
+                      {categories.map((cat) => (
+                        <div key={cat.id} className="flex items-center gap-1.5 shrink-0">
+                          <div
+                            className="w-2 h-2 rounded-full shadow-sm"
+                            style={{ backgroundColor: cat.color }}
+                          />
+                          <span
+                            className="text-[13px] font-medium truncate"
+                            style={{ color: "rgb(var(--color-text-primary))" }}
+                          >
+                            {cat.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                 </div>
               )}
             </div>
 
-            <div
-              className="p-3 rounded-xl border transition-colors"
-              style={{ borderColor: "rgb(var(--color-border))" }}
-            >
-              <h4
-                className="text-xs font-semibold mb-2"
-                style={{ color: "rgb(var(--color-text-primary))" }}
-              >
-                Aperçu
-              </h4>
               <div
-                className="p-2.5 rounded-lg text-white text-center text-sm font-medium shadow-sm transition-transform hover:scale-[1.02]"
-                style={{ backgroundColor: color }}
+                className="hidden md:block p-3 rounded-xl border transition-colors bg-transparent"
+                style={{ borderColor: "rgb(var(--color-border))" }}
               >
-                {title || "Nom de l'événement"}
-              </div>
-              {calculateDuration() && (
-                <div
-                  className="text-[12px] text-center mt-1.5"
-                  style={{ color: "rgb(var(--color-text-muted))" }}
+                <h4
+                  className="text-xs font-semibold mb-2"
+                  style={{ color: "rgb(var(--color-text-primary))" }}
                 >
-                  {calculateDuration()}
+                  Aperçu
+                </h4>
+                <div
+                  className="p-2.5 rounded-lg text-white text-center text-sm font-medium shadow-sm transition-transform hover:scale-[1.02]"
+                  style={{ backgroundColor: color }}
+                >
+                    {title || "nom de l'événement"}
                 </div>
-              )}
-            </div>
+                {calculateDuration() && (
+                  <div
+                    className="text-[12px] text-center mt-1.5"
+                    style={{ color: "rgb(var(--color-text-muted))" }}
+                  >
+                    {calculateDuration()}
+                  </div>
+                )}
+              </div>
 
             <div className="pt-2 space-y-2">
               <button
@@ -662,32 +879,17 @@ const EventModal: React.FC<EventModalProps> = ({
           </div>
         </div>
       </form>
-    </>
+    </div>
   );
 
   return (
     <>
-      {mode === 'edit' ? (
-        <div
-          className="modal-content rounded-2xl shadow-2xl w-full max-w-4xl xl:max-w-5xl 2xl:max-w-6xl 3xl:max-w-[1600px] min-h-[50vh] 3xl:min-h-[85vh] h-auto transition-colors overflow-hidden"
-          style={{ backgroundColor: "rgb(var(--color-surface))" }}
-        >
-          {renderContent()}
-        </div>
-      ) : (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 opacity-0 animate-modal-backdrop"
-          onClick={onClose}
-        >
-          <div
-            className="rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden opacity-0 scale-95 animate-modal-content"
-            style={{ backgroundColor: "rgb(var(--color-surface))" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {renderContent()}
-          </div>
-        </div>
-      )}
+      <div
+        className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 md:p-4 opacity-0 animate-modal-backdrop"
+        onClick={onClose}
+      >
+        {renderContent()}
+      </div>
 
       <ColorSettingsModal
         isOpen={isColorSettingsOpen}
