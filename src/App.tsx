@@ -48,15 +48,13 @@ function AppContent() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TaskProvider>
-      <TooltipProvider>
+    <TooltipProvider>
         <Toaster />
-        <BrowserRouter>
-          <HoverReceiver />
-          <AppContent />
-        </BrowserRouter>
-      </TooltipProvider>
-    </TaskProvider>
+      <HoverReceiver />
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 
