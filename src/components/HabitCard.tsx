@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Flame, Calendar, Edit2, Trash2, CheckCircle, Circle, X, Save } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTasks, Habit } from '../context/TaskContext';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '../components/ui/alert-dialog';
 
 interface HabitCardProps {
   habit: Habit;
@@ -38,9 +28,16 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, externalIsEditing, onExter
     color: habit.color
   });
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Use external editing state if provided, otherwise use internal
   const isEditing = externalIsEditing !== undefined ? externalIsEditing : internalIsEditing;
   const setIsEditing = onExternalEditingChange || setInternalIsEditing;
+
+  const handleDelete = () => {
+    deleteHabit(habit.id);
+    setIsDeleting(false);
+  };
 
   // Auto-start editing mode if externalIsEditing is true
   useEffect(() => {
@@ -180,15 +177,14 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, externalIsEditing, onExter
               </div>
             </div>
             
-            <div className="flex justify-end pt-4">
-              <button
-                onClick={handleSaveEdit}
-                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-colors font-medium"
-              >
-                <Save size={16} />
-                Sauvegarder
-              </button>
-            </div>
+              <div className="flex justify-end pt-4">
+                <button
+                  onClick={handleSaveEdit}
+                  className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-colors font-medium"
+                >
+                  Sauvegarder
+                </button>
+              </div>
           </div>
         ) : (
           /* Mode affichage normal */
@@ -232,34 +228,52 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, externalIsEditing, onExter
                   >
                     <Edit2 size={18} className="md:w-4 md:h-4" />
                   </button>
-                  <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <button 
-                          className="p-2 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={18} className="md:w-4 md:h-4" />
-                        </button>
-                      </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Êtes-vous sûr de vouloir supprimer l'habitude "{habit.name}" ? Cette action est irréversible.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Annuler</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => deleteHabit(habit.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white"
+                    <button 
+                      onClick={() => setIsDeleting(true)}
+                      className="p-2 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={18} className="md:w-4 md:h-4" />
+                    </button>
+                  </div>
+                </div>
+      
+                <AnimatePresence>
+                  {isDeleting && (
+                    <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+                      <motion.div 
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-700"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        Supprimer
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </div>
+                        <div className="p-6">
+                          <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+                            <Trash2 className="text-red-600 dark:text-red-400" size={24} />
+                          </div>
+                          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Supprimer l'habitude</h3>
+                          <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
+                            Êtes-vous sûr de vouloir supprimer l'habitude "{habit.name}" ? Cette action est irréversible.
+                          </p>
+                          <div className="flex gap-3">
+                            <button
+                              onClick={() => setIsDeleting(false)}
+                              className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200"
+                            >
+                              Annuler
+                            </button>
+                            <button
+                              onClick={handleDelete}
+                              className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-all duration-200 shadow-md shadow-red-500/20"
+                            >
+                              Supprimer
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </div>
+                  )}
+                </AnimatePresence>
   
             {/* Calendrier compact - toujours visible */}
             <div className="mb-4 overflow-x-auto pb-2 -mx-1 px-1 hide-scrollbar">
@@ -363,4 +377,3 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, externalIsEditing, onExter
 };
 
 export default HabitCard;
-
