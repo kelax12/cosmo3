@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Zap, Play, Check, Star, Users, MessageCircle, Sparkles } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
+import { useDarkMode } from '../hooks/useDarkMode';
 import AdModal from '../components/AdModal';
 import PaymentModal from '../components/PaymentModal';
 
@@ -30,6 +31,7 @@ const itemVariants = {
 
 export function PremiumPage() {
   const { user, isPremium, watchAd, updateUserSettings } = useTasks();
+  const { isDark } = useDarkMode();
   const [showAdModal, setShowAdModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
@@ -131,49 +133,24 @@ export function PremiumPage() {
             
             <div className="w-full sm:w-auto">
               {premium ? (
-                        <motion.div
-                          className="text-center px-6 py-3 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl font-black border-2 relative overflow-hidden"
-                          style={{
-                            borderColor: 'rgba(59, 130, 246, 0.8)',
-                          }}
-                          animate={{
-                            boxShadow: [
-                              "0 0 20px 2px rgba(59, 130, 246, 0.4), inset 0 0 10px rgba(59, 130, 246, 0.2)",
-                              "0 0 50px 15px rgba(37, 99, 235, 0.9), inset 0 0 25px rgba(37, 99, 235, 0.5)",
-                              "0 0 30px 5px rgba(147, 197, 253, 0.7), inset 0 0 15px rgba(147, 197, 253, 0.3)",
-                              "0 0 20px 2px rgba(59, 130, 246, 0.4), inset 0 0 10px rgba(59, 130, 246, 0.2)"
-                            ],
-                            borderColor: [
-                              "rgba(59, 130, 246, 0.6)",
-                              "rgba(147, 197, 253, 1)",
-                              "rgba(37, 99, 235, 1)",
-                              "rgba(96, 165, 250, 0.8)",
-                              "rgba(59, 130, 246, 0.6)"
-                            ],
-                            borderRadius: [
-                              "12px 12px 12px 12px",
-                              "18px 30px 14px 22px",
-                              "14px 22px 30px 18px",
-                              "25px 15px 22px 12px",
-                              "12px 12px 12px 12px"
-                            ],
-                            scale: [1, 1.04, 0.98, 1.04, 1],
-                            rotate: [0, 1, -1, 0.5, 0],
-                            skewY: [0, 2, -2, 1, 0],
-                            filter: [
-                              "drop-shadow(0 0 5px rgba(59, 130, 246, 0.5))",
-                              "drop-shadow(0 0 15px rgba(37, 99, 235, 0.8))",
-                              "drop-shadow(0 0 5px rgba(59, 130, 246, 0.5))"
-                            ]
-                          }}
-                          transition={{
-                            duration: 0.6,
-                            repeat: Infinity,
-                            ease: "easeInOut",
-                            times: [0, 0.25, 0.5, 0.75, 1]
-                          }}
-                          whileHover={{ scale: 1.1, transition: { duration: 0.2 } }}
-                        >
+                            <motion.div
+                              className="text-center px-6 py-3 rounded-xl font-black border-2 relative overflow-hidden transition-all duration-500 bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-500 text-amber-950 border-amber-600 shadow-xl shadow-amber-500/20"
+                              animate={{
+                                boxShadow: [
+                                  "0 4px 15px rgba(245, 158, 11, 0.3)",
+                                  "0 10px 30px rgba(245, 158, 11, 0.5)",
+                                  "0 4px 15px rgba(245, 158, 11, 0.3)"
+                                ],
+                                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                                scale: [1, 1.03, 1],
+                              }}
+                              transition={{
+                                duration: 3,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                              }}
+                              whileHover={{ scale: 1.1, transition: { duration: 0.2 } }}
+                            >
                   <span className="flex items-center gap-2 justify-center">
                     <Sparkles className="w-5 h-5" />
                     PREMIUM ACTIF
