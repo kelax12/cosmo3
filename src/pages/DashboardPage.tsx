@@ -7,6 +7,7 @@ import TodayHabits from '../components/TodayHabits';
 import TodayTasks from '../components/TodayTasks';
 import CollaborativeTasks from '../components/CollaborativeTasks';
 import ActiveOKRs from '../components/ActiveOKRs';
+import TextType from '../components/TextType';
 
 const DashboardPage: React.FC = () => {
   const { user, tasks, habits, okrs, events, isPremium } = useTasks();
@@ -106,22 +107,19 @@ const DashboardPage: React.FC = () => {
             variants={itemVariants}
           >
             <div className="flex-1">
-              <motion.h1 
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[rgb(var(--color-text-primary))] mb-2 lg:mb-3"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                Bonjour, <motion.span
-                  className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 dark:from-blue-400 dark:via-purple-400 dark:to-blue-400 bg-clip-text text-transparent bg-[length:200%_auto]"
-                  animate={{ 
-                    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
-                  }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                >
-{user.name}
-                 </motion.span>
-              </motion.h1>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[rgb(var(--color-text-primary))] mb-2 lg:mb-3">
+                <TextType
+                  text={`Bonjour, ${user.name}`}
+                  typingSpeed={80}
+                  pauseDuration={5000}
+                  deletingSpeed={50}
+                  loop={false}
+                  showCursor={true}
+                  cursorCharacter="|"
+                  cursorClassName="text-blue-500"
+                  className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 dark:from-blue-400 dark:via-purple-400 dark:to-blue-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient"
+                />
+              </h1>
               <motion.p 
                 className="text-[rgb(var(--color-text-secondary))] text-base lg:text-lg"
                 initial={{ opacity: 0 }}
