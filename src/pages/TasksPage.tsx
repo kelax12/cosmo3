@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import TaskTable from '../components/TaskTable';
 import TaskFilter from '../components/TaskFilter';
-import AddTaskForm from '../components/AddTaskForm';
+import TaskModal from '../components/TaskModal';
 import TasksSummary from '../components/TasksSummary';
 import DeadlineCalendar from '../components/DeadlineCalendar';
 import ListManager from '../components/ListManager';
@@ -340,21 +340,11 @@ const TasksPage: React.FC = () => {
                 )}
 
 
-              <AnimatePresence>
-                {showAddTaskForm && (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="mb-8"
-                  >
-                    <AddTaskForm 
-                      onFormToggle={setShowAddTaskForm}
-                      expanded={true}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                <TaskModal 
+                  isOpen={showAddTaskForm}
+                  onClose={() => setShowAddTaskForm(false)}
+                  isCreating={true}
+                />
               
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
