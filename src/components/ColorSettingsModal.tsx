@@ -8,9 +8,10 @@ type ColorSettingsModalProps = {
   onClose: () => void;
 };
 
-const ColorSettingsModal: React.FC<ColorSettingsModalProps> = ({ isOpen, onClose }) => {
+  const ColorSettingsModal: React.FC<ColorSettingsModalProps> = ({ isOpen, onClose }) => {
   const { categories, updateCategory, addCategory, deleteCategory } = useTasks();
   const [localCategories, setLocalCategories] = useState(categories);
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   if (!isOpen) return null;
@@ -40,7 +41,14 @@ const ColorSettingsModal: React.FC<ColorSettingsModalProps> = ({ isOpen, onClose
   };
 
   const handleDeleteLocal = (id: string) => {
-    setLocalCategories(prev => prev.filter(cat => cat.id !== id));
+    setCategoryToDelete(id);
+  };
+
+  const confirmDeleteLocal = () => {
+    if (categoryToDelete) {
+      setLocalCategories(prev => prev.filter(cat => cat.id !== categoryToDelete));
+      setCategoryToDelete(null);
+    }
   };
 
   const handleSave = () => {
@@ -167,6 +175,44 @@ const ColorSettingsModal: React.FC<ColorSettingsModalProps> = ({ isOpen, onClose
             </button>
           </div>
         </motion.div>
+
+        {/* Delete Confirmation Modal */}
+        <AnimatePresence>
+          {categoryToDelete && (
+            <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/70 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-700"
+              >
+                <div className="p-6">
+                  <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+                    <Trash2 className="text-red-600 dark:text-red-400" size={24} />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Supprimer la catégorie</h3>
+                  <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
+                    Êtes-vous sûr de vouloir supprimer cette catégorie ? Cette action est irréversible.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setCategoryToDelete(null)}
+                      className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={confirmDeleteLocal}
+                      className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-all duration-200 shadow-md shadow-red-500/20"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
     </div>
   );
 };
