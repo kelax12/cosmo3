@@ -47,17 +47,17 @@ function AppContent() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+    <QueryClientProvider client={queryClient}>
       <TaskProvider>
-        <Toaster />
-        <HoverReceiver />
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
+        <TooltipProvider>
+          <Toaster />
+          <HoverReceiver />
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </TooltipProvider>
       </TaskProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+    </QueryClientProvider>
 );
 
 export default App;
