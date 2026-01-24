@@ -1,8 +1,8 @@
 import React from 'react';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Circle, Sparkles } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
 
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark' | 'monochrome' | 'glass';
 
 interface ThemeToggleProps {
   className?: string;
@@ -13,6 +13,12 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', showLabel = f
   const { theme, toggleTheme } = useDarkMode();
 
   const getThemeIcon = (currentTheme: Theme) => {
+    if (currentTheme === 'glass') {
+      return <Sparkles size={20} className="text-cyan-400" />;
+    }
+    if (currentTheme === 'monochrome') {
+      return <Circle size={20} className="text-white" fill="white" />;
+    }
     if (currentTheme === 'dark') {
       return <Moon size={20} className="text-[rgb(var(--color-accent))]" />;
     }
@@ -20,6 +26,8 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', showLabel = f
   };
 
   const getThemeLabel = (currentTheme: Theme) => {
+    if (currentTheme === 'glass') return 'Glass';
+    if (currentTheme === 'monochrome') return 'Noir & Blanc';
     return currentTheme === 'dark' ? 'Mode sombre' : 'Mode clair';
   };
 
