@@ -8,6 +8,7 @@ import TaskCategoryIndicator from './TaskCategoryIndicator';
 import TaskModal from './TaskModal';
 import EventModal from './EventModal';
 import CollaboratorModal from './CollaboratorModal';
+import AddToListModal from './AddToListModal';
 
 type TaskTableProps = {
   tasks?: Task[];
@@ -35,11 +36,7 @@ const TaskTable: React.FC<TaskTableProps> = ({
   }, [propSortField]);
 
   useEffect(() => {
-    if (localSortField === 'priority') {
-      setSortDirection('desc');
-    } else {
-      setSortDirection('asc');
-    }
+    setSortDirection('asc');
   }, [localSortField]);
 
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
@@ -74,7 +71,7 @@ const TaskTable: React.FC<TaskTableProps> = ({
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setLocalSortField(field);
-      setSortDirection(field === 'priority' ? 'desc' : 'asc');
+      setSortDirection('asc');
     }
   };
 
@@ -279,8 +276,8 @@ const TaskTable: React.FC<TaskTableProps> = ({
             onClick={() => toggleQuickFilter('favoris')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-sm border ${
               activeQuickFilter === 'favoris' 
-                ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md' 
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700'
+                ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 monochrome:bg-white monochrome:text-black monochrome:border-white shadow-md' 
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700 monochrome:bg-neutral-900 monochrome:text-neutral-300 monochrome:border-neutral-700 monochrome:hover:bg-neutral-800'
             }`}
           >
             {activeQuickFilter === 'favoris' ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
@@ -292,8 +289,8 @@ const TaskTable: React.FC<TaskTableProps> = ({
             onClick={() => toggleQuickFilter('terminées')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-sm border ${
               activeQuickFilter === 'terminées'
-                ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700'
+                ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 monochrome:bg-white monochrome:text-black monochrome:border-white shadow-md'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700 monochrome:bg-neutral-900 monochrome:text-neutral-300 monochrome:border-neutral-700 monochrome:hover:bg-neutral-800'
             }`}
           >
             <CheckCircle2 size={20} />
@@ -305,8 +302,8 @@ const TaskTable: React.FC<TaskTableProps> = ({
               onClick={() => toggleQuickFilter('retard')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-sm border ${
                 activeQuickFilter === 'retard'
-                  ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-700 shadow-md'
-                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700'
+                  ? 'bg-red-100 dark:bg-red-900/30 monochrome:bg-neutral-800 text-red-600 dark:text-red-400 monochrome:text-neutral-300 border border-red-300 dark:border-red-700 monochrome:border-neutral-600 shadow-md'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700 monochrome:bg-neutral-900 monochrome:text-neutral-300 monochrome:border-neutral-700 monochrome:hover:bg-neutral-800'
               }`}
             >
               <AlertTriangle size={20} />
@@ -318,8 +315,8 @@ const TaskTable: React.FC<TaskTableProps> = ({
               onClick={() => toggleQuickFilter('collaboration')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-sm border ${
                 activeQuickFilter === 'collaboration'
-                  ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 shadow-md'
-                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700'
+                  ? 'bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:border-blue-600 monochrome:bg-white monochrome:text-black monochrome:border-white shadow-md'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700 monochrome:bg-neutral-900 monochrome:text-neutral-300 monochrome:border-neutral-700 monochrome:hover:bg-neutral-800'
               }`}
             >
               <Users size={20} />
@@ -333,11 +330,11 @@ const TaskTable: React.FC<TaskTableProps> = ({
       <div className="hidden md:block table-container shadow-sm overflow-x-auto">
         <table className="data-table w-full" style={{ minWidth: '1000px' }}>
           <thead>
-            <tr>
-              <th className="px-2 py-3" style={{ width: '40px' }}></th>
-              <th className="px-1 py-3" style={{ width: '30px' }}></th>
+            <tr className="monochrome:bg-neutral-900 monochrome:text-neutral-200">
+              <th className="px-2 py-3 monochrome:border-neutral-700" style={{ width: '40px' }}></th>
+              <th className="px-1 py-3 monochrome:border-neutral-700" style={{ width: '30px' }}></th>
               <th 
-                className="cursor-pointer px-2 py-3"
+                className="cursor-pointer px-2 py-3 monochrome:border-neutral-700 monochrome:hover:bg-neutral-800"
                 onClick={() => handleSort('name')}
               >
                 Nom de la tache
@@ -439,15 +436,15 @@ const TaskTable: React.FC<TaskTableProps> = ({
                 <td className="text-center px-1 py-4 whitespace-nowrap text-base font-medium" style={{ color: 'rgb(var(--color-text-primary))' }}>{task.estimatedTime}</td>
                 <td onClick={e => e.stopPropagation()} className="px-2 py-4 whitespace-nowrap">
                   <div className="flex justify-center items-center gap-1">
-                    <button 
-                      onClick={() => toggleBookmark(task.id)} 
-                      className={`p-2 rounded transition-colors ${task.bookmarked ? 'favorite-icon filled' : ''}`}
-                      style={{ 
-                        color: task.bookmarked ? '#EAB308' : 'rgb(var(--color-text-muted))'
-                      }}
-                    >
-                      <Bookmark size={16} />
-                    </button>
+                      <button 
+                        onClick={() => toggleBookmark(task.id)} 
+                        className={`p-2 rounded transition-colors ${task.bookmarked ? 'favorite-icon filled' : ''}`}
+                        style={{ 
+                          color: task.bookmarked ? '#EAB308' : 'rgb(var(--color-text-muted))'
+                        }}
+                      >
+                        {task.bookmarked ? <BookmarkCheck size={16} fill="#EAB308" /> : <Bookmark size={16} />}
+                      </button>
                     {!task.completed && (
                       <button 
                         onClick={() => setTaskToEventModal(task)}
@@ -458,26 +455,26 @@ const TaskTable: React.FC<TaskTableProps> = ({
                       </button>
                     )}
                       <button 
-                        onClick={() => setSelectedTask(task.id)}
+                          onClick={() => setAddToListTask(task.id)}
+                          className="p-2 rounded transition-colors"
+                          style={{ color: 'rgb(var(--color-text-muted))' }}
+                        >
+                          <MoreHorizontal size={16} />
+                        </button>
+                      <button 
+                        onClick={() => setCollaboratorModalTask(task.id)}
                         className="p-2 rounded transition-colors"
                         style={{ color: 'rgb(var(--color-text-muted))' }}
                       >
-                        <MoreHorizontal size={16} />
+                        <UserPlus size={16} />
                       </button>
-                    <button 
-                      onClick={() => setCollaboratorModalTask(task.id)}
-                      className="p-2 rounded transition-colors"
-                      style={{ color: 'rgb(var(--color-text-muted))' }}
-                    >
-                      <UserPlus size={16} />
-                    </button>
-                    <button 
-                      onClick={() => setTaskToDelete(task.id)} 
-                      className="p-2 rounded transition-colors"
-                      style={{ color: 'rgb(var(--color-text-muted))' }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                        <button 
+                          onClick={() => setTaskToDelete(task.id)} 
+                          className="p-2 rounded transition-colors"
+                          style={{ color: 'rgb(var(--color-text-muted))' }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
                   </div>
                 </td>
                 <td className="px-2 py-4 whitespace-nowrap text-base" style={{ color: 'rgb(var(--color-text-primary))' }}>
@@ -547,16 +544,16 @@ const TaskTable: React.FC<TaskTableProps> = ({
       )}
 
         {taskToDelete && (
-          <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/70 monochrome:bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-700"
+              className="bg-white dark:bg-slate-800 monochrome:bg-neutral-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-700 monochrome:border-neutral-700"
             >
               <div className="p-6">
-                <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
-                  <Trash2 className="text-red-600 dark:text-red-400" size={24} />
+                <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 monochrome:bg-neutral-800 flex items-center justify-center mb-4">
+                  <Trash2 className="text-red-600 dark:text-red-400 monochrome:text-neutral-300" size={24} />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Supprimer la tâche</h3>
                 <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
@@ -565,13 +562,13 @@ const TaskTable: React.FC<TaskTableProps> = ({
                 <div className="flex gap-3">
                   <button
                     onClick={() => setTaskToDelete(null)}
-                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200"
+                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 monochrome:border-neutral-600 hover:bg-slate-50 dark:hover:bg-slate-700 monochrome:hover:bg-neutral-800 transition-all duration-200"
                   >
                     Annuler
                   </button>
                   <button
                     onClick={confirmDelete}
-                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-all duration-200 shadow-md shadow-red-500/20"
+                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 monochrome:bg-white monochrome:text-black monochrome:hover:bg-neutral-200 transition-all duration-200 shadow-md shadow-red-500/20 monochrome:shadow-white/10"
                   >
                     Supprimer
                   </button>
@@ -579,6 +576,14 @@ const TaskTable: React.FC<TaskTableProps> = ({
               </div>
             </motion.div>
           </div>
+          )}
+
+        {addToListTask && (
+          <AddToListModal
+            isOpen={true}
+            onClose={() => setAddToListTask(null)}
+            taskId={addToListTask}
+          />
         )}
     </>
   );
