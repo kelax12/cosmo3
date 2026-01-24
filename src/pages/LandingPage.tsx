@@ -23,19 +23,17 @@ import {
   Infinity as InfinityIcon 
 } from 'lucide-react';
 
-// --- DONNÉES STATIQUES (Optimisation) ---
-
 const FEATURES = [
   {
     icon: CheckCircle,
-    title: 'Gestion de tâches intelligente',
+    title: 'Gestion de tâches puissante',
     subtitle: 'Centralisez, priorisez, accomplissez',
-    description: 'Organisez vos tâches avec une intelligence artificielle qui apprend de vos habitudes et optimise votre productivité.',
+    description: 'Organisez toutes vos tâches dans un espace unique et intuitif conçu pour maximiser votre productivité au quotidien.',
     benefits: [
-      'Catégorisation intelligente par couleurs',
-      'Deadlines avec rappels adaptatifs',
+      'Catégorisation par couleurs et étiquettes',
+      'Deadlines avec rappels personnalisables',
       'Suivi de progression en temps réel',
-      'Organisation de vos tâches avancée',
+      'Organisation avancée de vos projets',
       'Collaboration en équipe simplifiée'
     ],
     gradient: 'from-blue-500 to-cyan-500',
@@ -45,13 +43,13 @@ const FEATURES = [
     icon: Calendar,
     title: 'Agenda intégré nouvelle génération',
     subtitle: 'Planifiez avec une précision chirurgicale',
-    description: 'Un calendrier qui s\'adapte à votre rythme avec synchronisation multi-plateformes et suggestions intelligentes.',
+    description: "Un calendrier complet qui s'adapte à votre rythme avec synchronisation multi-plateformes et vues personnalisables.",
     benefits: [
       'Vue unifiée tâches + événements',
-      'Organisation intelligente',
-      'Placez vos tâches directement dans l\'agenda',
+      'Glissez-déposez vos tâches',
+      "Placez vos tâches directement dans l'agenda",
       'Synchronisation multi-appareils instantanée',
-      'Organisation intelligente des événements'
+      'Vues jour, semaine et mois'
     ],
     gradient: 'from-purple-500 to-pink-500',
     path: '/agenda'
@@ -65,21 +63,21 @@ const FEATURES = [
       'Framework OKR professionnel',
       'Suivi de progression visuel',
       'Alignement équipe-objectifs',
-      'Métriques de performance avancées',
-      'Ayez une vue d\'ensemble sur votre progression'
+      'Métriques de performance détaillées',
+      "Vue d'ensemble sur votre progression"
     ],
     gradient: 'from-green-500 to-emerald-500',
     path: '/okr'
   },
   {
     icon: Zap,
-    title: 'Habitudes & Automatisation',
+    title: 'Habitudes & Routines',
     subtitle: 'Construisez votre succès quotidien',
-    description: 'Développez des habitudes durables avec un système de gamification et d\'automatisation avancé.',
+    description: 'Développez des habitudes durables avec un système de suivi motivant et des statistiques détaillées.',
     benefits: [
-      'Tracking d\'habitudes intelligent',
+      "Suivi d'habitudes quotidien",
       'Gamification et récompenses',
-      'Ayez une vue avancée sur vos habitudes',
+      'Statistiques détaillées de progression',
       'Analyse de productivité intégrée',
       'Streaks et défis personnalisés'
     ],
@@ -93,7 +91,7 @@ const TESTIMONIALS = [
     name: 'Sarah Chen',
     role: 'Product Manager chez Meta',
     company: 'Meta',
-    content: 'Cosmo a révolutionné notre façon de gérer les projets. L\'IA prédictive nous fait gagner 40% de temps sur la planification.',
+    content: "Cosmo a révolutionné notre façon de gérer les projets. L'interface intuitive nous fait gagner 40% de temps sur la planification.",
     rating: 5,
     avatar: '👩‍💼'
   },
@@ -101,7 +99,7 @@ const TESTIMONIALS = [
     name: 'Marcus Rodriguez',
     role: 'CEO & Founder',
     company: 'TechStart Inc.',
-    content: 'Impossible de revenir en arrière après Cosmo. L\'intégration OKR nous a permis d\'aligner toute l\'équipe sur nos objectifs stratégiques.',
+    content: "Impossible de revenir en arrière après Cosmo. L'intégration OKR nous a permis d'aligner toute l'équipe sur nos objectifs stratégiques.",
     rating: 5,
     avatar: '👨‍💻'
   },
@@ -109,7 +107,7 @@ const TESTIMONIALS = [
     name: 'Dr. Emily Watson',
     role: 'Directrice R&D',
     company: 'BioTech Labs',
-    content: 'La gestion des habitudes de Cosmo m\'a aidée à maintenir un équilibre parfait entre recherche intensive et bien-être personnel.',
+    content: "La gestion des habitudes de Cosmo m'a aidée à maintenir un équilibre parfait entre recherche intensive et bien-être personnel.",
     rating: 5,
     avatar: '👩‍🔬'
   },
@@ -117,81 +115,79 @@ const TESTIMONIALS = [
     name: 'Alex Thompson',
     role: 'Lead Developer',
     company: 'Microsoft',
-    content: 'L\'automatisation intelligente de Cosmo s\'adapte parfaitement à nos sprints agiles. Un game-changer pour notre productivité.',
+    content: "Les fonctionnalités de Cosmo s'adaptent parfaitement à nos sprints agiles. Un game-changer pour notre productivité.",
     rating: 5,
     avatar: '👨‍💼'
   }
 ];
 
-  const USE_CASES = [
-    {
-      profile: 'Étudiants',
-      icon: '🎓',
-      title: 'Excellence académique',
-      description: 'Gérez vos cours, devoirs et révisions avec une planification intelligente qui s\'adapte à votre rythme d\'apprentissage.',
-      features: ['Planning de révisions optimisé', 'Suivi des notes et objectifs', 'Vision globale + réduction du stress'],
-      path: '/tasks'
-    },
-    {
-      profile: 'Professionnels',
-      icon: '💼',
-      title: 'Performance maximale',
-      description: 'Boostez votre carrière avec des outils de productivité qui transforment votre façon de travailler et d\'atteindre vos objectifs.',
-      features: ['Gestion de projets avancée', 'OKR et développement personnel', 'Système de priorisation intelligent'],
-      path: '/dashboard'
-    },
-    {
-      profile: 'Équipes',
-      icon: '👥',
-      title: 'Collaboration fluide',
-      description: 'Synchronisez votre équipe avec des outils collaboratifs qui alignent tous les membres sur les mêmes objectifs stratégiques.',
-      features: ['Partage de tâches intelligent', 'Communication intégrée', 'Tableaux de bord équipe'],
-      path: '/messaging'
-    },
-    {
-      profile: 'Entrepreneurs',
-      icon: '🚀',
-      title: 'Croissance accélérée',
-      description: 'Pilotez votre startup avec des métriques précises et des automatisations qui vous font gagner un temps précieux.',
-      features: ['Organisation multi-projets avancée', 'Délégation et suivi des tâches', 'Planification stratégique intégrée'],
-      path: '/okr'
-    }
-  ];
+const USE_CASES = [
+  {
+    profile: 'Étudiants',
+    icon: '🎓',
+    title: 'Excellence académique',
+    description: "Gérez vos cours, devoirs et révisions avec une planification optimisée qui s'adapte à votre rythme d'apprentissage.",
+    features: ['Planning de révisions optimisé', 'Suivi des notes et objectifs', 'Vision globale + réduction du stress'],
+    path: '/tasks'
+  },
+  {
+    profile: 'Professionnels',
+    icon: '💼',
+    title: 'Performance maximale',
+    description: "Boostez votre carrière avec des outils de productivité qui transforment votre façon de travailler et d'atteindre vos objectifs.",
+    features: ['Gestion de projets avancée', 'OKR et développement personnel', 'Système de priorisation efficace'],
+    path: '/dashboard'
+  },
+  {
+    profile: 'Équipes',
+    icon: '👥',
+    title: 'Collaboration fluide',
+    description: "Synchronisez votre équipe avec des outils collaboratifs qui alignent tous les membres sur les mêmes objectifs stratégiques.",
+    features: ['Partage de tâches simplifié', 'Communication intégrée', 'Tableaux de bord équipe'],
+    path: '/messaging'
+  },
+  {
+    profile: 'Entrepreneurs',
+    icon: '🚀',
+    title: 'Croissance accélérée',
+    description: "Pilotez votre startup avec des métriques précises et des automatisations qui vous font gagner un temps précieux.",
+    features: ['Organisation multi-projets avancée', 'Délégation et suivi des tâches', 'Planification stratégique intégrée'],
+    path: '/okr'
+  }
+];
 
 const ADVANCED_FEATURES = [
   {
     icon: Brain,
-    title: 'Organisation intelligente',
-    description: 'Système de catégorisation et de priorisation avancé qui vous aide à structurer vos tâches et projets efficacement'
+    title: 'Organisation avancée',
+    description: "Système de catégorisation et de priorisation avancé qui vous aide à structurer vos tâches et projets efficacement"
   },
   {
     icon: Workflow,
     title: 'Adaptable à tous vos besoins',
-    description: 'Que ce soit pour gérer vos projets personnels, organiser vos études, suivre vos objectifs professionnels ou planifier vos loisirs, Cosmo s\'adapte à votre style de vie'
+    description: "Que ce soit pour gérer vos projets personnels, organiser vos études, suivre vos objectifs professionnels ou planifier vos loisirs, Cosmo s'adapte à votre style de vie"
   },
   {
     icon: Database,
     title: 'Synchronisation multi-appareils',
-    description: 'Accédez à vos données depuis n\'importe quel appareil avec une synchronisation en temps réel et hors ligne'
+    description: "Accédez à vos données depuis n'importe quel appareil avec une synchronisation en temps réel et hors ligne"
   },
   {
     icon: Layers,
     title: 'Vues personnalisables',
-    description: 'Liste, Kanban, Calendrier, Gantt, Timeline - adaptez l\'interface à votre style de travail unique'
+    description: "Liste, Kanban, Calendrier, Gantt, Timeline - adaptez l'interface à votre style de travail unique"
   },
   {
     icon: Shield,
     title: 'Sauvegarde automatique',
-    description: 'Vos données sont automatiquement sauvegardées et protégées contre toute perte accidentelle'
+    description: "Vos données sont automatiquement sauvegardées et protégées contre toute perte accidentelle"
   },
   {
     icon: InfinityIcon,
     title: 'Collaboration simplifiée',
-    description: 'Partagez vos projets et collaborez facilement avec votre équipe grâce aux fonctionnalités de partage intégrées'
+    description: "Partagez vos projets et collaborez facilement avec votre équipe grâce aux fonctionnalités de partage intégrées"
   }
 ];
-
-// --- COMPOSANTS INTERNES (Pour l'autonomie) ---
 
 const MockLoginModal = ({ isOpen, onClose, mode }: { isOpen: boolean; onClose: () => void; mode: 'login' | 'register' }) => {
   const { login, register } = useTasks();
@@ -301,8 +297,6 @@ const MockLoginModal = ({ isOpen, onClose, mode }: { isOpen: boolean; onClose: (
   );
 };
 
-// --- MAIN COMPONENT ---
-
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useTasks();
@@ -312,7 +306,6 @@ const LandingPage: React.FC = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [userCount, setUserCount] = useState(12847);
 
-  // Animation du compteur d'utilisateurs
   useEffect(() => {
     const interval = setInterval(() => {
       setUserCount(prev => prev + Math.floor(Math.random() * 3) + 1);
@@ -320,7 +313,6 @@ const LandingPage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Rotation automatique des témoignages
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTestimonial(prev => (prev + 1) % TESTIMONIALS.length);
@@ -360,24 +352,21 @@ const LandingPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Header ultra moderne */}
       <header className="relative z-50 bg-black/20 backdrop-blur-xl border-b border-white/10 sticky top-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            {/* Logo avec effet néon */}
             <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-                <div className="relative group">
-                  <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 transition-transform group-hover:scale-105">
-                    <img src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/b4ddfaeb-2a04-4c84-84c7-5a56cde957c5/image-1767984831202.png?width=8000&height=8000&resize=contain" alt="Cosmo" className="w-full h-full object-contain bg-white/10" />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur-lg opacity-30 animate-pulse"></div>
+              <div className="relative group">
+                <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 transition-transform group-hover:scale-105">
+                  <img src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/b4ddfaeb-2a04-4c84-84c7-5a56cde957c5/image-1767984831202.png?width=8000&height=8000&resize=contain" alt="Cosmo" className="w-full h-full object-contain bg-white/10" />
                 </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur-lg opacity-30 animate-pulse"></div>
+              </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
                 Cosmo
               </span>
             </div>
 
-            {/* Navigation */}
             <nav className="hidden md:flex items-center justify-between w-80 lg:w-96 xl:w-[28rem]">
               <a href="#features" className="text-slate-300 hover:text-white font-medium transition-all duration-200 hover:scale-105 transform text-sm lg:text-base whitespace-nowrap">
                 Fonctionnalités
@@ -390,9 +379,7 @@ const LandingPage: React.FC = () => {
               </a>
             </nav>
 
-            {/* Auth Buttons */}
             <div className="flex items-center gap-3 lg:gap-4">
-              {/* Menu mobile */}
               <button 
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
                 className="md:hidden p-2 text-slate-300 hover:text-white transition-colors"
@@ -402,7 +389,6 @@ const LandingPage: React.FC = () => {
                 </svg>
               </button>
               
-              {/* Boutons d'authentification */}
               <button
                 onClick={handleLoginClick}
                 className="hidden sm:block text-slate-300 hover:text-white font-medium transition-colors text-sm lg:text-base whitespace-nowrap"
@@ -419,7 +405,6 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
           
-          {/* Menu mobile déroulant */}
           <AnimatePresence>
             {showMobileMenu && (
               <motion.div 
@@ -451,18 +436,15 @@ const LandingPage: React.FC = () => {
         </div>
       </header>
 
-        {/* Hero Section Ultra Technologique */}
-        <section className="relative py-20 lg:py-32 overflow-hidden">
-          {/* Effets de fond animés */}
-          <div className="absolute inset-0">
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
-          </div>
+      <section className="relative py-20 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+        </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            {/* Badge de nouveauté */}
             <motion.div 
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -470,11 +452,10 @@ const LandingPage: React.FC = () => {
               className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-xl border border-blue-500/30 rounded-full px-4 py-2 mb-8 cursor-default hover:bg-white/5 transition-colors"
             >
               <Sparkles size={16} className="text-blue-400" />
-              <span className="text-sm font-medium text-blue-200">Nouveau : Organisation intelligente intégrée</span>
+              <span className="text-sm font-medium text-blue-200">Nouveau : Organisation avancée intégrée</span>
               <ChevronRight size={14} className="text-blue-400" />
             </motion.div>
 
-            {/* Titre principal avec effet gradient */}
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -490,18 +471,16 @@ const LandingPage: React.FC = () => {
               </span>
             </motion.h1>
 
-            {/* Sous-titre */}
             <motion.p 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.8 }}
               className="text-xl lg:text-2xl text-slate-300 mb-12 max-w-4xl mx-auto leading-relaxed"
             >
-              Révolutionnez votre productivité avec une organisation intelligente. Gérez vos tâches, agenda, objectifs et habitudes 
+              Révolutionnez votre productivité avec une organisation optimisée. Gérez vos tâches, agenda, objectifs et habitudes 
               dans un écosystème unifié qui s'adapte à votre rythme.
             </motion.p>
 
-            {/* CTA Principal */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -518,7 +497,6 @@ const LandingPage: React.FC = () => {
               </button>
             </motion.div>
 
-            {/* Preuve sociale */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -548,7 +526,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Statistiques impressionnantes */}
       <section className="py-16 bg-black/20 backdrop-blur-xl border-y border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
@@ -572,7 +549,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Sections de bénéfices avec design ultra moderne */}
       <section id="features" className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
@@ -639,7 +615,7 @@ const LandingPage: React.FC = () => {
                     className={`group bg-gradient-to-r ${feature.gradient} hover:shadow-lg hover:shadow-blue-500/25 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 transform flex items-center justify-center gap-2 w-full sm:w-auto`}
                   >
                     En savoir plus
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform sm:w-4.5 sm:h-4.5" />
+                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
 
@@ -648,8 +624,8 @@ const LandingPage: React.FC = () => {
                     <div className={`w-full h-64 sm:h-80 lg:h-96 bg-gradient-to-br ${feature.gradient} rounded-2xl sm:rounded-3xl shadow-2xl flex items-center justify-center transform transition-transform duration-500 group-hover:scale-[1.02]`}>
                       <feature.icon size={80} className="text-white/20 sm:w-24 sm:h-24 lg:w-30 lg:h-30 absolute" />
                       <div className="absolute inset-0 bg-black/20 rounded-2xl sm:rounded-3xl flex items-center justify-center backdrop-blur-sm">
-                        <div className="text-center">
-                          <feature.icon size={60} className="text-white mx-auto mb-3 sm:w-16 sm:h-16 lg:w-20 lg:h-20 sm:mb-4 drop-shadow-lg" />
+                        <div className="flex flex-col items-center justify-center text-center">
+                          <feature.icon size={60} className="text-white mb-3 sm:w-16 sm:h-16 lg:w-20 lg:h-20 sm:mb-4 drop-shadow-lg" />
                           <div className="text-white font-bold text-lg sm:text-xl px-4 drop-shadow-md">{feature.title}</div>
                         </div>
                       </div>
@@ -663,7 +639,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Cas d'usage */}
       <section id="solutions" className="py-24 bg-black/20 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
@@ -678,44 +653,43 @@ const LandingPage: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {USE_CASES.map((useCase, index) => (
-                <motion.div 
-                  key={index} 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5 }}
-                  className="group bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-slate-700/80 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10"
-                >
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="text-4xl">{useCase.icon}</div>
+              <motion.div 
+                key={index} 
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5 }}
+                className="group bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-slate-700/80 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10"
+              >
+                <div className="flex flex-col items-center gap-4 mb-6 text-center">
+                  <div className="text-5xl mb-2">{useCase.icon}</div>
                   <div>
                     <h3 className="text-2xl font-bold text-white">{useCase.profile}</h3>
                     <p className="text-blue-400 font-semibold">{useCase.title}</p>
                   </div>
                 </div>
-                  <p className="text-slate-300 mb-6 leading-relaxed">{useCase.description}</p>
-                  <div className="space-y-3 mb-8">
-                    {useCase.features.map((feature, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <CheckCircle size={16} className="text-green-400 flex-shrink-0" />
-                        <span className="text-slate-300 font-medium">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <button 
-                    onClick={() => handleFeatureClick(useCase.path)}
-                    className="w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-blue-500/50 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 group"
-                  >
-                    En savoir plus
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform text-blue-400" />
-                  </button>
-                </motion.div>
+                <p className="text-slate-300 mb-6 leading-relaxed text-center">{useCase.description}</p>
+                <div className="space-y-3 mb-8 flex flex-col items-center">
+                  {useCase.features.map((feature, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <CheckCircle size={16} className="text-green-400 flex-shrink-0" />
+                      <span className="text-slate-300 font-medium">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+                <button 
+                  onClick={() => handleFeatureClick(useCase.path)}
+                  className="w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-blue-500/50 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 group"
+                >
+                  En savoir plus
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform text-blue-400" />
+                </button>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Témoignages rotatifs */}
       <section id="testimonials" className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
@@ -759,7 +733,6 @@ const LandingPage: React.FC = () => {
               </AnimatePresence>
             </div>
 
-            {/* Indicateurs de témoignages */}
             <div className="flex justify-center gap-2 mt-8">
               {TESTIMONIALS.map((_, index) => (
                 <button
@@ -777,7 +750,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Fonctionnalités avancées */}
       <section className="py-24 bg-black/20 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
@@ -785,21 +757,21 @@ const LandingPage: React.FC = () => {
               Technologies de pointe
             </h2>
             <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-              Propulsé par l'IA et conçu pour l'entreprise moderne, Cosmo intègre les dernières innovations technologiques
+              Conçu pour l'entreprise moderne, Cosmo intègre les dernières innovations technologiques
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {ADVANCED_FEATURES.map((feature, index) => (
-                <motion.div 
-                  key={index} 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ scale: 1.05 }}
-                  className="group bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:bg-slate-700/80 transition-all duration-300"
-                >
+              <motion.div 
+                key={index} 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                className="group bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:bg-slate-700/80 transition-all duration-300 flex flex-col items-center text-center"
+              >
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/20">
                   <feature.icon size={32} className="text-white" />
                 </div>
@@ -811,7 +783,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* CTA Final */}
       <section className="py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div 
@@ -820,7 +791,6 @@ const LandingPage: React.FC = () => {
             viewport={{ once: true }}
             className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-xl border border-blue-500/30 rounded-3xl p-12 relative overflow-hidden"
           >
-             {/* Effet background */}
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500/5 to-purple-500/5 z-0"></div>
             
             <div className="relative z-10">
@@ -851,17 +821,16 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer moderne */}
       <footer className="bg-black/40 backdrop-blur-xl border-t border-white/10 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center">
-                    <img src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/b4ddfaeb-2a04-4c84-84c7-5a56cde957c5/image-1767984831202.png?width=8000&height=8000&resize=contain" alt="Cosmo" className="w-full h-full object-contain bg-white/10" />
-                  </div>
-                  <span className="text-2xl font-bold text-white">Cosmo</span>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center">
+                  <img src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/b4ddfaeb-2a04-4c84-84c7-5a56cde957c5/image-1767984831202.png?width=8000&height=8000&resize=contain" alt="Cosmo" className="w-full h-full object-contain bg-white/10" />
                 </div>
+                <span className="text-2xl font-bold text-white">Cosmo</span>
+              </div>
               <p className="text-slate-400">
                 La plateforme de productivité nouvelle génération qui transforme votre façon de travailler.
               </p>
@@ -900,7 +869,7 @@ const LandingPage: React.FC = () => {
           
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
             <div className="text-slate-400 text-sm mb-4 md:mb-0">
-              © 2025 Cosmo. Tous droits réservés. Conçu avec ❤️ pour la productivité.
+              © 2025 Cosmo. Tous droits réservés.
             </div>
             <div className="flex items-center gap-6 text-sm text-slate-400">
               <a href="#" className="hover:text-white transition-colors">Confidentialité</a>
