@@ -1,11 +1,14 @@
 import React, { useState, useMemo } from 'react';
-import { Users, Lock, Plus, X, UserPlus, UserMinus, Check, Search, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Users, Lock, Plus, X, UserPlus, Check, Search, AlertTriangle, Mail } from 'lucide-react';
 import { useTasks, Task } from '../context/TaskContext';
 import CollaboratorAvatars from './CollaboratorAvatars';
+import CollaboratorItem from './CollaboratorItem';
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const CollaborativeTasks: React.FC = () => {
 
-  const { tasks, user, isPremium, friends, updateTask, categories, priorityRange } = useTasks();
+  const { tasks, user, isPremium, friends, updateTask, categories, priorityRange, sendFriendRequest } = useTasks();
   
   const getCategoryColor = (categoryId: string) => {
     const category = categories.find(cat => cat.id === categoryId);
@@ -22,6 +25,7 @@ const CollaborativeTasks: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showOverdueOnly, setShowOverdueOnly] = useState(false);
   const [collaboratorSearchQuery, setCollaboratorSearchQuery] = useState('');
+  const [emailInput, setEmailInput] = useState('');
   
   const selectedTask = selectedTaskId ? tasks.find(t => t.id === selectedTaskId) || null : null;
   
@@ -75,18 +79,60 @@ const CollaborativeTasks: React.FC = () => {
     }
   };
 
-  const handleRemoveCollaborator = (collaboratorName: string) => {
+const handleRemoveCollaborator = (collaboratorName: string) => {
     if (!selectedTask) return;
     const currentCollaborators = selectedTask.collaborators || [];
     const newCollaborators = currentCollaborators.filter(c => c !== collaboratorName);
     const newValidations = { ...selectedTask.collaboratorValidations };
     delete newValidations[collaboratorName];
+    const newPendingInvites = (selectedTask.pendingInvites || []).filter(e => e !== collaboratorName);
     
     updateTask(selectedTask.id, {
       collaborators: newCollaborators,
       isCollaborative: newCollaborators.length > 0,
-      collaboratorValidations: newValidations
+      collaboratorValidations: newValidations,
+      pendingInvites: newPendingInvites
     });
+  };
+
+  const handleAddCollaboratorByEmail = () => {
+    if (!selectedTask || !emailInput.trim()) return;
+    
+    const email = emailInput.trim().toLowerCase();
+    const friend = friends.find(f => f.email.toLowerCase() === email);
+    
+    if (friend) {
+      handleAddCollaborator(friend.name);
+    } else {
+      const currentCollaborators = selectedTask.collaborators || [];
+      const pendingInvites = selectedTask.pendingInvites || [];
+      
+      if (!currentCollaborators.includes(email) && !pendingInvites.includes(email)) {
+        sendFriendRequest(email);
+        updateTask(selectedTask.id, {
+          isCollaborative: true,
+          collaborators: [...currentCollaborators, email],
+          pendingInvites: [...pendingInvites, email],
+          collaboratorValidations: {
+            ...selectedTask.collaboratorValidations,
+            [email]: false
+          }
+        });
+      }
+    }
+    setEmailInput('');
+  };
+
+  const displayInfo = (id: string) => {
+    const friend = friends?.find((f) => f.id === id || f.name === id);
+    if (friend) {
+      return { name: friend.name, email: friend.email, avatar: friend.avatar, isPending: false };
+    }
+    const isPending = (selectedTask?.pendingInvites || []).includes(id);
+    if (emailRegex.test(id)) {
+      return { name: id, email: id, avatar: undefined, isPending };
+    }
+    return { name: id, email: undefined, avatar: undefined, isPending };
   };
 
   if (!premium) {
@@ -308,68 +354,72 @@ const CollaborativeTasks: React.FC = () => {
                       Collaborateurs pour "{selectedTask.name}"
                     </h3>
                     
-                    {selectedTask.collaborators && selectedTask.collaborators.length > 0 && (
-                      <div className="mb-6">
-                        <h4 className="text-sm font-medium text-[rgb(var(--color-text-secondary))] mb-3">
-                          Collaborateurs actuels
-                        </h4>
-                        <div className="space-y-2">
-                          {selectedTask.collaborators.map((collaborator, index) => {
-                            const hasValidated = selectedTask.collaboratorValidations?.[collaborator] ?? false;
-                            return (
-                              <div 
-                                key={index}
-                                className="flex items-center justify-between p-3 bg-[rgb(var(--color-hover))] rounded-xl"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
-                                    hasValidated 
-                                      ? 'bg-gradient-to-br from-green-400 to-emerald-500 text-white' 
-                                      : 'bg-[rgb(var(--color-active))] text-[rgb(var(--color-text-secondary))]'
-                                  }`}>
-                                    {collaborator.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-[rgb(var(--color-text-primary))]">
-                                      {collaborator}
-                                    </span>
-                                    <p className={`text-xs ${hasValidated ? 'text-green-500' : 'text-[rgb(var(--color-text-secondary))]'}`}>
-                                      {hasValidated ? '✓ A validé' : '○ Non validé'}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={() => handleRemoveCollaborator(collaborator)}
-                                    className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                                    title="Retirer"
-                                  >
-                                    <UserMinus size={18} />
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
+{selectedTask.collaborators && selectedTask.collaborators.length > 0 && (
+                        <div className="mb-6">
+                          <h4 className="text-sm font-medium text-[rgb(var(--color-text-secondary))] mb-3">
+                            Collaborateurs actuels
+                          </h4>
+                          <div className="space-y-2">
+                            {selectedTask.collaborators.map((collaborator, index) => {
+                              const info = displayInfo(collaborator);
+                              return (
+                                <CollaboratorItem
+                                  key={index}
+                                  id={collaborator}
+                                  name={info.name}
+                                  email={info.email}
+                                  avatar={info.avatar}
+                                  isPending={info.isPending}
+                                  onAction={() => handleRemoveCollaborator(collaborator)}
+                                  variant="remove"
+                                />
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     <div>
                       <h4 className="text-sm font-medium text-[rgb(var(--color-text-secondary))] mb-3">
                         Ajouter un collaborateur
                       </h4>
                       
-                      <div className="space-y-3 mb-4">
-                        <div className="relative">
-                            <input
-                              type="text"
-                              placeholder="Rechercher un contact..."
-                              value={collaboratorSearchQuery}
-                              onChange={(e) => setCollaboratorSearchQuery(e.target.value)}
-                              className="w-full px-4 py-2.5 pl-10 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text-primary))] placeholder-[rgb(var(--color-text-muted))] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))]" />
-                          </div>
+<div className="space-y-3 mb-4">
+                          <div className="flex gap-2 mb-4">
+                              <div className="relative flex-1">
+                                <Mail
+                                  size={16}
+                                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                                />
+                                <input
+                                  type="text"
+                                  value={emailInput}
+                                  onChange={(e) => setEmailInput(e.target.value)}
+                                  placeholder="Email ou identifiant"
+                                  className="w-full pl-10 pr-4 h-10 border rounded-lg focus:outline-none hover:border-blue-500 focus:border-blue-600 focus:border-2 text-sm transition-colors border-slate-200 dark:border-slate-700"
+                                  style={{
+                                    backgroundColor: 'rgb(var(--color-surface))',
+                                    color: 'rgb(var(--color-text-primary))',
+                                  }}
+                                />
+                              </div>
+<button
+                                  onClick={handleAddCollaboratorByEmail}
+                                  className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center h-10"
+                                >
+                                  <UserPlus size={16} />
+                                </button>
+                            </div>
+                          <div className="relative">
+                              <input
+                                type="text"
+                                placeholder="Rechercher un contact..."
+                                value={collaboratorSearchQuery}
+                                onChange={(e) => setCollaboratorSearchQuery(e.target.value)}
+                                className="w-full px-4 h-10 pl-10 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text-primary))] placeholder-[rgb(var(--color-text-muted))] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))]" />
+                            </div>
                         
                         </div>
                       
@@ -381,28 +431,22 @@ const CollaborativeTasks: React.FC = () => {
                               friend.name.toLowerCase().includes(collaboratorSearchQuery.toLowerCase())
                             )
                             .map(friend => (
-                          <button
-                            key={friend.id}
-                            onClick={() => handleAddCollaborator(friend.name)}
-                            className="w-full flex items-center justify-between p-3 bg-[rgb(var(--color-hover))] rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold">
-                                {friend.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                              </div>
-                              <span className="font-medium text-[rgb(var(--color-text-primary))]">
-                                {friend.name}
-                              </span>
-                            </div>
-                            <UserPlus size={18} className="text-blue-500" />
-                          </button>
-                        ))}
-                        {friends.filter(f => !selectedTask.collaborators?.includes(f.name)).filter(f => collaboratorSearchQuery.trim() === '' || f.name.toLowerCase().includes(collaboratorSearchQuery.toLowerCase())).length === 0 && (
-                          <p className="text-center py-4 text-[rgb(var(--color-text-muted))]">
-                            {collaboratorSearchQuery.trim() ? 'Aucun contact trouvé' : 'Tous vos amis sont déjà collaborateurs'}
-                          </p>
-                        )}
-                      </div>
+                              <CollaboratorItem
+                                key={friend.id}
+                                id={friend.id}
+                                name={friend.name}
+                                email={friend.email}
+                                avatar={friend.avatar}
+                                onAction={() => handleAddCollaborator(friend.name)}
+                                variant="add"
+                              />
+                          ))}
+                          {friends.filter(f => !selectedTask.collaborators?.includes(f.name)).filter(f => collaboratorSearchQuery.trim() === '' || f.name.toLowerCase().includes(collaboratorSearchQuery.toLowerCase())).length === 0 && (
+                            <p className="text-center py-4 text-[rgb(var(--color-text-muted))]">
+                              {collaboratorSearchQuery.trim() ? 'Aucun contact trouvé' : 'Tous vos amis sont déjà collaborateurs'}
+                            </p>
+                          )}
+                        </div>
                     </div>
                   </>
                 ) : (
