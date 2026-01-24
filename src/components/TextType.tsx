@@ -13,6 +13,7 @@ const TextType = ({
   deletingSpeed = 30,
   loop = true,
   className = '',
+  textClassName = '',
   showCursor = true,
   hideCursorWhileTyping = false,
   cursorCharacter = '|',
@@ -42,8 +43,27 @@ const TextType = ({
   }, [variableSpeed, typingSpeed]);
 
   const getCurrentTextColor = () => {
-    if (textColors.length === 0) return;
+    if (textColors.length === 0) return null;
     return textColors[currentTextIndex % textColors.length];
+  };
+
+  const getTextStyle = () => {
+    const color = getCurrentTextColor();
+    if (!color) return {};
+    
+    const isGradient = color.includes('gradient') || color.includes('linear-') || color.includes('radial-');
+    
+    if (isGradient) {
+      return {
+        background: color,
+        backgroundClip: 'text',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        color: 'transparent'
+      };
+    }
+    
+    return { color };
   };
 
   useEffect(() => {
@@ -159,7 +179,7 @@ const TextType = ({
       className: `text-type ${className}`,
       ...props
     },
-    <span className="text-type__content" style={{ color: getCurrentTextColor() || 'inherit' }}>
+    <span className={`text-type__content ${textClassName}`} style={getTextStyle()}>
       {displayedText}
     </span>,
     showCursor && (
