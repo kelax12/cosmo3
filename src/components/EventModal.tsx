@@ -296,8 +296,8 @@ const EventModal: React.FC<EventModalProps> = ({
   const isPrefilledMode = mode === 'add';
 
   const renderContent = () => (
-    <div
-      className="md:rounded-2xl shadow-2xl w-full md:max-w-4xl h-full md:h-auto md:max-h-[90vh] overflow-hidden opacity-0 scale-95 animate-modal-content"
+<div
+        className="md:rounded-2xl shadow-2xl w-full md:max-w-4xl lg:max-w-5xl h-full md:h-auto md:max-h-[90vh] lg:max-h-[85vh] overflow-hidden opacity-0 scale-95 animate-modal-content"
       style={{ backgroundColor: "rgb(var(--color-surface))" }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -446,16 +446,16 @@ const EventModal: React.FC<EventModalProps> = ({
                           }}
                         required
                       />
-                      <button
-                        type="button"
-                        onClick={() => setActiveTimeAssistant(activeTimeAssistant === 'start' ? null : 'start')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors"
-                        title="Choisir une heure"
-                      >
-                        <Clock
-                          size={16}
-                          style={{ color: "rgb(var(--color-text-muted))" }}
-                        />
+                        <button
+                          type="button"
+                          onClick={() => setActiveTimeAssistant(activeTimeAssistant === 'start' ? null : 'start')}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors"
+                          title="Choisir une heure"
+                        >
+                          <Clock
+                            size={16}
+                            className="text-blue-500"
+                          />
                       </button>
 
                       <AnimatePresence>
@@ -598,10 +598,10 @@ const EventModal: React.FC<EventModalProps> = ({
                         className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors"
                         title="Choisir une heure"
                       >
-                        <Clock
-                          size={16}
-                          style={{ color: "rgb(var(--color-text-muted))" }}
-                        />
+                          <Clock
+                            size={16}
+                            className="text-blue-500"
+                          />
                       </button>
 
                       <AnimatePresence>
