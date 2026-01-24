@@ -16,6 +16,7 @@ export type Task = {
   sharedBy?: string;
   permissions?: 'responsible' | 'editor' | 'observer';
   collaboratorValidations?: { [key: string]: boolean };
+  pendingInvites?: string[];
 };
 
 export type TaskList = {
@@ -431,7 +432,15 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [user, setUser] = useState<User | null>(null);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([
+    {
+      id: 'fr-demo-1',
+      senderId: 'alice@example.com',
+      receiverId: 'demo@example.com',
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    }
+  ]);
   const [habits, setHabits] = useState<Habit[]>(initialHabits);
   const [okrs, setOkrs] = useState<OKR[]>(initialOKRs);
   const [okrCategories, setOkrCategories] = useState<OKRCategory[]>(initialOKRCategories);
@@ -607,7 +616,24 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setFriendRequests(prev => [...prev, newRequest]);
   };
 
-  const acceptFriendRequest = (requestId: string) => setFriendRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'accepted' } : r));
+  const acceptFriendRequest = (requestId: string) => {
+    const request = friendRequests.find(r => r.id === requestId);
+    if (request) {
+      // Ajouter le nouvel ami à la liste des amis
+      const newFriend: User = {
+        id: `friend-${Date.now()}`,
+        name: request.receiverId.split('@')[0] || 'Nouvel ami',
+        email: request.receiverId,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${request.receiverId}`,
+        premiumTokens: 0,
+        premiumWinStreak: 0,
+        lastTokenConsumption: new Date().toISOString(),
+        autoValidation: false
+      };
+      setFriends(prev => [...prev, newFriend]);
+    }
+    setFriendRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'accepted' } : r));
+  };
   const rejectFriendRequest = (requestId: string) => setFriendRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'rejected' } : r));
 
   const shareTask = (taskId: string, userId: string, permission: 'responsible' | 'editor' | 'observer') => {
@@ -713,4 +739,3 @@ export const useTasks = () => {
   if (context === undefined) throw new Error('useTasks must be used within a TaskProvider');
   return context;
 };
-
