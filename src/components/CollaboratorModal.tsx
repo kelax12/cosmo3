@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { X, Users, UserPlus, Trash2, Mail, Search } from 'lucide-react';
+import { X, Users, UserPlus, Search } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
 import CollaboratorItem from './CollaboratorItem';
 
@@ -11,15 +11,8 @@ type CollaboratorModalProps = {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const getInitials = (value: string) => {
-  if (!value) return '?';
-  const parts = value.split(/\s|@/).filter(Boolean);
-  const firstTwo = parts.slice(0, 2).map((p) => p.charAt(0).toUpperCase());
-  return firstTwo.join('') || value.charAt(0).toUpperCase();
-};
-
 const CollaboratorModal: React.FC<CollaboratorModalProps> = ({ isOpen, onClose, taskId }) => {
-  const { tasks, updateTask, friends, shareTask } = useTasks();
+  const { tasks, updateTask, friends, sendFriendRequest } = useTasks();
   const task = tasks.find((t) => t.id === taskId);
 
   const [input, setInput] = useState('');
@@ -41,48 +34,97 @@ const CollaboratorModal: React.FC<CollaboratorModalProps> = ({ isOpen, onClose, 
   if (!isOpen) return null;
   if (!task) return null;
 
-  const setCollaborators = (collaborators: string[]) => {
-    updateTask(task.id, { collaborators, isCollaborative: collaborators.length > 0 });
-  };
-
   const handleAdd = () => {
-    const value = input.trim();
+    if (!task) return;
+    const value = input.trim().toLowerCase();
     if (!value) return;
-    if (assignedCollaborators.includes(value)) {
-      setInput('');
-      return;
-    }
-    // Check if it's a known friend
-    const friend = friends.find(f => f.email === value || f.id === value);
+    
+    const friend = friends.find(f => f.email.toLowerCase() === value);
+    
     if (friend) {
-      shareTask(task.id, friend.id, 'editor');
+      if (!assignedCollaborators.includes(friend.name)) {
+        updateTask(task.id, {
+          isCollaborative: true,
+          collaborators: [...assignedCollaborators, friend.name],
+          collaboratorValidations: {
+            ...task.collaboratorValidations,
+            [friend.name]: false
+          }
+        });
+      }
     } else {
-      setCollaborators([...assignedCollaborators, value]);
+      if (assignedCollaborators.includes(value)) {
+        setInput('');
+        return;
+      }
+      const pendingInvites = task.pendingInvites || [];
+      if (!pendingInvites.includes(value)) {
+        sendFriendRequest(value);
+        updateTask(task.id, {
+          isCollaborative: true,
+          collaborators: [...assignedCollaborators, value],
+          pendingInvites: [...pendingInvites, value],
+          collaboratorValidations: {
+            ...task.collaboratorValidations,
+            [value]: false
+          }
+        });
+      }
     }
     setInput('');
   };
 
   const handleToggleFriend = (friendId: string) => {
-    if (assignedCollaborators.includes(friendId)) {
-      setCollaborators(assignedCollaborators.filter((c) => c !== friendId));
+    if (!task) return;
+    const friend = friends.find(f => f.id === friendId);
+    const name = friend?.name || friendId;
+    
+    if (assignedCollaborators.includes(name)) {
+      const newCollaborators = assignedCollaborators.filter((c) => c !== name);
+      const newValidations = { ...task.collaboratorValidations };
+      delete newValidations[name];
+      updateTask(task.id, {
+        collaborators: newCollaborators,
+        isCollaborative: newCollaborators.length > 0,
+        collaboratorValidations: newValidations
+      });
     } else {
-      shareTask(task.id, friendId, 'editor');
+      updateTask(task.id, {
+        isCollaborative: true,
+        collaborators: [...assignedCollaborators, name],
+        collaboratorValidations: {
+          ...task.collaboratorValidations,
+          [name]: false
+        }
+      });
     }
   };
 
-  const handleRemove = (collaboratorId: string) => {
-    setCollaborators(assignedCollaborators.filter((c) => c !== collaboratorId));
+  const handleRemove = (collaboratorName: string) => {
+    if (!task) return;
+    const newCollaborators = assignedCollaborators.filter((c) => c !== collaboratorName);
+    const newValidations = { ...task.collaboratorValidations };
+    delete newValidations[collaboratorName];
+    const newPendingInvites = (task.pendingInvites || []).filter(e => e !== collaboratorName);
+    
+    updateTask(task.id, {
+      collaborators: newCollaborators,
+      isCollaborative: newCollaborators.length > 0,
+      collaboratorValidations: newValidations,
+      pendingInvites: newPendingInvites
+    });
   };
 
   const displayInfo = (id: string) => {
-    const friend = friends?.find((f) => f.id === id);
+    const friend = friends?.find((f) => f.id === id || f.name === id);
     if (friend) {
-      return { name: friend.name, email: friend.email, avatar: friend.avatar };
+      return { name: friend.name, email: friend.email, avatar: friend.avatar, isPending: false };
     }
+    const isPending = (task?.pendingInvites || []).includes(id);
     if (emailRegex.test(id)) {
-      return { name: id.split('@')[0], email: id, avatar: undefined };
+      return { name: id, email: id, avatar: undefined, isPending };
     }
-    return { name: id, email: undefined, avatar: undefined };
+    return { name: id, email: undefined, avatar: undefined, isPending };
   };
 
   return (
@@ -141,22 +183,23 @@ const CollaboratorModal: React.FC<CollaboratorModalProps> = ({ isOpen, onClose, 
                   <p className="text-sm" style={{ color: 'rgb(var(--color-text-muted))' }}>Aucun collaborateur pour l’instant.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-3">
-                  {assignedCollaborators.map((collaboratorId) => {
-                    const info = displayInfo(collaboratorId);
-                    return (
-                      <CollaboratorItem
-                        key={collaboratorId}
-                        id={collaboratorId}
-                        name={info.name}
-                        email={info.email}
-                        avatar={info.avatar}
-                        onAction={() => handleRemove(collaboratorId)}
-                        variant="remove"
-                      />
-                    );
-                  })}
-                </div>
+                  <div className="grid grid-cols-1 gap-3">
+                    {assignedCollaborators.map((collaboratorId) => {
+                      const info = displayInfo(collaboratorId);
+                      return (
+                        <CollaboratorItem
+                          key={collaboratorId}
+                          id={collaboratorId}
+                          name={info.name}
+                          email={info.email}
+                          avatar={info.avatar}
+                          isPending={info.isPending}
+                          onAction={() => handleRemove(collaboratorId)}
+                          variant="remove"
+                        />
+                      );
+                    })}
+                  </div>
               )}
             </section>
 
