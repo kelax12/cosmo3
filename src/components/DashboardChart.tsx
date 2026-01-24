@@ -66,18 +66,22 @@ const DashboardChart: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl" />
-      </div>
+      <div className="absolute inset-0 overflow-hidden monochrome:hidden">
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl" />
+        </div>
+        <div className="absolute inset-0 overflow-hidden hidden monochrome:block">
+          <div className="absolute -top-32 -right-32 w-64 h-64 bg-white/[0.02] rounded-full blur-3xl" />
+          <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-white/[0.01] rounded-full blur-3xl" />
+        </div>
 
       <div className="relative z-10 flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <motion.div 
-            className="p-3 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-500 shadow-lg shadow-blue-500/25"
-            whileHover={{ scale: 1.05, rotate: 5 }}
-          >
-            <TrendingUp size={24} className="text-white" />
+            <motion.div 
+              className="p-3 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-500 shadow-lg shadow-blue-500/25 monochrome:bg-white monochrome:from-white monochrome:to-white monochrome:shadow-white/10"
+              whileHover={{ scale: 1.05, rotate: 5 }}
+            >
+              <TrendingUp size={24} className="text-white monochrome:text-zinc-900" />
           </motion.div>
           <div>
             <h2 className="text-xl lg:text-2xl font-bold text-[rgb(var(--color-text-primary))] tracking-tight">
@@ -90,13 +94,13 @@ const DashboardChart: React.FC = () => {
           </div>
         </div>
         
-        <motion.div 
-          className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-[rgb(var(--color-success)/0.1)] border border-[rgb(var(--color-success)/0.2)]"
-          whileHover={{ scale: 1.02 }}
-        >
-          <Flame size={16} className="text-[rgb(var(--color-success))]" />
-          <span className="text-[rgb(var(--color-success))] text-sm font-medium">+12% cette semaine</span>
-        </motion.div>
+          <motion.div 
+            className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-[rgb(var(--color-success)/0.1)] border border-[rgb(var(--color-success)/0.2)] monochrome:bg-white/5 monochrome:border-white/10"
+            whileHover={{ scale: 1.02 }}
+          >
+            <Flame size={16} className="text-[rgb(var(--color-success))] monochrome:text-white" />
+            <span className="text-[rgb(var(--color-success))] text-sm font-medium monochrome:text-zinc-300">+12% cette semaine</span>
+          </motion.div>
       </div>
   
       <div className="relative z-10 mb-6">
@@ -158,13 +162,13 @@ const DashboardChart: React.FC = () => {
                         )}
                       </AnimatePresence>
   
-                      {/* Bar */}
-                      <motion.div
-                        className={`w-8 rounded-t-lg cursor-pointer ${
-                          isToday 
-                            ? 'bg-gradient-to-t from-[rgb(var(--color-accent))] to-[rgb(var(--color-accent)/0.6)]' 
-                            : 'bg-gradient-to-t from-[rgb(var(--color-accent)/0.8)] to-[rgb(var(--color-accent)/0.4)]'
-                        }`}
+                        {/* Bar */}
+                        <motion.div
+                          className={`w-8 rounded-t-lg cursor-pointer transition-all duration-200 ${
+                            isToday 
+                              ? 'bg-gradient-to-t from-[rgb(var(--color-accent))] to-[rgb(var(--color-accent)/0.6)] monochrome:from-white monochrome:to-white/60' 
+                              : 'bg-gradient-to-t from-[rgb(var(--color-accent)/0.8)] to-[rgb(var(--color-accent)/0.4)] monochrome:from-zinc-400 monochrome:to-zinc-600'
+                          }`}
                         style={{
                           opacity: hoveredBar === null || isHovered ? 1 : 0.4,
                           minHeight: 4
