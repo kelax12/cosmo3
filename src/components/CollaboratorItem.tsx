@@ -7,6 +7,7 @@ interface CollaboratorItemProps {
   email?: string;
   avatar?: string;
   isSelected?: boolean;
+  isPending?: boolean;
   onAction: () => void;
   variant: 'add' | 'remove' | 'toggle';
 }
@@ -24,6 +25,7 @@ const CollaboratorItem: React.FC<CollaboratorItemProps> = ({
   email,
   avatar,
   isSelected,
+  isPending,
   onAction,
   variant
 }) => {
@@ -47,19 +49,24 @@ const CollaboratorItem: React.FC<CollaboratorItemProps> = ({
     >
       <div className="flex items-center gap-3 overflow-hidden">
         <div className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center font-semibold text-sm ${
-          isEmoji ? 'text-2xl' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
-        }`} style={isEmoji ? { backgroundColor: 'rgb(var(--color-hover))' } : {}}>
-          {avatar ? (isEmoji ? avatar : <img src={avatar} alt={name} className="w-full h-full rounded-full object-cover" />) : getInitials(name || id)}
+          isPending
+            ? 'bg-gradient-to-br from-orange-400 to-amber-500 text-white'
+            : isEmoji 
+              ? 'text-2xl' 
+              : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+        }`} style={isEmoji && !isPending ? { backgroundColor: 'rgb(var(--color-hover))' } : {}}>
+          {isPending ? <Mail size={16} /> : avatar ? (isEmoji ? avatar : <img src={avatar} alt={name} className="w-full h-full rounded-full object-cover" />) : getInitials(name || id)}
         </div>
         <div className="overflow-hidden">
           <p className="text-sm font-semibold truncate" style={{ color: 'rgb(var(--color-text-primary))' }}>{name || id}</p>
-          {email && (
+          {isPending ? (
+            <p className="text-xs text-orange-500">⏳ Demande d'ami envoyée</p>
+          ) : email && (
             <div className="flex items-center gap-1.5 text-xs truncate" style={{ color: 'rgb(var(--color-text-muted))' }}>
               <Mail size={12} className="shrink-0" />
               <span className="truncate">{email}</span>
             </div>
-          )}
-        </div>
+          )}</div>
       </div>
       
       <button
