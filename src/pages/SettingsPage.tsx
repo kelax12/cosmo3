@@ -5,6 +5,7 @@ import {
   CheckSquare, Activity, Target, BarChart2,
   HelpCircle, Shield, Mail, Monitor, Camera, ChevronRight
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../context/TaskContext';
 import ThemeToggle from '../components/ThemeToggle';
 import { toast } from 'sonner';
@@ -45,6 +46,7 @@ const itemVariants = {
 
 const SettingsPage: React.FC = () => {
   const { user, updateUserSettings, logout } = useTasks();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -104,14 +106,15 @@ const SettingsPage: React.FC = () => {
       variant: 'destructive',
       showInput: true,
       confirmationText: 'DELETE',
-      onConfirm: () => {
-        toast.info('Suppression du compte...', {
-          description: 'Vos données seront supprimées définitivement.'
-        });
-        setTimeout(() => {
-          logout();
-        }, 2000);
-      }
+        onConfirm: () => {
+          toast.info('Suppression du compte...', {
+            description: 'Vos données seront supprimées définitivement.'
+          });
+          setTimeout(() => {
+            logout();
+            navigate('/welcome');
+          }, 2000);
+        }
     });
     setConfirmInput('');
   };
@@ -147,10 +150,11 @@ const SettingsPage: React.FC = () => {
       title: 'Déconnexion ?',
       description: 'Voulez-vous vraiment vous déconnecter de votre session ?',
       variant: 'default',
-      onConfirm: () => {
-        logout();
-        toast.success('Déconnexion réussie');
-      }
+        onConfirm: () => {
+          logout();
+          toast.success('Déconnexion réussie');
+          navigate('/welcome');
+        }
     });
   };
 
@@ -637,20 +641,16 @@ const SettingsPage: React.FC = () => {
 
           <AlertDialogFooter className="gap-2">
             <AlertDialogCancel className="rounded-lg border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] hover:bg-[rgb(var(--color-hover))] text-[rgb(var(--color-text-primary))] font-bold text-sm">Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={confirmConfig.showInput && confirmInput !== confirmConfig.confirmationText}
-              onClick={() => {
-                confirmConfig.onConfirm();
-                setConfirmConfig(prev => ({ ...prev, isOpen: false }));
-              }}
-              className={`rounded-lg font-bold text-sm ${
-                confirmConfig.variant === 'destructive' 
-                  ? 'bg-red-500 hover:bg-red-600 text-white' 
-                  : 'bg-[rgb(var(--color-accent))] hover:opacity-90 text-white'
-              }`}
-            >
-              Confirmer
-            </AlertDialogAction>
+              <AlertDialogAction
+                disabled={confirmConfig.showInput && confirmInput !== confirmConfig.confirmationText}
+                onClick={() => {
+                  confirmConfig.onConfirm();
+                  setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                }}
+                className="rounded-lg font-bold text-sm bg-red-500 hover:bg-red-600 text-white"
+              >
+                Confirmer
+              </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
