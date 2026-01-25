@@ -1,11 +1,21 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Crown, X, Lock, Check, AlertCircle, Loader2, Sparkles } from 'lucide-react';
 
-const STRIPE_PUBLISHABLE_KEY = 'pk_test_51SnQiTBhw3icNXo4O7lCJlwk0fq1ZQDlnAxwG2oA289ZiNCqvn94UqoxjrfolGoL534fRBdSirFtN8f8UOmluAEm00eZGrSWKy';
-const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
+const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
+
+let stripePromise: Promise<Stripe | null> | null = null;
+const getStripe = () => {
+  if (!STRIPE_PUBLISHABLE_KEY) {
+    return null;
+  }
+  if (!stripePromise) {
+    stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
+  }
+  return stripePromise;
+};
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -175,11 +185,21 @@ function CheckoutForm({ onSuccess, onClose }: { onSuccess: () => void; onClose: 
 export function PaymentModal({ isOpen, onClose, onPaymentSuccess }: PaymentModalProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [stripeReady, setStripeReady] = useState<Promise<Stripe | null> | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
       setError(null);
+      
+      const stripe = getStripe();
+      if (!stripe) {
+        setError('Payment system is not configured. Please contact support.');
+        setIsLoading(false);
+        return;
+      }
+      
+      setStripeReady(stripe);
       const timer = setTimeout(() => {
         setIsLoading(false);
       }, 500);
@@ -315,11 +335,11 @@ export function PaymentModal({ isOpen, onClose, onPaymentSuccess }: PaymentModal
                       Réessayer
                     </button>
                   </div>
-                ) : (
-                  <Elements stripe={stripePromise} options={elementsOptions}>
+                ) : stripeReady ? (
+                  <Elements stripe={stripeReady} options={elementsOptions}>
                     <CheckoutForm onSuccess={onPaymentSuccess} onClose={handleClose} />
                   </Elements>
-                )}
+                ) : null}
               </div>
 
               <div className={`${isDarkMode ? 'bg-slate-950 border-white/5' : 'bg-slate-50 border-slate-200'} px-6 py-4 border-t`}>
