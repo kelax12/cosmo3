@@ -80,13 +80,14 @@ const App = () => (
       <BillingProvider>
         <TaskProvider>
           <TooltipProvider>
-          <Toaster />
-          <HoverReceiver />
-          <BrowserRouter>
-            <AppContent />
-          </BrowserRouter>
-        </TooltipProvider>
-      </TaskProvider>
+            <Toaster />
+            <HoverReceiver />
+            <BrowserRouter>
+              <AppContent />
+            </BrowserRouter>
+          </TooltipProvider>
+        </TaskProvider>
+      </BillingProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
