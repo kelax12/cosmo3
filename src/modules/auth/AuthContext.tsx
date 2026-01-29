@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (name: string, email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -91,9 +91,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           },
         },
       });
-      if (error) return { success: false, error: error.message || "Erreur lors de l'inscription" };
+      
+      if (error) {
+        console.error('Supabase signup error:', error);
+        return { success: false, error: error.message || "Erreur lors de l'inscription" };
+      }
+      
+      // Check if email confirmation is required
+      if (data?.user?.identities?.length === 0) {
+        return { success: false, error: 'Cet email est déjà utilisé.' };
+      }
+      
+      // If user exists but email is not confirmed, still return success
+      if (data?.user && !data?.session) {
+        return { success: true, needsConfirmation: true };
+      }
+      
       return { success: true };
     } catch (err) {
+      console.error('Unexpected error:', err);
       return { success: false, error: 'Une erreur est survenue' };
     }
   };
