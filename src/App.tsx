@@ -20,7 +20,6 @@ import { TaskProvider } from './context/TaskContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
-import HoverReceiver from "@/visual-edits/VisualEditsMessenger";
 
 const queryClient = new QueryClient({
   defaultOptions: {
