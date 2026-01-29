@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { authClient } from '../lib/auth-client';
+import { useAuth } from '../modules/auth/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -8,22 +8,19 @@ const SignupPage = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data, error } = await authClient.signUp.email({
-        email,
-        password,
-        name,
-      });
+      const { success, error } = await register(name, email, password);
 
-      if (error) {
-        toast.error(error.message || "Erreur lors de l'inscription");
+      if (!success) {
+        toast.error(error || "Erreur lors de l'inscription");
       } else {
-        toast.success('Compte créé avec succès !');
+        toast.success('Compte créé avec succès ! Vérifiez vos emails si nécessaire.');
         navigate('/dashboard');
       }
     } catch (err) {
