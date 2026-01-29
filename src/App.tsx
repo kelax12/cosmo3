@@ -13,7 +13,10 @@ import StatisticsPage from './pages/StatisticsPage';
 import MessagingPage from './pages/MessagingPage';
 import PremiumPage from './pages/PremiumPage';
 import SettingsPage from './pages/SettingsPage';
-import { TaskProvider, useTasks } from './context/TaskContext';
+import { AuthProvider } from './modules/auth/AuthContext';
+import { useAuthStatus } from './modules/auth/useAuthStatus';
+import { BillingProvider } from './modules/billing/billing.context';
+import { TaskProvider } from './context/TaskContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
@@ -29,9 +32,9 @@ const queryClient = new QueryClient({
 });
 
 function AppContent() {
-  const { user, loading } = useTasks();
+  const { isAuthenticated, isLoading } = useAuthStatus();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -48,7 +51,7 @@ function AppContent() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
-      {!user ? (
+      {!isAuthenticated ? (
         <Route path="*" element={<LandingPage />} />
       ) : (
         <Route path="/" element={<Layout />}>
@@ -73,15 +76,18 @@ function AppContent() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <TaskProvider>
-        <Toaster />
-        <HoverReceiver />
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
+    <AuthProvider>
+      <BillingProvider>
+        <TaskProvider>
+          <TooltipProvider>
+          <Toaster />
+          <HoverReceiver />
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </TooltipProvider>
       </TaskProvider>
-    </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
