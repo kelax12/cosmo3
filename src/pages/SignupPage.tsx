@@ -15,15 +15,19 @@ const SignupPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { success, error } = await register(name, email, password);
+      const result = await register(name, email, password);
 
-      if (!success) {
-        toast.error(error || "Erreur lors de l'inscription");
+      if (!result.success) {
+        toast.error(result.error || "Erreur lors de l'inscription");
+      } else if ((result as any).needsConfirmation) {
+        toast.success('Compte créé ! Vérifiez votre boîte mail pour confirmer votre inscription.');
+        // Stay on signup page since email confirmation is needed
       } else {
-        toast.success('Compte créé avec succès ! Vérifiez vos emails si nécessaire.');
+        toast.success('Compte créé avec succès !');
         navigate('/dashboard');
       }
     } catch (err) {
+      console.error('Signup error:', err);
       toast.error('Une erreur inattendue est survenue');
     } finally {
       setLoading(false);
